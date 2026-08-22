@@ -6,7 +6,40 @@ const http = require('http');
 const KEY = process.env.ANTHROPIC_API_KEY;
 if (!KEY) { console.error('Set ANTHROPIC_API_KEY before starting.'); process.exit(1); }
 
-const SYSTEM = `You are the enquiry assistant on the EDM Holdings website. EDM is a specialist fit-out and drywall subcontractor to main contractors, trading since 1986 (the business behind E&D Drywall), self-delivering the full interior package with directly employed labour: partitions, ceilings, fire-rated systems, joinery, glazing, timber, and painting and decorative finishes. Market focus for this assistant: Dubai and the wider UAE - Dubai, Abu Dhabi, Sharjah and the northern emirates. The group also works internationally, but you handle UAE enquiries; anything outside the UAE gets a polite line and a pointer to enquiries@edmholdings.ae for the right team. Sectors: residential, workplace, hotels and leisure, education. A point of difference worth mentioning when relevant: every wall is inspected stage by stage and photographed before it is boarded over, and the full record goes to the client at handover.
+// Which sites may call this relay. Without it, anyone who finds the URL can
+// spend EDM's Anthropic budget. Comma-separated; defaults to the live site.
+const ALLOWED = (process.env.ALLOWED_ORIGINS ||
+  'https://www.edmholdings.ae,https://edmholdings.ae').split(',').map(s => s.trim()).filter(Boolean);
+
+// A plain per-IP rate limit. Not a defence against a determined attacker — that
+// is what a CDN or WAF in front of this is for — but it stops a stuck browser
+// tab or a casual script running up a bill.
+const WINDOW_MS = 60_000, MAX_PER_WINDOW = 12;
+const hits = new Map();
+function overLimit(ip) {
+  const now = Date.now();
+  const rec = hits.get(ip);
+  if (!rec || now - rec.start > WINDOW_MS) { hits.set(ip, { start: now, n: 1 }); return false; }
+  rec.n += 1;
+  return rec.n > MAX_PER_WINDOW;
+}
+// Keep the map from growing without bound on a long-running process.
+setInterval(() => {
+  const cutoff = Date.now() - WINDOW_MS;
+  for (const [ip, rec] of hits) if (rec.start < cutoff) hits.delete(ip);
+}, WINDOW_MS).unref();
+
+function corsHeaders(origin) {
+  const allow = ALLOWED.includes(origin);
+  return allow ? {
+    'access-control-allow-origin': origin,
+    'access-control-allow-headers': 'content-type',
+    'access-control-allow-methods': 'POST, OPTIONS',
+    'vary': 'Origin',
+  } : null;
+}
+
+const SYSTEM = `You are the enquiry assistant on the EDM Holdings website. EDM is a specialist fit-out and drywall subcontractor to main contractors, with a team that has worked in this trade since 1986 (the people behind E&D Drywall), self-delivering the full interior package with directly employed labour: partitions, ceilings, fire-rated systems, joinery, glazing, timber, and painting and decorative finishes. Market focus for this assistant: Dubai and the wider UAE - Dubai, Abu Dhabi, Sharjah and the northern emirates. EDM delivers in the UAE. The team's track record was built across the UK and Ireland, which you may mention as experience but never as somewhere EDM can mobilise labour today; anything outside the UAE gets a polite line and a pointer to enquiries@edmholdings.ae. Sectors: residential, workplace, hotels and leisure, education. A point of difference worth mentioning when relevant: every wall is inspected stage by stage and photographed before it is boarded over, and the full record goes to the client at handover.
 
 HOW YOU SPEAK
 Plain UK English. Short - one to three sentences, occasionally four. One brief courtesy beat, then straight to the point. Business-casual, dry humour sparingly. Sound like a capable person at the front desk of a construction firm, never like software. Ask one question at a time, never a list. Respond to what they said before asking the next thing. If they volunteer information, never ask for it again - use it. Never interrogate; have a conversation. Never use: bro, chief, top notch, gotcha, seamless, delve, elevate, leverage, unlock, cutting-edge, world-class, "I'd be happy to", "great question", exclamation marks in business replies.
@@ -32,14 +65,35 @@ HARD RULES
 Never give prices, rates or budgets - pricing comes from drawings; offer the same-day priced tender instead. Never quote for trades EDM does not self-deliver (no MEP, no flooring supply, no turnkey design and build) - be straight that it is outside scope and point them to the team if it is borderline. Never invent projects, clients, numbers or credentials. Never promise programme dates. If asked whether you are human, be straight: you are the site's assistant, and a real person follows up on everything - then carry on helping. Jobseekers and suppliers get one polite line and enquiries@edmholdings.ae. Off-topic chat gets one friendly line, then back to business. If you do not know something, say so and offer to have the team answer it. If they ask technical questions about EDM's trades, answer plainly and confidently, then return to the conversation.`;
 
 const server = http.createServer((req, res) => {
+  const origin = req.headers.origin || '';
+  const cors = corsHeaders(origin);
+
+  if (req.method === 'OPTIONS' && req.url === '/chat') {
+    if (!cors) { res.writeHead(403); res.end(); return; }
+    res.writeHead(204, cors); res.end(); return;
+  }
   if (req.method !== 'POST' || req.url !== '/chat') { res.writeHead(404); res.end(); return; }
+
+  // A browser always sends Origin on a cross-origin POST. Same-origin requests
+  // (the relay served behind the site at /chat) send none, which is expected.
+  if (origin && !cors) {
+    res.writeHead(403, { 'content-type': 'application/json' });
+    res.end('{"error":"origin not allowed"}'); return;
+  }
+
+  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket.remoteAddress || 'unknown';
+  if (overLimit(ip)) {
+    res.writeHead(429, { 'content-type': 'application/json', 'retry-after': '60', ...(cors || {}) });
+    res.end('{"error":"too many requests — try again in a minute"}'); return;
+  }
+
   let body = '';
   req.on('data', c => { body += c; if (body.length > 200000) req.destroy(); });
   req.on('end', async () => {
     try {
       const { messages } = JSON.parse(body || '{}');
       if (!Array.isArray(messages) || messages.length === 0 || messages.length > 40) {
-        res.writeHead(400, {'content-type':'application/json'}); res.end('{"error":"bad request"}'); return;
+        res.writeHead(400, {'content-type':'application/json', ...(cors || {})}); res.end('{"error":"bad request"}'); return;
       }
       const r = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
@@ -48,11 +102,13 @@ const server = http.createServer((req, res) => {
       });
       const data = await r.json();
       const reply = (data.content || []).filter(c => c.type === 'text').map(c => c.text).join('\n').trim();
-      res.writeHead(200, {'content-type':'application/json'});
+      res.writeHead(200, {'content-type':'application/json', ...(cors || {})});
       res.end(JSON.stringify({ reply }));
     } catch (e) {
-      res.writeHead(500, {'content-type':'application/json'}); res.end('{"error":"upstream"}');
+      res.writeHead(500, {'content-type':'application/json', ...(cors || {})}); res.end('{"error":"upstream"}');
     }
   });
 });
-server.listen(process.env.PORT || 8787, () => console.log('EDM chatbot relay on port ' + (process.env.PORT || 8787)));
+server.listen(process.env.PORT || 8787, () =>
+  console.log('EDM chatbot relay on port ' + (process.env.PORT || 8787) +
+              ' — origins allowed: ' + ALLOWED.join(', ')));

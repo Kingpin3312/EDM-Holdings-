@@ -171,6 +171,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
 
 <div id="pack"></div>
 
+<script src="assets/edm-autosave.js"></script>
 <script>
 'use strict';
 /* EDM Evidence — every wall, inspected, photographed, signed.
@@ -369,6 +370,9 @@ $('#btnPack').addEventListener('click',()=>{
 });
 
 render();
+
+/* Autosave: keeps this device's copy up to date between manual saves. */
+var edmSave = EDMAutosave.attach({ key: 'evidence', state: S, onRestore: function(){ try{ render(); }catch(e){} } });
 </script>
 </body>
 </html>

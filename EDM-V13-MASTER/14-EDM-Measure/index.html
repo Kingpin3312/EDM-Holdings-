@@ -256,7 +256,8 @@ tfoot td{font-weight:700;border-bottom:none;padding-top:9px}
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="vendor/pdf.min.js"></script>
+<script src="assets/edm-autosave.js"></script>
 <script>
 'use strict';
 /* ============================================================
@@ -567,7 +568,7 @@ async function loadFile(file, asRev){
     let bmp,name=file.name;
     if(/\.pdf$/i.test(name)){
       if(typeof pdfjsLib==='undefined'){ toast('PDF rendering needs an internet connection once. Offline? Use a PNG or JPG of the drawing.'); return; }
-      pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      pdfjsLib.GlobalWorkerOptions.workerSrc='vendor/pdf.worker.min.js';
       const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
       let pg=1; if(pdf.numPages>1){ const a=prompt(`This PDF has ${pdf.numPages} pages. Which page is the layout?`,'1'); pg=Math.min(pdf.numPages,Math.max(1,parseInt(a||'1',10)||1)); }
       const page=await pdf.getPage(pg), vp=page.getViewport({scale:2.5});
@@ -677,6 +678,9 @@ $('#btnPlan').addEventListener('click',()=>{
 
 // ---------- boot ----------
 ratesUI(); typesUI(); renderAll(); setMode('pan'); resize();
+
+/* Autosave: keeps this device's copy up to date between manual saves. */
+var edmSave = EDMAutosave.attach({ key: 'measure', state: S, onRestore: function(){ try{ draw(); }catch(e){} } });
 </script>
 </body>
 </html>

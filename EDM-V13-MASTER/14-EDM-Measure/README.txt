@@ -32,8 +32,9 @@ Also in the box
 
 Worth knowing
 -------------
-- Opening a PDF needs an internet connection the first time (the PDF
-  reader loads from the web). Offline on site? Use a PNG or JPG export.
+- Works fully offline, PDFs included. The PDF reader ships inside the
+  tool (vendor/), so nothing loads from the web and a cabin with no
+  signal is no longer a problem.
 - Door deduction is 0.9 x 2.1 per opening. Rates ship with sensible
   defaults — put your own in before you price anything real.
 - This is the standalone field tool. The same module is designed to sit

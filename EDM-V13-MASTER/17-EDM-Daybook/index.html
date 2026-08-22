@@ -138,6 +138,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
 <div class="toast" id="toast"></div>
 <div id="rep"></div>
 
+<script src="assets/edm-autosave.js"></script>
 <script>
 'use strict';
 /* EDM Daybook — one page a day, kept the day it happened.
@@ -276,6 +277,9 @@ $('#btnPrint').addEventListener('click',()=>{
 $('#day').value=today();
 $('#day').addEventListener('change',render);
 render();
+
+/* Autosave: keeps this device's copy up to date between manual saves. */
+var edmSave = EDMAutosave.attach({ key: 'daybook', state: S, onRestore: function(){ try{ render(); }catch(e){} } });
 </script>
 </body>
 </html>

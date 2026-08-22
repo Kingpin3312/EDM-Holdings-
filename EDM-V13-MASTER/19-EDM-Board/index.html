@@ -105,6 +105,7 @@ td{padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
 <div class="toast" id="toast"></div>
 <div id="rep"></div>
 
+<script src="assets/edm-autosave.js"></script>
 <script>
 'use strict';
 /* EDM Board — the Monday screen.
@@ -315,6 +316,9 @@ $('#btnRep').addEventListener('click',()=>{
 });
 
 render();
+
+/* Autosave: keeps this device's copy up to date between manual saves. */
+var edmSave = EDMAutosave.attach({ key: 'board', state: S, onRestore: function(){ try{ render(); }catch(e){} } });
 </script>
 </body>
 </html>

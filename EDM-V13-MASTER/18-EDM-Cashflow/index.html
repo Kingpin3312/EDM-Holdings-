@@ -160,6 +160,7 @@ tfoot td{font-weight:700;border-bottom:none;padding-top:9px}
 
 <div id="rep"></div>
 
+<script src="assets/edm-autosave.js"></script>
 <script>
 'use strict';
 /* EDM Cashflow — because applied is not certified, certified is not paid,
@@ -399,6 +400,9 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+t.dataset.v));}));
 function renderAll(){projUI();board();apps();ret();}
 renderAll();
+
+/* Autosave: keeps this device's copy up to date between manual saves. */
+var edmSave = EDMAutosave.attach({ key: 'cashflow', state: S, onRestore: function(){ try{ renderAll(); }catch(e){} } });
 </script>
 </body>
 </html>

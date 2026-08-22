@@ -169,6 +169,7 @@ td .spc.late{color:var(--late);font-weight:700}
 <div class="toast" id="toast"></div>
 <div id="rep"></div>
 
+<script src="assets/edm-autosave.js"></script>
 <script>
 'use strict';
 /* EDM Progress — the third piece of the thread.
@@ -395,6 +396,9 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+t.dataset.v));}));
 function renderAll(){dash();plan();look();conUI();}
 renderAll();
+
+/* Autosave: keeps this device's copy up to date between manual saves. */
+var edmSave = EDMAutosave.attach({ key: 'progress', state: S, onRestore: function(){ try{ renderAll(); }catch(e){} } });
 </script>
 </body>
 </html>
