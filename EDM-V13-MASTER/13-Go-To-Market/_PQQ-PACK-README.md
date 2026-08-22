@@ -55,10 +55,17 @@ Confirmed by Christopher: **this pack was right, the business cards were wrong.*
 
 Kenny's business card had been printing Christopher's mobile. Rebuilt.
 
-**Still outstanding: Eddie Duffy's card.** It also carries Christopher's number,
-+971 (0) 58 601 2021. This pack lists Eddie as **+44 (0) 7778 877353**. Which
-belongs on his card has not been confirmed, so the card is left as-is rather than
-guessed at. `tools/compliance-check.py` fails until it is settled.
+Eddie Duffy's card had the same fault. Confirmed 22/08/2026: his number is
+**+44 (0) 7778 877353**, the UK mobile this pack already lists. Rebuilt.
+
+All four cards now carry the right person's number, and they agree with this pack:
+
+| | Card | This pack |
+|---|---|---|
+| Eddie Duffy · Chairman | +44 (0) 7778 877353 | +44 (0) 7778 877353 |
+| Damien Meenan · CEO | +971 (0) 58 507 6481 | +971 (0) 58 507 6481 |
+| Christopher Simon · COO | +971 (0) 58 601 2021 | +971 (0) 58 601 2021 |
+| Kenny Buchanan · Project Director | +971 (0) 58 580 0870 | +971 (0) 58 580 0870 |
 
 A contact-consistency check now runs over the cards and this pack together: two
 people sharing a number fails the build, and one person appearing with two numbers
