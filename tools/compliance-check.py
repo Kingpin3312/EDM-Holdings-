@@ -225,6 +225,41 @@ def check_documents() -> None:
                 (internal if is_internal(pdf) else fails).append(f"{rel(pdf)}: second font family embedded — {base}")
 
 
+def check_contacts() -> None:
+    """Two people must not share a mobile number.
+
+    Kenny Buchanan's and Eddie Duffy's business cards both carried Christopher
+    Simon's mobile. Nothing was comparing the personalised cards against each
+    other or against the PQQ pack, so a director handed out a card with the wrong
+    number on it and no check noticed.
+    """
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        return
+    people: dict[str, set[str]] = {}
+    for pdf in sorted(glob.glob(os.path.join(PACK, "04-Stationery", "EDM-Business-Card-*.pdf"))
+                      + [os.path.join(PACK, "13-Go-To-Market", "EDM-PQQ-Information-Pack.pdf")]):
+        try:
+            text = " ".join((pg.extract_text() or "") for pg in PdfReader(pdf).pages)
+        except Exception:
+            continue
+        text = re.sub(r"\s+", " ", text)
+        for m in re.finditer(r"(Eddie Duffy|Damien Meenan|Christopher Simon|Kenny Buchanan)"
+                             r"[^+]{0,80}?(\+\d[\d ()]{7,})", text):
+            people.setdefault(m.group(1), set()).add(re.sub(r"\s+", " ", m.group(2)).strip())
+
+    seen: dict[str, str] = {}
+    for person, numbers in sorted(people.items()):
+        for n in numbers:
+            if n in seen and seen[n] != person:
+                fails.append(f"contacts: {person} and {seen[n]} share the number {n} — one of them is wrong")
+            else:
+                seen[n] = person
+        if len(numbers) > 1:
+            warns.append(f"contacts: {person} appears with {len(numbers)} different numbers — {sorted(numbers)}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--web", action="store_true", help="website only")
@@ -234,6 +269,7 @@ def main() -> int:
         check_website()
     if a.docs or not a.web:
         check_documents()
+        check_contacts()
 
     for w in warns:
         print(f"  warn  {w}")

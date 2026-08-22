@@ -46,8 +46,21 @@ legal name, licence and TRN numbers, incorporation date, registered address,
 insurances, accreditations, HSE record, workforce numbers, three years of turnover,
 bankers and trade references.
 
-## One discrepancy to resolve
+## Contact numbers — resolved 22/08/2026
 
-Kenny Buchanan's number is **+971 (0) 58 580 0870** in this pack and
-**+971 (0) 58 601 2021** on his business card. Both were carried forward as found
-rather than reconciled by guesswork. One of them is wrong.
+Confirmed by Christopher: **this pack was right, the business cards were wrong.**
+
+- Christopher Simon is **+971 (0) 58 601 2021**.
+- Kenny Buchanan is **+971 (0) 58 580 0870** — the number already listed here.
+
+Kenny's business card had been printing Christopher's mobile. Rebuilt.
+
+**Still outstanding: Eddie Duffy's card.** It also carries Christopher's number,
++971 (0) 58 601 2021. This pack lists Eddie as **+44 (0) 7778 877353**. Which
+belongs on his card has not been confirmed, so the card is left as-is rather than
+guessed at. `tools/compliance-check.py` fails until it is settled.
+
+A contact-consistency check now runs over the cards and this pack together: two
+people sharing a number fails the build, and one person appearing with two numbers
+raises a warning. Nothing had been comparing them before, which is how a director
+came to be handing out a card with someone else's mobile on it.
