@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EDM Progress — Programme &amp; Weekly Report</title>
+<style>
+@font-face{font-family:'Montserrat';font-weight:400;font-display:swap;src:url('fonts/montserrat-400.woff2') format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:600;font-display:swap;src:url('fonts/montserrat-600.woff2') format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:700;font-display:swap;src:url('fonts/montserrat-700.woff2') format('woff2')}
+:root{--green:#083819;--ink:#0F231B;--muted:#5C6F66;--line:#E4E6E0;--wash:#F7F8F7;--late:#8F2B1F;--due:#8a5a00;--ok:#0B6B33}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Montserrat',system-ui,sans-serif;color:var(--ink);background:#fff;display:flex;flex-direction:column;overflow:hidden}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:12px;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:5px 7px;background:#fff}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--green);outline-offset:1px}
+
+.top{display:flex;align-items:center;gap:12px;padding:8px 14px;border-bottom:1px solid var(--line);flex:0 0 auto;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:9px}
+.brand img{height:26px}
+.brand .t{font-size:14px;font-weight:700}.brand .t span{color:var(--green)}
+.brand .d{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.projname{border:none;font-weight:600;font-size:13px;flex:0 1 200px;border-bottom:1px dashed transparent;border-radius:0;padding:4px 2px}
+.projname:hover{border-bottom-color:var(--line)}
+.grow{flex:1}
+.tbtn{font-size:11.5px;font-weight:600;border:1px solid var(--line);background:#fff;border-radius:5px;padding:6px 11px;color:var(--ink)}
+.tbtn:hover{border-color:var(--green);color:var(--green)}
+.tbtn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.tbtn.primary:hover{background:#0a4520;color:#fff}
+
+.tabs{display:flex;border-bottom:1px solid var(--line);flex:0 0 auto;padding:0 10px}
+.tab{border:none;background:none;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:11px 14px;border-bottom:2px solid transparent}
+.tab.on{color:var(--green);border-bottom-color:var(--green)}
+.view{flex:1;overflow-y:auto;display:none;background:var(--wash)}
+.view.on{display:block}
+.vwrap{max-width:860px;margin:0 auto;padding:16px 18px 42px}
+.hint{font-size:11.5px;color:var(--muted);line-height:1.65;margin-bottom:13px}
+.card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:13px 15px;margin-bottom:11px}
+
+/* dashboard */
+.kpis{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.kpi{flex:1;min-width:130px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.kpi b{display:block;font-size:20px;font-weight:700;color:var(--green)}
+.kpi span{font-size:10.5px;color:var(--muted)}
+.kpi.warn b{color:var(--late)}
+.zrow{display:flex;align-items:center;gap:12px;padding:10px 2px;border-bottom:1px solid var(--line)}
+.zrow:last-child{border-bottom:none}
+.zrow .zn{flex:0 0 170px;font-weight:600;font-size:12.5px}
+.zrow .zn small{display:block;font-weight:400;color:var(--muted);font-size:10.5px}
+.bar{flex:1;height:9px;background:var(--wash);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--green)}
+.zrow .pc{flex:0 0 44px;text-align:right;font-weight:700;font-size:12.5px}
+.flag{flex:0 0 auto;font-size:9px;font-weight:700;letter-spacing:.07em;padding:3px 7px;border-radius:4px}
+.flag.late{background:#f6e8e6;color:var(--late)}
+.flag.ok{background:#e8f1ec;color:var(--ok)}
+.emptyv{text-align:center;padding:44px 20px;color:var(--muted);font-size:12.5px;line-height:1.8}
+
+/* plan grid */
+.pgrid{overflow-x:auto}
+table{border-collapse:collapse;font-size:11px;width:100%}
+th{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+td input[type=date]{width:118px;font-size:10.5px;padding:3px 4px}
+td .spc{font-size:9px;color:var(--muted);display:block;margin-top:2px}
+td .spc.done{color:var(--ok);font-weight:700}
+td .spc.late{color:var(--late);font-weight:700}
+
+/* lookahead */
+.la{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line);font-size:12px}
+.la:last-child{border-bottom:none}
+.la .d{flex:0 0 86px;font-weight:600}
+.la .w{flex:1}.la .w small{color:var(--muted)}
+.la .s{font-weight:700}
+.la.islate .d,.la.islate .s{color:var(--late)}
+
+/* constraints */
+.cadd{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.cadd input,.cadd select{flex:1;min-width:110px}
+.cadd .note{flex:2;min-width:170px}
+.crow{display:flex;gap:10px;align-items:flex-start;padding:10px 2px;border-bottom:1px solid var(--line);font-size:12px}
+.crow:last-child{border-bottom:none}
+.crow .cd{flex:0 0 80px;font-weight:600}
+.crow .cb{flex:1;line-height:1.5}.crow .cb small{color:var(--muted)}
+.crow .open{color:var(--late);font-weight:700;font-size:10px;letter-spacing:.06em}
+.crow .closed{color:var(--muted);font-weight:600;font-size:10px}
+.crow .tbtn{padding:4px 9px;font-size:10.5px}
+
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12px;padding:8px 16px;border-radius:6px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:9;max-width:84%;text-align:center}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+
+/* print report */
+#rep{display:none}
+@media print{
+ body>*{display:none!important}
+ body{overflow:visible;display:block}
+ #rep{display:block!important;color:#0F231B;font-size:10.5pt}
+ .rhead{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #083819;padding-bottom:4mm;margin-bottom:6mm}
+ .rhead img{width:52mm}
+ .rhead .rt{text-align:right}
+ .rhead h1{font-size:15pt;font-weight:700;margin:0}
+ .rhead .rm{font-size:9.5pt;color:#5C6F66}
+ h2{font-size:9pt;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#083819;margin:6mm 0 2mm}
+ .rk{display:flex;gap:4mm;margin-bottom:2mm}
+ .rk div{flex:1;border:1px solid #E4E6E0;border-radius:2mm;padding:3mm}
+ .rk b{display:block;font-size:14pt;color:#083819}
+ .rk span{font-size:8pt;color:#5C6F66}
+ table{width:100%;border-collapse:collapse;font-size:9pt}
+ th{text-align:left;font-size:7.5pt;letter-spacing:.07em;text-transform:uppercase;color:#5C6F66;border-bottom:1px solid #E4E6E0;padding:1.5mm 2mm}
+ td{border-bottom:1px solid #E4E6E0;padding:1.8mm 2mm;vertical-align:top}
+ .lt{color:#8F2B1F;font-weight:700}.okc{color:#0B6B33;font-weight:700}
+ .rfoot{font-size:8pt;color:#5C6F66;border-top:1px solid #E4E6E0;margin-top:6mm;padding-top:2mm}
+ tr{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><img src="assets/cube.png" alt="EDM Holdings">
+    <div><div class="t">EDM <span>Progress</span></div><div class="d">Programme &amp; weekly report</div></div></div>
+  <input class="projname" id="projName" value="Untitled project" aria-label="Project name">
+  <div class="grow"></div>
+  <button class="tbtn" id="btnImpM">Import takeoff</button>
+  <button class="tbtn" id="btnImpE">Import evidence</button>
+  <button class="tbtn" id="btnOpen">Open</button>
+  <button class="tbtn" id="btnSave">Save</button>
+  <button class="tbtn primary" id="btnRep">Print weekly report</button>
+  <input type="file" id="fileM" accept=".json,.edm" hidden>
+  <input type="file" id="fileE" accept=".json" hidden>
+  <input type="file" id="fileO" accept=".json" hidden>
+</header>
+
+<nav class="tabs">
+  <button class="tab on" data-v="dash">Dashboard</button>
+  <button class="tab" data-v="plan">Plan</button>
+  <button class="tab" data-v="look">Lookahead</button>
+  <button class="tab" data-v="con">Delay log</button>
+</nav>
+
+<section class="view on" id="v-dash"><div class="vwrap" id="dash"></div></section>
+<section class="view" id="v-plan"><div class="vwrap">
+  <p class="hint">Plan by zone, not by wall — set the date each stage should <b>start</b> in each zone. Actual progress fills itself in from the evidence file, so what you see under each date is what the supervisors have actually signed.</p>
+  <div class="card pgrid" id="plan"></div>
+</div></section>
+<section class="view" id="v-look"><div class="vwrap">
+  <p class="hint">The next two weeks, plus anything already late. This is the answer to “when is Level 14 boarded?” — with the current signed percentage next to the promise.</p>
+  <div class="card" id="look"></div>
+</div></section>
+<section class="view" id="v-con"><div class="vwrap">
+  <p class="hint">Every hold-up, dated the day it happens. This log is the delay record — kept honestly, it is what wins the extension-of-time conversation months later.</p>
+  <div class="card">
+    <div class="cadd">
+      <select id="cZone"></select>
+      <select id="cCause">
+        <option>Access not released</option><option>Preceding trade</option>
+        <option>Information / RFI</option><option>Design change</option>
+        <option>Client instruction</option><option>Materials</option>
+        <option>Weather</option><option>Other</option>
+      </select>
+      <input class="note" id="cNote" placeholder="What happened, in one line">
+      <button class="tbtn primary" id="cAdd">Log it</button>
+    </div>
+    <div id="clist"></div>
+  </div>
+</div></section>
+
+<div class="toast" id="toast"></div>
+<div id="rep"></div>
+
+<script>
+'use strict';
+/* EDM Progress — the third piece of the thread.
+   Measure numbers the walls. Evidence signs them. This one puts dates on them. */
+
+const STAGES=[['set','Set out'],['frame','Framing'],['mep','Services in'],['ins','Insulation'],
+  ['b1','Board 1'],['b2','Board 2'],['fire','Fire-stop'],['dec','Decoration']];
+const S={walls:[],act:{},plan:{},cons:[],nextC:1};
+
+const $=q=>document.querySelector(q);
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2600);}
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function today(){return new Date().toISOString().slice(0,10);}
+const fmtd=d=>{if(!d)return'—';const x=new Date(d+'T12:00:00');return x.toLocaleDateString('en-GB',{day:'numeric',month:'short'});};
+const pc=x=>Math.round(x*100);
+
+function zones(){const z=[];S.walls.forEach(w=>{const n=w.zone||'Unzoned';if(!z.includes(n))z.push(n);});return z;}
+function wallsIn(z){return S.walls.filter(w=>(w.zone||'Unzoned')===z);}
+function area(w){return (w.lm&&w.ht)? w.lm*w.ht : 1;}
+
+// stage progress in a zone: share of wall area with that stage Passed (N/A walls excluded)
+function stagePct(z,k){
+  let a=0,p=0;
+  wallsIn(z).forEach(w=>{const r=(S.act[w.id]||{})[k];
+    if(r&&r.s==='N')return; a+=area(w); if(r&&r.s==='P')p+=area(w);});
+  return a? p/a : 0;
+}
+// whole-zone completion, stage-weighted by area
+function zonePct(z){
+  let a=0,p=0;
+  wallsIn(z).forEach(w=>{const rs=S.act[w.id]||{};
+    let appl=0,done=0;
+    STAGES.forEach(st=>{const r=rs[st[0]];if(r&&r.s==='N')return;appl++;if(r&&r.s==='P')done++;});
+    if(!appl)return; a+=area(w); p+=area(w)*(done/appl);});
+  return a? p/a : 0;
+}
+function lateList(){
+  const t=today(),out=[];
+  zones().forEach(z=>STAGES.forEach(st=>{
+    const d=(S.plan[z]||{})[st[0]];
+    if(d&&d<t&&stagePct(z,st[0])<1) out.push({z,k:st[0],nm:st[1],d,p:stagePct(z,st[0])});
+  }));
+  return out.sort((a,b)=>a.d<b.d?-1:1);
+}
+
+// ---------- dashboard ----------
+function dash(){
+  if(!S.walls.length){$('#dash').innerHTML=`<div class="emptyv">Nothing on the board yet.<br><br>
+    <b>Import takeoff</b> brings the wall register in from EDM Measure.<br>
+    <b>Import evidence</b> fills in what has actually been signed off on site.</div>`;return;}
+  const zs=zones();
+  const tot=S.walls.reduce((s,w)=>s+area(w),0);
+  const overall=zs.reduce((s,z)=>{const a=wallsIn(z).reduce((x,w)=>x+area(w),0);return s+zonePct(z)*a;},0)/(tot||1);
+  const fire=zs.reduce((s,z)=>{const a=wallsIn(z).reduce((x,w)=>x+area(w),0);return s+stagePct(z,'fire')*a;},0)/(tot||1);
+  const late=lateList().length, open=S.cons.filter(c=>!c.closed).length;
+  $('#dash').innerHTML=`
+   <div class="kpis">
+    <div class="kpi"><b>${pc(overall)}%</b><span>package complete, weighted by wall area</span></div>
+    <div class="kpi"><b>${Math.round(tot).toLocaleString('en-GB')} m²</b><span>wall area on the board · ${S.walls.length} walls</span></div>
+    <div class="kpi"><b>${pc(fire)}%</b><span>fire-stopping signed off</span></div>
+    <div class="kpi ${late?'warn':''}"><b>${late}</b><span>stages behind plan</span></div>
+    <div class="kpi ${open?'warn':''}"><b>${open}</b><span>open constraints in the delay log</span></div>
+   </div>
+   <div class="card">${zs.map(z=>{
+     const p=zonePct(z),isLate=lateList().some(l=>l.z===z);
+     const ws=wallsIn(z);
+     return `<div class="zrow"><span class="zn">${esc(z)}<small>${ws.length} walls · ${Math.round(ws.reduce((s,w)=>s+area(w),0))} m²</small></span>
+       <span class="bar"><i style="width:${pc(p)}%"></i></span>
+       <span class="pc">${pc(p)}%</span>
+       <span class="flag ${isLate?'late':'ok'}">${isLate?'BEHIND':'ON PLAN'}</span></div>`;}).join('')}
+   </div>`;
+}
+
+// ---------- plan ----------
+function plan(){
+  if(!S.walls.length){$('#plan').innerHTML='<p class="hint">Import the takeoff first — the zones arrive with it.</p>';return;}
+  const t=today();
+  $('#plan').innerHTML=`<table><thead><tr><th>Zone</th>${STAGES.map(s=>`<th>${s[1]}</th>`).join('')}</tr></thead><tbody>
+   ${zones().map(z=>`<tr><td style="font-weight:600;white-space:nowrap">${esc(z)}</td>
+     ${STAGES.map(st=>{const d=(S.plan[z]||{})[st[0]]||'';const p=stagePct(z,st[0]);
+       const cls=p>=1?'done':(d&&d<t?'late':'');
+       return `<td><input type="date" value="${d}" data-z="${esc(z)}" data-k="${st[0]}">
+         <span class="spc ${cls}">${p>=1?'signed off':pc(p)+'% signed'}</span></td>`;}).join('')}</tr>`).join('')}
+  </tbody></table>`;
+  document.querySelectorAll('#plan input[type=date]').forEach(i=>i.addEventListener('change',()=>{
+    const z=i.dataset.z;(S.plan[z]=S.plan[z]||{})[i.dataset.k]=i.value;renderAll();}));
+}
+
+// ---------- lookahead ----------
+function look(){
+  if(!S.walls.length){$('#look').innerHTML='<p class="hint">Nothing planned yet.</p>';return;}
+  const t=new Date(today()+'T12:00:00'),end=new Date(t);end.setDate(end.getDate()+13);
+  const eIso=end.toISOString().slice(0,10),tIso=today();
+  const items=[];
+  zones().forEach(z=>STAGES.forEach(st=>{
+    const d=(S.plan[z]||{})[st[0]];if(!d)return;
+    const p=stagePct(z,st[0]);
+    if(d<tIso&&p<1)items.push({d,z,nm:st[1],p,late:true});
+    else if(d>=tIso&&d<=eIso)items.push({d,z,nm:st[1],p,late:false});
+  }));
+  items.sort((a,b)=>a.d<b.d?-1:1);
+  $('#look').innerHTML=items.length? items.map(i=>`
+    <div class="la ${i.late?'islate':''}">
+      <span class="d">${i.late?'LATE · ':''}${fmtd(i.d)}</span>
+      <span class="w"><b>${esc(i.z)}</b> — ${i.nm} <small>starts</small></span>
+      <span class="s">${pc(i.p)}%</span>
+    </div>`).join('')
+   : '<p class="hint">Nothing due in the next two weeks and nothing late. Enjoy it — it never lasts.</p>';
+}
+
+// ---------- constraints ----------
+function conUI(){
+  $('#cZone').innerHTML='<option value="">Whole site</option>'+zones().map(z=>`<option>${esc(z)}</option>`).join('');
+  $('#clist').innerHTML=S.cons.length? S.cons.slice().reverse().map(c=>`
+    <div class="crow"><span class="cd">${fmtd(c.date)}</span>
+      <span class="cb"><b>${esc(c.cause)}</b>${c.zone?` · ${esc(c.zone)}`:''}<br><small>${esc(c.note)}</small>
+      ${c.closed?`<br><span class="closed">Closed ${fmtd(c.closed)} — held for ${days(c.date,c.closed)} day${days(c.date,c.closed)===1?'':'s'}</span>`:''}</span>
+      ${c.closed?'':`<span class="open">OPEN</span><button class="tbtn" data-close="${c.id}">Close out</button>`}
+    </div>`).join('')
+   : '<p class="hint">Nothing logged. When a hold-up happens, log it the same day — memory is not evidence.</p>';
+  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>{
+    const c=S.cons.find(x=>x.id===+b.dataset.close);c.closed=today();renderAll();}));
+}
+function days(a,b){return Math.max(0,Math.round((new Date(b)-new Date(a))/86400000));}
+$('#cAdd').addEventListener('click',()=>{
+  const note=$('#cNote').value.trim();
+  if(!note){toast('One line on what happened — that line is the record.');return;}
+  S.cons.push({id:S.nextC++,date:today(),zone:$('#cZone').value,cause:$('#cCause').value,note,closed:null});
+  $('#cNote').value='';renderAll();toast('Logged, dated today. Close it out when it clears.');});
+
+// ---------- imports ----------
+$('#btnImpM').addEventListener('click',()=>$('#fileM').click());
+$('#fileM').addEventListener('change',async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{const d=JSON.parse(await f.text());
+    if(!d.walls||!d.ppm){toast('That is not an EDM Measure file.');return;}
+    let n=0;
+    d.walls.forEach(mw=>{if(S.walls.some(w=>w.id===mw.id))return;
+      let L=0;for(let i=1;i<mw.pts.length;i++)L+=Math.hypot(mw.pts[i].x-mw.pts[i-1].x,mw.pts[i].y-mw.pts[i-1].y);
+      S.walls.push({id:mw.id,type:mw.typeId,zone:mw.zone||'',lm:+(L/d.ppm).toFixed(2),ht:mw.ht});n++;});
+    if(d.name&&$('#projName').value==='Untitled project')$('#projName').value=d.name;
+    renderAll();toast(n+' walls on the board, straight from the takeoff.');
+  }catch(err){toast('Could not read that file.');}});
+$('#btnImpE').addEventListener('click',()=>$('#fileE').click());
+$('#fileE').addEventListener('change',async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{const d=JSON.parse(await f.text());
+    if(d.app!=='EDM Evidence'){toast('That is not an EDM Evidence file.');return;}
+    let upd=0,added=0;
+    (d.walls||[]).forEach(ew=>{
+      if(!S.walls.some(w=>w.id===ew.id)){
+        S.walls.push({id:ew.id,type:ew.type,zone:ew.zone||'',lm:ew.lm||'',ht:ew.ht||''});added++;}
+      const rec={};Object.keys(ew.stages||{}).forEach(k=>{const r=ew.stages[k];rec[k]={s:r.s,d:r.d};});
+      S.act[ew.id]=rec;upd++;});
+    renderAll();toast(`Actuals updated for ${upd} walls${added?` (${added} new)`:''} — the board now shows what's signed, not what's hoped.`);
+  }catch(err){toast('Could not read that file.');}});
+
+// ---------- save / open ----------
+$('#btnSave').addEventListener('click',()=>{
+  const out={app:'EDM Progress',v:1,name:$('#projName').value,walls:S.walls,act:S.act,plan:S.plan,cons:S.cons,nextC:S.nextC};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(out)],{type:'application/json'}));
+  a.download=($('#projName').value||'edm-progress').replace(/[^\w\- ]+/g,'').trim().replace(/ +/g,'-')+'.progress.json';
+  a.click();toast('Saved — plan, actuals and the delay log in one file.');});
+$('#btnOpen').addEventListener('click',()=>$('#fileO').click());
+$('#fileO').addEventListener('change',async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{const d=JSON.parse(await f.text());
+    if(d.app!=='EDM Progress'){toast('That is not an EDM Progress file.');return;}
+    $('#projName').value=d.name||'Untitled project';
+    S.walls=d.walls||[];S.act=d.act||{};S.plan=d.plan||{};S.cons=d.cons||[];S.nextC=d.nextC||1;
+    renderAll();toast('Project restored.');
+  }catch(err){toast('Could not read that file.');}});
+
+// ---------- weekly report ----------
+$('#btnRep').addEventListener('click',()=>{
+  if(!S.walls.length){toast('Nothing to report yet.');return;}
+  const P=esc($('#projName').value),zs=zones();
+  const tot=S.walls.reduce((s,w)=>s+area(w),0);
+  const overall=zs.reduce((s,z)=>{const a=wallsIn(z).reduce((x,w)=>x+area(w),0);return s+zonePct(z)*a;},0)/(tot||1);
+  const fire=zs.reduce((s,z)=>{const a=wallsIn(z).reduce((x,w)=>x+area(w),0);return s+stagePct(z,'fire')*a;},0)/(tot||1);
+  const lates=lateList(),open=S.cons.filter(c=>!c.closed);
+  const t=new Date(today()+'T12:00:00'),end=new Date(t);end.setDate(end.getDate()+13);
+  const eIso=end.toISOString().slice(0,10),tIso=today();
+  const ahead=[];zs.forEach(z=>STAGES.forEach(st=>{const d=(S.plan[z]||{})[st[0]];
+    if(d&&d>=tIso&&d<=eIso)ahead.push({d,z,nm:st[1],p:stagePct(z,st[0])});}));
+  ahead.sort((a,b)=>a.d<b.d?-1:1);
+  $('#rep').innerHTML=`
+   <div class="rhead"><img src="assets/logo.png" alt="EDM Holdings">
+    <div class="rt"><h1>Weekly progress report</h1><div class="rm">${P} · week ending ${fmtd(tIso)}</div></div></div>
+   <div class="rk">
+    <div><b>${pc(overall)}%</b><span>package complete (area-weighted)</span></div>
+    <div><b>${Math.round(tot).toLocaleString('en-GB')} m²</b><span>wall area · ${S.walls.length} walls</span></div>
+    <div><b>${pc(fire)}%</b><span>fire-stopping signed off</span></div>
+    <div><b>${lates.length}</b><span>stages behind plan</span></div>
+    <div><b>${open.length}</b><span>open constraints</span></div>
+   </div>
+   <h2>Progress by zone</h2>
+   <table><tr><th>Zone</th><th>Walls</th><th>Area m²</th><th>Complete</th><th>Fire-stopping</th><th>Status</th></tr>
+   ${zs.map(z=>{const ws=wallsIn(z),isLate=lates.some(l=>l.z===z);
+     return `<tr><td>${esc(z)}</td><td>${ws.length}</td><td>${Math.round(ws.reduce((s,w)=>s+area(w),0))}</td>
+      <td>${pc(zonePct(z))}%</td><td>${pc(stagePct(z,'fire'))}%</td>
+      <td class="${isLate?'lt':'okc'}">${isLate?'Behind plan':'On plan'}</td></tr>`;}).join('')}</table>
+   ${lates.length?`<h2>Behind plan</h2>
+   <table><tr><th>Zone</th><th>Stage</th><th>Planned start</th><th>Signed</th></tr>
+   ${lates.map(l=>`<tr><td>${esc(l.z)}</td><td>${l.nm}</td><td class="lt">${fmtd(l.d)}</td><td>${pc(l.p)}%</td></tr>`).join('')}</table>`:''}
+   <h2>Two-week lookahead</h2>
+   ${ahead.length?`<table><tr><th>Starts</th><th>Zone</th><th>Stage</th><th>Currently signed</th></tr>
+   ${ahead.map(i=>`<tr><td>${fmtd(i.d)}</td><td>${esc(i.z)}</td><td>${i.nm}</td><td>${pc(i.p)}%</td></tr>`).join('')}</table>`
+   :'<p style="font-size:9.5pt;color:#5C6F66">No planned starts fall in the next two weeks.</p>'}
+   <h2>Constraints &amp; delay log</h2>
+   ${S.cons.length?`<table><tr><th>Raised</th><th>Cause</th><th>Zone</th><th>Detail</th><th>Status</th></tr>
+   ${S.cons.map(c=>`<tr><td>${fmtd(c.date)}</td><td>${esc(c.cause)}</td><td>${esc(c.zone)||'Site-wide'}</td><td>${esc(c.note)}</td>
+    <td class="${c.closed?'okc':'lt'}">${c.closed?`Closed ${fmtd(c.closed)} (${days(c.date,c.closed)}d)`:'Open'}</td></tr>`).join('')}</table>`
+   :'<p style="font-size:9.5pt;color:#5C6F66">No constraints recorded this period.</p>'}
+   <div class="rfoot">Progress figures are taken from signed inspection records, not estimates — a stage counts only when a supervisor has passed it. Failed checks remain on the record.
+   <br>EDM Holdings · Fit-Out &amp; Drywall Specialists · UAE · Ireland · UK · Australia · edmholdings.ae</div>`;
+  window.print();
+});
+
+// ---------- tabs & boot ----------
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+t.dataset.v));}));
+function renderAll(){dash();plan();look();conUI();}
+renderAll();
+</script>
+</body>
+</html>

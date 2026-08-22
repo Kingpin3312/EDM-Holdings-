@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EDM Measure — Drywall Takeoff</title>
+<style>
+@font-face{font-family:'Montserrat';font-weight:400;font-display:swap;src:url('fonts/montserrat-400.woff2') format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:600;font-display:swap;src:url('fonts/montserrat-600.woff2') format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:700;font-display:swap;src:url('fonts/montserrat-700.woff2') format('woff2')}
+:root{--green:#083819;--ink:#0F231B;--muted:#5C6F66;--line:#E4E6E0;--white:#FFFFFF;--wash:#F7F8F7}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Montserrat',system-ui,sans-serif;color:var(--ink);background:var(--white);display:flex;flex-direction:column;overflow:hidden}
+button{font-family:inherit;cursor:pointer}
+input,select{font-family:inherit;font-size:12px;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:5px 7px;background:#fff}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--green);outline-offset:1px}
+
+/* ---------- top bar ---------- */
+.top{display:flex;align-items:center;gap:14px;padding:8px 14px;border-bottom:1px solid var(--line);background:#fff;flex:0 0 auto}
+.brand{display:flex;align-items:center;gap:9px}
+.brand img{height:26px;width:auto}
+.brand .t{font-size:14px;font-weight:700;letter-spacing:.02em}
+.brand .t span{color:var(--green)}
+.brand .d{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.projname{border:none;font-weight:600;font-size:13px;min-width:120px;flex:0 1 220px;border-bottom:1px dashed transparent;border-radius:0;padding:4px 2px}
+.projname:hover{border-bottom-color:var(--line)}
+.top .grow{flex:1}
+.tbtn{font-size:11.5px;font-weight:600;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:5px;padding:6px 11px}
+.tbtn:hover{border-color:var(--green);color:var(--green)}
+.tbtn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.tbtn.primary:hover{background:#0a4520;color:#fff}
+
+/* ---------- main ---------- */
+.main{flex:1;display:flex;min-height:0}
+
+/* left rail */
+.rail{flex:0 0 52px;border-right:1px solid var(--line);background:#fff;display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:6px}
+.mode{width:38px;height:38px;border:1px solid transparent;border-radius:7px;background:none;color:var(--muted);display:flex;align-items:center;justify-content:center;position:relative}
+.mode svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.mode:hover{background:var(--wash);color:var(--ink)}
+.mode.on{background:var(--green);color:#fff}
+.mode .kb{position:absolute;right:3px;bottom:2px;font-size:7px;font-weight:700;opacity:.55}
+.railsep{width:26px;border-top:1px solid var(--line);margin:4px 0}
+
+/* stage */
+.stage{flex:1;position:relative;background:var(--wash);min-width:0}
+canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:30px}
+.empty img{height:64px;opacity:.9}
+.empty h2{font-size:16px;font-weight:700}
+.empty p{font-size:12.5px;color:var(--muted);max-width:380px;line-height:1.6}
+.empty.hide{display:none}
+.drop{position:absolute;inset:0;border:2px dashed var(--green);background:rgba(8,56,25,.05);display:none;align-items:center;justify-content:center;font-weight:600;color:var(--green);z-index:5;pointer-events:none}
+.stage.dragging .drop{display:flex}
+
+/* revision controls */
+.revbar{position:absolute;left:12px;top:12px;background:#fff;border:1px solid var(--line);border-radius:7px;padding:8px 12px;display:none;align-items:center;gap:10px;font-size:11px;box-shadow:0 2px 8px rgba(15,35,27,.07);z-index:4}
+.revbar.show{display:flex}
+.revbar b{font-weight:600}
+.revbar input[type=range]{width:90px;accent-color:var(--green)}
+
+/* toast */
+.toast{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12px;padding:8px 16px;border-radius:6px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:8;max-width:80%;text-align:center}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+
+/* right panel */
+.panel{flex:0 0 340px;border-left:1px solid var(--line);background:#fff;display:flex;flex-direction:column;min-height:0}
+.tabs{display:flex;border-bottom:1px solid var(--line);flex:0 0 auto}
+.tab{flex:1;border:none;background:none;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:11px 4px;border-bottom:2px solid transparent}
+.tab.on{color:var(--green);border-bottom-color:var(--green)}
+.pv{flex:1;overflow-y:auto;padding:14px;display:none}
+.pv.on{display:block}
+.hint{font-size:11.5px;color:var(--muted);line-height:1.6;margin-bottom:12px}
+
+/* wall types */
+.wt{border:1px solid var(--line);border-radius:7px;padding:11px 12px;margin-bottom:9px;cursor:pointer}
+.wt:hover{border-color:var(--green)}
+.wt.on{border-color:var(--green);box-shadow:0 0 0 1px var(--green)}
+.wt .n{display:flex;justify-content:space-between;align-items:baseline}
+.wt .code{font-weight:700;font-size:13px;color:var(--green)}
+.wt .rate{font-size:11px;color:var(--muted)}
+.wt .ds{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.5}
+.rates{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.rates h3,.pv h3{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:9px}
+.rrow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;font-size:12px}
+.rrow input{width:88px;text-align:right}
+
+/* bill */
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:5px 6px;border-bottom:1px solid var(--line)}
+td{padding:6px;border-bottom:1px solid var(--line);vertical-align:top}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
+tr.type{cursor:pointer}
+tr.type:hover td{background:var(--wash)}
+tr.type.hl td{background:#eaf2ed}
+tr.sub td{font-size:10.5px;color:var(--muted);padding:2px 6px 2px 14px;border-bottom:none}
+tr.gap td{border-bottom:1px solid var(--line);padding:0 0 6px}
+tfoot td{font-weight:700;border-bottom:none;padding-top:9px}
+.flash td{animation:fl 1s}
+@keyframes fl{0%{background:#dcebe2}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){.flash td{animation:none}}
+
+/* register rows */
+.reg{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:6px;padding:8px 10px;margin-bottom:7px;font-size:11.5px}
+.reg.sel{border-color:var(--green);box-shadow:0 0 0 1px var(--green)}
+.reg .id{font-weight:700;color:var(--green);width:34px}
+.reg .meta{flex:1;line-height:1.45}
+.reg .meta small{color:var(--muted)}
+.ico{border:none;background:none;color:var(--muted);width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center}
+.ico:hover{background:var(--wash);color:var(--green)}
+.ico svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* status bar */
+.status{flex:0 0 auto;display:flex;align-items:center;gap:18px;border-top:1px solid var(--line);padding:6px 14px;font-size:11px;color:var(--muted);background:#fff}
+.status .grow{flex:1}
+.status b{color:var(--ink);font-weight:600}
+.scale-ok{color:var(--green);font-weight:700}
+.scale-no{color:#8a5a00;font-weight:700}
+
+/* dialog */
+.dlgwrap{position:fixed;inset:0;background:rgba(15,35,27,.35);display:none;align-items:center;justify-content:center;z-index:20}
+.dlgwrap.show{display:flex}
+.dlg{background:#fff;border-radius:9px;padding:20px 22px;width:330px;max-width:92vw;box-shadow:0 12px 40px rgba(15,35,27,.2)}
+.dlg h2{font-size:14px;font-weight:700;margin-bottom:4px}
+.dlg p{font-size:11.5px;color:var(--muted);margin-bottom:13px;line-height:1.5}
+.frow{margin-bottom:10px}
+.frow label{display:block;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.frow input,.frow select{width:100%}
+.f2{display:flex;gap:10px}.f2 .frow{flex:1}
+.dact{display:flex;gap:8px;justify-content:flex-end;margin-top:15px}
+.danger{color:#8f2b1f;border-color:#e4c7c2;margin-right:auto}
+.danger:hover{border-color:#8f2b1f;color:#8f2b1f}
+@media (max-width:900px){.panel{flex-basis:290px}}
+#wplan{display:none}
+@media print{
+ body>*{display:none!important}
+ body{overflow:visible;display:block}
+ #wplan{display:block!important;color:#0F231B}
+ #wplan .ph{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #083819;padding-bottom:3mm;margin-bottom:4mm}
+ #wplan .ph img{width:48mm}
+ #wplan h1{font-size:13pt;font-weight:700;margin:0;text-align:right}
+ #wplan .pm{font-size:9pt;color:#5C6F66;text-align:right}
+ #wplan .pimg{width:100%;border:1px solid #E4E6E0}
+ #wplan table{width:100%;border-collapse:collapse;font-size:8.5pt;margin-top:4mm}
+ #wplan th{text-align:left;font-size:7pt;letter-spacing:.07em;text-transform:uppercase;color:#5C6F66;border-bottom:1px solid #E4E6E0;padding:1.2mm 1.5mm}
+ #wplan td{border-bottom:1px solid #E4E6E0;padding:1.4mm 1.5mm}
+ #wplan .pf{font-size:8pt;color:#5C6F66;margin-top:3mm}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <img src="assets/cube.png" alt="EDM Holdings">
+    <div><div class="t">EDM <span>Measure</span></div><div class="d">Drywall takeoff</div></div>
+  </div>
+  <input class="projname" id="projName" value="Untitled project" aria-label="Project name">
+  <div class="grow"></div>
+  <button class="tbtn" id="btnOpen">Open project</button>
+  <button class="tbtn" id="btnSave">Save project</button>
+  <button class="tbtn" id="btnCSV">Export bill (CSV)</button>
+  <button class="tbtn" id="btnPlan">Print wall plan</button>
+  <button class="tbtn primary" id="btnLoad">Load drawing</button>
+  <input type="file" id="fileDrw" accept=".pdf,.png,.jpg,.jpeg,.webp" hidden>
+  <input type="file" id="fileRev" accept=".pdf,.png,.jpg,.jpeg,.webp" hidden>
+  <input type="file" id="fileProj" accept=".edm,.json" hidden>
+</header>
+
+<div class="main">
+  <nav class="rail" aria-label="Tools">
+    <button class="mode on" data-mode="pan" title="Pan and zoom (V)"><svg viewBox="0 0 24 24"><path d="M9 11V6a1.5 1.5 0 0 1 3 0v5m0-2a1.5 1.5 0 0 1 3 0v2m0-1a1.5 1.5 0 0 1 3 0v4c0 4-2.5 6-6 6s-5-1.5-7-5l-1.7-3a1.4 1.4 0 0 1 2.4-1.4L7 12V7a1.5 1.5 0 0 1 2-1.4"/></svg><span class="kb">V</span></button>
+    <div class="railsep"></div>
+    <button class="mode" data-mode="cal" title="Calibrate scale (C)"><svg viewBox="0 0 24 24"><path d="M3 17 17 3l4 4L7 21zm4-8 2 2m1-5 2 2m1-5 2 2"/></svg><span class="kb">C</span></button>
+    <button class="mode" data-mode="check" title="Check a dimension (K)"><svg viewBox="0 0 24 24"><path d="M4 20h16M6 20v-3m4 3v-5m4 5v-3m4 3v-5M4 8l5-4 4 3 7-5"/></svg><span class="kb">K</span></button>
+    <div class="railsep"></div>
+    <button class="mode" data-mode="trace" title="Trace a wall run (T)"><svg viewBox="0 0 24 24"><path d="M4 19 10 5l5 9 5-11"/><circle cx="4" cy="19" r="1.6"/><circle cx="10" cy="5" r="1.6"/><circle cx="15" cy="14" r="1.6"/><circle cx="20" cy="3" r="1.6"/></svg><span class="kb">T</span></button>
+    <button class="mode" data-mode="sel" title="Select and edit (S)"><svg viewBox="0 0 24 24"><path d="M5 3l14 8-6.5 1.5L9 19z"/></svg><span class="kb">S</span></button>
+  </nav>
+
+  <div class="stage" id="stage">
+    <canvas id="cv"></canvas>
+    <div class="empty" id="empty">
+      <img src="assets/cube.png" alt="">
+      <h2>Load a drawing to start</h2>
+      <p>Drop a PDF or image of the drywall layout here, or use <b>Load drawing</b>. Then calibrate the scale against one known dimension, and trace your first wall run.</p>
+      <button class="tbtn primary" id="btnLoad2">Load drawing</button>
+    </div>
+    <div class="drop">Drop drawing to load</div>
+    <div class="revbar" id="revbar">
+      <b>Revision overlay</b>
+      <input type="range" id="revOp" min="0" max="100" value="55" aria-label="Overlay opacity">
+      <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" id="revDiff">Difference</label>
+      <button class="ico" id="revOff" title="Remove overlay"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <aside class="panel">
+    <div class="tabs" role="tablist">
+      <button class="tab on" data-tab="types">Wall types</button>
+      <button class="tab" data-tab="bill">Bill</button>
+      <button class="tab" data-tab="reg">Register</button>
+    </div>
+    <div class="pv on" id="pv-types">
+      <p class="hint">Pick the wall type before tracing — every run you draw is billed as this type. Rates are yours to edit below.</p>
+      <div id="wtList"></div>
+      <div class="rates">
+        <h3>Rates</h3>
+        <div id="rateList"></div>
+        <div class="rrow"><span>Currency</span><input id="curr" value="AED" style="width:64px;text-align:center"></div>
+      </div>
+    </div>
+    <div class="pv" id="pv-bill">
+      <p class="hint">Live bill of quantities. Every trace writes straight in — tap a row to light up its walls on the drawing.</p>
+      <div id="billBox"></div>
+    </div>
+    <div class="pv" id="pv-reg">
+      <p class="hint">Every measurement, with its evidence. Tap the target to jump to a run on the drawing.</p>
+      <div id="regBox"></div>
+      <div style="margin-top:10px"><button class="tbtn" id="btnRev">Load revision overlay</button></div>
+    </div>
+  </aside>
+</div>
+
+<footer class="status">
+  <span id="stMode"><b>Pan</b> — drag to move, scroll to zoom</span>
+  <div class="grow"></div>
+  <span id="stXY"></span>
+  <span id="stScale" class="scale-no">Not calibrated</span>
+</footer>
+
+<!-- dialog -->
+<div class="dlgwrap" id="dlg">
+  <div class="dlg">
+    <h2 id="dTitle">Wall run</h2>
+    <p id="dSub"></p>
+    <div id="dCal" style="display:none">
+      <div class="frow"><label>Known distance (metres)</label><input id="dDist" type="number" step="0.001" min="0.01" placeholder="e.g. 5.400"></div>
+    </div>
+    <div id="dWall" style="display:none">
+      <div class="frow"><label>Wall type</label><select id="dType"></select></div>
+      <div class="f2">
+        <div class="frow"><label>Height (m)</label><input id="dHt" type="number" step="0.05" min="0.1"></div>
+        <div class="frow"><label>Door openings</label><input id="dOp" type="number" step="1" min="0" value="0"></div>
+      </div>
+      <div class="frow"><label>Level / zone</label><input id="dZone" placeholder="e.g. L03 — Cores"></div>
+    </div>
+    <div class="dact">
+      <button class="tbtn danger" id="dDel" style="display:none">Delete run</button>
+      <button class="tbtn" id="dCancel">Cancel</button>
+      <button class="tbtn primary" id="dOK">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+'use strict';
+/* ============================================================
+   EDM Measure — drywall takeoff
+   The trace is the bill: draw a run, it lands priced in the BOQ.
+   ============================================================ */
+
+// ---------- wall type library (factors per m² of net wall unless stated) ----------
+const TYPES = [
+  {id:'P1', name:'P1 — 92mm partition, single layer', ds:'70/92mm C-stud @ 400cc, 1 × 12.5mm board each face, taped and jointed.',
+   f:{board:2.20, stud:2.50, track:2.00, ins:0, sund:1.0, lab:0.55}},
+  {id:'P2', name:'P2 — 92mm partition, double layer (FR60)', ds:'92mm C-stud @ 400cc, 2 × 12.5mm fire board each face, insulated.',
+   f:{board:4.40, stud:2.50, track:2.00, ins:1.05, sund:1.0, lab:0.75}},
+  {id:'P3', name:'P3 — 146mm acoustic partition', ds:'146mm C-stud @ 400cc, 2 × soundboard each face, mineral wool core.',
+   f:{board:4.40, stud:2.50, track:2.00, ins:1.05, sund:1.0, lab:0.85}},
+  {id:'SW', name:'SW — Shaftwall 100mm', ds:'CH-stud shaftwall: liner panel + 2 × 12.5mm fire board, one-side access.',
+   f:{board:3.30, stud:2.50, track:2.00, ins:1.05, sund:1.0, lab:0.90}},
+  {id:'WL', name:'WL — Wall lining, single layer', ds:'Metal furring lining, 1 × 12.5mm board, taped and jointed.',
+   f:{board:1.10, stud:2.00, track:2.00, ins:0, sund:0.6, lab:0.35}}
+];
+const RATES = [ // label, key, unit, default (AED)
+  ['Board (12.5mm)','board','m²',14],['Stud','stud','lm',9],['Track','track','lm',8.5],
+  ['Insulation','ins','m²',12],['Sundries','sund','m² wall',6],['Labour','lab','hr',38]
+];
+const DOOR = 0.9*2.1; // m² deducted per opening
+
+// ---------- state ----------
+const S = {
+  img:null, rev:null,           // {bmp, w, h, name}
+  ppm:0,                        // pixels per metre (drawing space)
+  walls:[], nextId:1,
+  rates:{}, view:{z:0.15, x:40, y:40},
+  mode:'pan', typeId:'P2',
+  draft:[], calPts:[], hover:null,
+  selId:null, hlType:null,
+  last:{ht:2.8, zone:''}
+};
+RATES.forEach(r=>S.rates[r[1]]=r[3]);
+
+// ---------- helpers ----------
+const $=s=>document.querySelector(s);
+const cv=$('#cv'), ctx=cv.getContext('2d'), stage=$('#stage');
+const fmt=(n,d)=> n.toLocaleString('en-GB',{minimumFractionDigits:d===undefined?2:d, maximumFractionDigits:d===undefined?2:d});
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2600); }
+const w2s=p=>({x:p.x*S.view.z+S.view.x, y:p.y*S.view.z+S.view.y});
+const s2w=p=>({x:(p.x-S.view.x)/S.view.z, y:(p.y-S.view.y)/S.view.z});
+function lenPx(pts){ let L=0; for(let i=1;i<pts.length;i++) L+=Math.hypot(pts[i].x-pts[i-1].x, pts[i].y-pts[i-1].y); return L; }
+const lenM=pts=> S.ppm? lenPx(pts)/S.ppm : 0;
+function typeOf(id){ return TYPES.find(t=>t.id===id); }
+
+// wall quantities: LM, gross, net, components, cost
+function calc(w){
+  const L=lenM(w.pts), gross=L*w.ht, net=Math.max(0, gross - w.op*DOOR), f=typeOf(w.typeId).f;
+  const q={ L, net,
+    board:net*f.board, stud:net*f.stud, track:L*f.track, ins:net*f.ins, sund:net*f.sund, lab:net*f.lab };
+  q.cost = q.board*S.rates.board + q.stud*S.rates.stud + q.track*S.rates.track +
+           q.ins*S.rates.ins + q.sund*S.rates.sund + q.lab*S.rates.lab;
+  return q;
+}
+
+// ---------- canvas ----------
+function resize(){ const r=stage.getBoundingClientRect(), d=window.devicePixelRatio||1;
+  cv.width=r.width*d; cv.height=r.height*d; ctx.setTransform(d,0,0,d,0,0); draw(); }
+window.addEventListener('resize',resize);
+
+function draw(){
+  const r=stage.getBoundingClientRect();
+  ctx.clearRect(0,0,r.width,r.height);
+  if(!S.img) return;
+  ctx.save();
+  ctx.translate(S.view.x,S.view.y); ctx.scale(S.view.z,S.view.z);
+  ctx.drawImage(S.img.bmp,0,0);
+  if(S.rev){ ctx.save(); ctx.globalAlpha=(+$('#revOp').value)/100;
+    if($('#revDiff').checked) ctx.globalCompositeOperation='difference';
+    ctx.drawImage(S.rev.bmp,0,0); ctx.restore(); }
+  ctx.restore();
+
+  // walls (screen space for crisp lines)
+  S.walls.forEach(w=>{
+    const hl = w.typeId===S.hlType, sel = w.id===S.selId;
+    strokePath(w.pts, sel? '#0F231B' : '#083819', sel?4:(hl?4:2.5), hl? .95 : .8);
+    w.pts.forEach(p=>dot(p, sel?'#0F231B':'#083819', sel?3.5:2.6));
+    if(S.ppm){ const mid=w.pts[Math.floor((w.pts.length-1)/2)], m2=w.pts[Math.ceil((w.pts.length-1)/2)];
+      label(`${w.id}  ·  ${fmt(lenM(w.pts))} m`, {x:(mid.x+m2.x)/2,y:(mid.y+m2.y)/2}); }
+  });
+  // draft trace
+  if(S.draft.length){ const pts=S.hover? S.draft.concat([S.hover]) : S.draft;
+    strokePath(pts,'#083819',2.5,.9,[6,5]); S.draft.forEach(p=>dot(p,'#083819',3));
+    if(S.ppm&&pts.length>1) label(`${fmt(lenM(pts))} m`, pts[pts.length-1], true);
+  }
+  // calibration picks
+  if(S.calPts.length){ const pts=S.hover&&S.calPts.length===1? S.calPts.concat([S.hover]) : S.calPts;
+    strokePath(pts,'#5C6F66',2,1,[3,4]); S.calPts.forEach(p=>dot(p,'#5C6F66',3.2)); }
+}
+function strokePath(pts,c,wd,al,dash){ if(pts.length<2) return; ctx.save(); ctx.globalAlpha=al;
+  ctx.strokeStyle=c; ctx.lineWidth=wd; ctx.lineJoin='round'; ctx.lineCap='round'; ctx.setLineDash(dash||[]);
+  ctx.beginPath(); const a=w2s(pts[0]); ctx.moveTo(a.x,a.y);
+  for(let i=1;i<pts.length;i++){const p=w2s(pts[i]); ctx.lineTo(p.x,p.y);} ctx.stroke(); ctx.restore(); }
+function dot(p,c,r){ const s=w2s(p); ctx.save(); ctx.fillStyle='#fff'; ctx.strokeStyle=c; ctx.lineWidth=1.6;
+  ctx.beginPath(); ctx.arc(s.x,s.y,r,0,7); ctx.fill(); ctx.stroke(); ctx.restore(); }
+function label(txt,p,raise){ const s=w2s(p); ctx.save(); ctx.font='600 11px Montserrat,sans-serif';
+  const w=ctx.measureText(txt).width; const y=s.y+(raise?-14:-10);
+  ctx.fillStyle='rgba(255,255,255,.92)'; ctx.fillRect(s.x-w/2-5,y-10,w+10,15);
+  ctx.strokeStyle='#E4E6E0'; ctx.strokeRect(s.x-w/2-5,y-10,w+10,15);
+  ctx.fillStyle='#083819'; ctx.textAlign='center'; ctx.fillText(txt,s.x,y+1.5); ctx.restore(); }
+
+// ---------- interaction ----------
+let drag=null, pinch=null;
+stage.addEventListener('pointerdown',e=>{
+  if(e.target!==cv) return; cv.setPointerCapture(e.pointerId);
+  const pt={x:e.offsetX,y:e.offsetY};
+  if(e.button===1 || S.mode==='pan'){ drag={x:e.clientX,y:e.clientY,vx:S.view.x,vy:S.view.y}; return; }
+});
+stage.addEventListener('pointermove',e=>{
+  const pt={x:e.offsetX,y:e.offsetY};
+  if(drag){ S.view.x=drag.vx+(e.clientX-drag.x); S.view.y=drag.vy+(e.clientY-drag.y); draw(); return; }
+  if(S.mode==='trace'||S.mode==='cal'||S.mode==='check'){
+    let w=s2w(pt);
+    if(S.mode==='trace'&&e.shiftKey&&S.draft.length){ const a=S.draft[S.draft.length-1];
+      if(Math.abs(w.x-a.x)>Math.abs(w.y-a.y)) w.y=a.y; else w.x=a.x; }
+    S.hover=w; draw();
+  }
+  if(S.img&&S.ppm){ const w=s2w(pt); $('#stXY').textContent=`${fmt(w.x/S.ppm,2)}, ${fmt(w.y/S.ppm,2)} m`; }
+});
+stage.addEventListener('pointerup',e=>{ if(drag){drag=null; return;}
+  if(e.target!==cv||e.button!==0) return;
+  const w=S.hover||s2w({x:e.offsetX,y:e.offsetY});
+  if(!S.img) return;
+  if(S.mode==='cal'||S.mode==='check'){
+    S.calPts.push(w);
+    if(S.calPts.length===2){
+      const px=lenPx(S.calPts);
+      if(S.mode==='cal'){ openDlg('cal',{px}); }
+      else { toast(S.ppm? `Measured: ${fmt(px/S.ppm,3)} m — compare against the drawing dimension.` : 'Calibrate first (C).'); S.calPts=[]; }
+    }
+    draw(); return;
+  }
+  if(S.mode==='trace'){
+    if(!S.ppm){ toast('Calibrate the scale first — press C and click both ends of a known dimension.'); return; }
+    S.draft.push(w); draw(); return;
+  }
+  if(S.mode==='sel'){ const id=pick({x:e.offsetX,y:e.offsetY}); S.selId=id; draw(); renderReg();
+    if(id){ openDlg('edit',{wall:S.walls.find(x=>x.id===id)}); } }
+});
+stage.addEventListener('dblclick',e=>{ if(S.mode==='trace') finishTrace(); });
+stage.addEventListener('wheel',e=>{ if(!S.img)return; e.preventDefault();
+  const f=e.deltaY<0?1.12:0.89, m={x:e.offsetX,y:e.offsetY}, w=s2w(m);
+  S.view.z=Math.min(8,Math.max(0.02,S.view.z*f));
+  S.view.x=m.x-w.x*S.view.z; S.view.y=m.y-w.y*S.view.z; draw();
+},{passive:false});
+// touch pinch
+stage.addEventListener('touchstart',e=>{ if(e.touches.length===2){ pinch={d:tdist(e),z:S.view.z}; }},{passive:true});
+stage.addEventListener('touchmove',e=>{ if(pinch&&e.touches.length===2){ e.preventDefault();
+  const c={x:(e.touches[0].clientX+e.touches[1].clientX)/2-stage.getBoundingClientRect().left,
+           y:(e.touches[0].clientY+e.touches[1].clientY)/2-stage.getBoundingClientRect().top};
+  const w=s2w(c); S.view.z=Math.min(8,Math.max(0.02,pinch.z*tdist(e)/pinch.d));
+  S.view.x=c.x-w.x*S.view.z; S.view.y=c.y-w.y*S.view.z; draw(); }},{passive:false});
+stage.addEventListener('touchend',()=>{pinch=null;});
+function tdist(e){ return Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY); }
+
+function pick(scr){ const T=8; let best=null,bd=1e9;
+  S.walls.forEach(w=>{ for(let i=1;i<w.pts.length;i++){
+    const a=w2s(w.pts[i-1]), b=w2s(w.pts[i]);
+    const d=segDist(scr,a,b); if(d<T&&d<bd){bd=d;best=w.id;} }});
+  return best; }
+function segDist(p,a,b){ const dx=b.x-a.x,dy=b.y-a.y,l2=dx*dx+dy*dy;
+  let t=l2? ((p.x-a.x)*dx+(p.y-a.y)*dy)/l2 :0; t=Math.max(0,Math.min(1,t));
+  return Math.hypot(p.x-(a.x+t*dx), p.y-(a.y+t*dy)); }
+
+function finishTrace(){ if(S.draft.length<2){ S.draft=[]; S.hover=null; draw(); return; }
+  openDlg('new',{pts:S.draft.slice()}); }
+
+// keyboard
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT') return;
+  const k=e.key.toLowerCase();
+  if(k==='v')setMode('pan'); if(k==='c')setMode('cal'); if(k==='k')setMode('check');
+  if(k==='t')setMode('trace'); if(k==='s')setMode('sel');
+  if(k==='enter'&&S.mode==='trace')finishTrace();
+  if(k==='escape'){ S.draft=[];S.calPts=[];S.hover=null;S.selId=null;closeDlg();draw(); }
+  if((k==='delete'||k==='backspace')&&S.selId){ delWall(S.selId); }
+});
+
+const HINTS={pan:'<b>Pan</b> — drag to move, scroll or pinch to zoom',
+  cal:'<b>Calibrate</b> — click both ends of a known dimension, then enter its length',
+  check:'<b>Check</b> — click both ends of a dimension to verify the scale',
+  trace:'<b>Trace</b> — click along the wall run · Shift = straight · Enter or double-click to finish',
+  sel:'<b>Select</b> — click a run to edit or delete it'};
+function setMode(m){ S.mode=m; S.draft=[];S.calPts=[];S.hover=null;
+  document.querySelectorAll('.mode').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  $('#stMode').innerHTML=HINTS[m]; draw(); }
+document.querySelectorAll('.mode').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+
+// ---------- dialog ----------
+let dlgCtx=null;
+function openDlg(kind,data){ dlgCtx={kind,data};
+  $('#dCal').style.display = kind==='cal'?'block':'none';
+  $('#dWall').style.display = kind==='cal'?'none':'block';
+  $('#dDel').style.display = kind==='edit'?'inline-block':'none';
+  if(kind==='cal'){ $('#dTitle').textContent='Calibrate scale';
+    $('#dSub').textContent='Enter the real length of the dimension you just clicked.'; $('#dDist').value='';
+    show(); $('#dDist').focus(); return; }
+  const sel=$('#dType'); sel.innerHTML=TYPES.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+  if(kind==='new'){ $('#dTitle').textContent='New wall run';
+    $('#dSub').textContent=`Length ${fmt(lenM(data.pts))} m — set the build-up and it lands in the bill.`;
+    sel.value=S.typeId; $('#dHt').value=S.last.ht; $('#dOp').value=0; $('#dZone').value=S.last.zone; }
+  else { const w=data.wall; $('#dTitle').textContent='Edit '+w.id;
+    $('#dSub').textContent=`Length ${fmt(lenM(w.pts))} m.`;
+    sel.value=w.typeId; $('#dHt').value=w.ht; $('#dOp').value=w.op; $('#dZone').value=w.zone; }
+  show(); }
+function show(){ $('#dlg').classList.add('show'); }
+function closeDlg(){ $('#dlg').classList.remove('show'); dlgCtx=null; }
+$('#dCancel').addEventListener('click',()=>{ if(dlgCtx&&dlgCtx.kind==='cal')S.calPts=[]; if(dlgCtx&&dlgCtx.kind==='new'){S.draft=[];S.hover=null;} closeDlg(); draw(); });
+$('#dDel').addEventListener('click',()=>{ if(dlgCtx&&dlgCtx.kind==='edit'){ delWall(dlgCtx.data.wall.id); closeDlg(); }});
+$('#dOK').addEventListener('click',()=>{
+  if(!dlgCtx) return;
+  if(dlgCtx.kind==='cal'){ const m=parseFloat($('#dDist').value);
+    if(!(m>0)){ toast('Enter the dimension in metres.'); return; }
+    S.ppm=dlgCtx.data.px/m; S.calPts=[];
+    $('#stScale').textContent=`Calibrated — 1 m = ${fmt(S.ppm,1)} px`; $('#stScale').className='scale-ok';
+    toast('Scale set. Verify it with the Check tool (K) before you trace — thirty seconds now saves a re-measure later.');
+    closeDlg(); draw(); renderAll(); return; }
+  const ht=parseFloat($('#dHt').value), op=Math.max(0,parseInt($('#dOp').value||'0',10)), zone=$('#dZone').value.trim();
+  if(!(ht>0)){ toast('Enter the wall height in metres.'); return; }
+  S.typeId=$('#dType').value; S.last={ht, zone};
+  if(dlgCtx.kind==='new'){
+    const w={id:'W'+String(S.nextId++).padStart(2,'0'), pts:dlgCtx.data.pts, typeId:S.typeId, ht, op, zone};
+    S.walls.push(w); S.draft=[]; S.hover=null; S.selId=w.id;
+    renderAll(true); toast(`${w.id} added — ${fmt(lenM(w.pts))} m of ${w.typeId} in the bill.`);
+  } else { const w=dlgCtx.data.wall; w.typeId=S.typeId; w.ht=ht; w.op=op; w.zone=zone; renderAll(); }
+  closeDlg(); draw(); typesUI(); });
+
+function delWall(id){ S.walls=S.walls.filter(w=>w.id!==id); if(S.selId===id)S.selId=null; renderAll(); draw(); }
+
+// ---------- panels ----------
+function typesUI(){ $('#wtList').innerHTML=TYPES.map(t=>{
+    const q={net:1}, f=t.f;
+    const rate=f.board*S.rates.board+f.stud*S.rates.stud+ (f.track*S.rates.track)/2.6 + f.ins*S.rates.ins+f.sund*S.rates.sund+f.lab*S.rates.lab;
+    return `<div class="wt ${t.id===S.typeId?'on':''}" data-id="${t.id}" role="button" tabindex="0">
+      <div class="n"><span class="code">${t.id}</span><span class="rate">≈ ${fmt(rate,0)} ${S.rates._c||'AED'}/m²</span></div>
+      <div class="ds">${t.ds}</div></div>`;
+  }).join('');
+  document.querySelectorAll('.wt').forEach(el=>{
+    const go=()=>{S.typeId=el.dataset.id; typesUI();};
+    el.addEventListener('click',go);
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')go();});
+  });
+}
+function ratesUI(){ $('#rateList').innerHTML=RATES.map(r=>
+    `<div class="rrow"><span>${r[0]} <small style="color:var(--muted)">/${r[2]}</small></span>
+     <input type="number" step="0.1" min="0" data-rate="${r[1]}" value="${S.rates[r[1]]}"></div>`).join('');
+  document.querySelectorAll('[data-rate]').forEach(i=>i.addEventListener('input',()=>{
+    S.rates[i.dataset.rate]=parseFloat(i.value)||0; renderBill(); typesUI(); }));
+  $('#curr').addEventListener('input',()=>{S.rates._c=$('#curr').value||'AED'; renderBill(); typesUI();});
+}
+function renderBill(flashType){
+  const cur=S.rates._c||$('#curr').value||'AED';
+  const by={}; S.walls.forEach(w=>{ (by[w.typeId]=by[w.typeId]||[]).push(w); });
+  if(!S.walls.length){ $('#billBox').innerHTML='<p class="hint">Nothing measured yet. Trace a wall run and it appears here, priced.</p>'; return; }
+  let grand=0, rows='';
+  TYPES.forEach(t=>{ const ws=by[t.id]; if(!ws) return;
+    let L=0,net=0,q={board:0,stud:0,track:0,ins:0,sund:0,lab:0},cost=0;
+    ws.forEach(w=>{ const c=calc(w); L+=c.L; net+=c.net; cost+=c.cost;
+      ['board','stud','track','ins','sund','lab'].forEach(k=>q[k]+=c[k]); });
+    grand+=cost;
+    rows+=`<tr class="type ${S.hlType===t.id?'hl':''} ${flashType===t.id?'flash':''}" data-t="${t.id}">
+      <td><b>${t.id}</b><br><small style="color:var(--muted)">${ws.length} run${ws.length>1?'s':''}</small></td>
+      <td class="r">${fmt(L)}</td><td class="r">${fmt(net)}</td><td class="r"><b>${fmt(cost,0)}</b></td></tr>
+      <tr class="sub"><td colspan="4">board ${fmt(q.board,1)} m² · stud ${fmt(q.stud,1)} lm · track ${fmt(q.track,1)} lm${q.ins?` · insulation ${fmt(q.ins,1)} m²`:''} · labour ${fmt(q.lab,1)} hr</td></tr>
+      <tr class="gap"><td colspan="4"></td></tr>`;
+  });
+  $('#billBox').innerHTML=`<table><thead><tr><th>Type</th><th class="r">LM</th><th class="r">Net m²</th><th class="r">${cur}</th></tr></thead>
+    <tbody>${rows}</tbody><tfoot><tr><td colspan="3">Measured total</td><td class="r">${fmt(grand,0)} ${cur}</td></tr></tfoot></table>`;
+  document.querySelectorAll('tr.type').forEach(tr=>tr.addEventListener('click',()=>{
+    S.hlType = S.hlType===tr.dataset.t? null : tr.dataset.t; renderBill(); draw(); }));
+}
+function renderReg(){
+  if(!S.walls.length){ $('#regBox').innerHTML='<p class="hint">No runs yet.</p>'; return; }
+  $('#regBox').innerHTML=S.walls.map(w=>{ const c=calc(w);
+    return `<div class="reg ${w.id===S.selId?'sel':''}">
+     <span class="id">${w.id}</span>
+     <span class="meta">${w.typeId} · ${fmt(c.L)} lm × ${fmt(w.ht,2)} m${w.op?` − ${w.op} door${w.op>1?'s':''}`:''} = <b>${fmt(c.net)} m²</b><br>
+     <small>${w.zone||'No zone set'}</small></span>
+     <button class="ico" data-zoom="${w.id}" title="Show on drawing"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5M11 8v6M8 11h6"/></svg></button>
+     <button class="ico" data-edit="${w.id}" title="Edit"><svg viewBox="0 0 24 24"><path d="M4 20h4L20 8l-4-4L4 16zM14 6l4 4"/></svg></button>
+    </div>`; }).join('');
+  document.querySelectorAll('[data-zoom]').forEach(b=>b.addEventListener('click',()=>zoomTo(b.dataset.zoom)));
+  document.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>{
+    const w=S.walls.find(x=>x.id===b.dataset.edit); S.selId=w.id; draw(); openDlg('edit',{wall:w}); }));
+}
+function zoomTo(id){ const w=S.walls.find(x=>x.id===id); if(!w) return;
+  S.selId=id; const xs=w.pts.map(p=>p.x), ys=w.pts.map(p=>p.y);
+  const bx={x:Math.min(...xs),y:Math.min(...ys),w:Math.max(...xs)-Math.min(...xs)||10,h:Math.max(...ys)-Math.min(...ys)||10};
+  const r=stage.getBoundingClientRect();
+  S.view.z=Math.min(3, 0.7*Math.min(r.width/bx.w, r.height/bx.h));
+  S.view.x=r.width/2-(bx.x+bx.w/2)*S.view.z; S.view.y=r.height/2-(bx.y+bx.h/2)*S.view.z;
+  draw(); renderReg(); }
+function renderAll(flashNew){ renderBill(flashNew? S.typeId:undefined); renderReg(); }
+
+// tabs
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
+  document.querySelectorAll('.pv').forEach(p=>p.classList.toggle('on',p.id==='pv-'+t.dataset.tab)); }));
+
+// ---------- file loading ----------
+async function loadFile(file, asRev){
+  try{
+    let bmp,name=file.name;
+    if(/\.pdf$/i.test(name)){
+      if(typeof pdfjsLib==='undefined'){ toast('PDF rendering needs an internet connection once. Offline? Use a PNG or JPG of the drawing.'); return; }
+      pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+      let pg=1; if(pdf.numPages>1){ const a=prompt(`This PDF has ${pdf.numPages} pages. Which page is the layout?`,'1'); pg=Math.min(pdf.numPages,Math.max(1,parseInt(a||'1',10)||1)); }
+      const page=await pdf.getPage(pg), vp=page.getViewport({scale:2.5});
+      const c=document.createElement('canvas'); c.width=vp.width; c.height=vp.height;
+      await page.render({canvasContext:c.getContext('2d'), viewport:vp}).promise; bmp=c;
+    } else {
+      bmp=await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=URL.createObjectURL(file); });
+    }
+    if(asRev){ S.rev={bmp,w:bmp.width,h:bmp.height,name}; $('#revbar').classList.add('show'); toast(`Revision loaded: ${name}. Slide the opacity, or tick Difference to see what changed.`); }
+    else{
+      S.img={bmp,w:bmp.width,h:bmp.height,name}; $('#empty').classList.add('hide');
+      const r=stage.getBoundingClientRect(); S.view.z=Math.min(r.width/bmp.width, r.height/bmp.height)*0.94;
+      S.view.x=(r.width-bmp.width*S.view.z)/2; S.view.y=(r.height-bmp.height*S.view.z)/2;
+      toast(`${name} loaded. Now calibrate: press C and click both ends of a known dimension.`);
+    }
+    draw();
+  }catch(err){ toast('That file would not open. Try a PDF, PNG or JPG export of the drawing.'); }
+}
+$('#btnLoad').addEventListener('click',()=>$('#fileDrw').click());
+$('#btnLoad2').addEventListener('click',()=>$('#fileDrw').click());
+$('#btnRev').addEventListener('click',()=>$('#fileRev').click());
+$('#fileDrw').addEventListener('change',e=>{ if(e.target.files[0]) loadFile(e.target.files[0]); e.target.value=''; });
+$('#fileRev').addEventListener('change',e=>{ if(e.target.files[0]) loadFile(e.target.files[0],true); e.target.value=''; });
+$('#revOff').addEventListener('click',()=>{ S.rev=null; $('#revbar').classList.remove('show'); draw(); });
+$('#revOp').addEventListener('input',draw); $('#revDiff').addEventListener('change',draw);
+['dragover','dragenter'].forEach(ev=>stage.addEventListener(ev,e=>{e.preventDefault();stage.classList.add('dragging');}));
+['dragleave','drop'].forEach(ev=>stage.addEventListener(ev,e=>{e.preventDefault();stage.classList.remove('dragging');}));
+stage.addEventListener('drop',e=>{ if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+
+// ---------- save / open / export ----------
+function dataURL(bmp){ const c=document.createElement('canvas'); c.width=bmp.width; c.height=bmp.height;
+  c.getContext('2d').drawImage(bmp,0,0); return c.toDataURL('image/png'); }
+$('#btnSave').addEventListener('click',()=>{
+  if(!S.img){ toast('Nothing to save yet — load a drawing first.'); return; }
+  const out={ app:'EDM Measure', v:1, name:$('#projName').value, ppm:S.ppm, walls:S.walls,
+    rates:S.rates, nextId:S.nextId, drawing:dataURL(S.img.bmp), rev:S.rev? dataURL(S.rev.bmp):null };
+  const blob=new Blob([JSON.stringify(out)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=($('#projName').value||'edm-measure').replace(/[^\w\- ]+/g,'').trim().replace(/ +/g,'-')+'.edm.json';
+  a.click(); toast('Project saved — drawing, scale, runs and rates, all in one file.'); });
+$('#btnOpen').addEventListener('click',()=>$('#fileProj').click());
+$('#fileProj').addEventListener('change',async e=>{ const f=e.target.files[0]; e.target.value=''; if(!f) return;
+  try{ const d=JSON.parse(await f.text());
+    $('#projName').value=d.name||'Untitled project'; S.ppm=d.ppm||0; S.walls=d.walls||[]; S.nextId=d.nextId||S.walls.length+1;
+    Object.assign(S.rates,d.rates||{}); if(S.rates._c)$('#curr').value=S.rates._c;
+    const im=new Image(); await new Promise(r=>{im.onload=r; im.src=d.drawing;});
+    S.img={bmp:im,w:im.width,h:im.height,name:d.name}; $('#empty').classList.add('hide');
+    if(d.rev){ const rv=new Image(); await new Promise(r=>{rv.onload=r; rv.src=d.rev;}); S.rev={bmp:rv,w:rv.width,h:rv.height}; $('#revbar').classList.add('show'); }
+    if(S.ppm){ $('#stScale').textContent=`Calibrated — 1 m = ${fmt(S.ppm,1)} px`; $('#stScale').className='scale-ok'; }
+    const r=stage.getBoundingClientRect(); S.view.z=Math.min(r.width/im.width,r.height/im.height)*0.94;
+    S.view.x=(r.width-im.width*S.view.z)/2; S.view.y=(r.height-im.height*S.view.z)/2;
+    ratesUI(); typesUI(); renderAll(); draw(); toast('Project restored.');
+  }catch(err){ toast('That is not an EDM Measure project file.'); } });
+$('#btnCSV').addEventListener('click',()=>{
+  if(!S.walls.length){ toast('Nothing in the bill yet.'); return; }
+  const cur=S.rates._c||$('#curr').value||'AED'; const P=$('#projName').value;
+  let s=`EDM Measure — bill of quantities\nProject,${csv(P)}\nExported,${new Date().toISOString().slice(0,10)}\n\n`;
+  s+='BILL\nType,Description,Runs,LM,Net m2,Board m2,Stud lm,Track lm,Insulation m2,Labour hr,Cost '+cur+'\n';
+  let grand=0;
+  TYPES.forEach(t=>{ const ws=S.walls.filter(w=>w.typeId===t.id); if(!ws.length) return;
+    let L=0,net=0,q={board:0,stud:0,track:0,ins:0,sund:0,lab:0},cost=0;
+    ws.forEach(w=>{const c=calc(w); L+=c.L; net+=c.net; cost+=c.cost; ['board','stud','track','ins','sund','lab'].forEach(k=>q[k]+=c[k]);});
+    grand+=cost;
+    s+=[t.id,csv(t.ds),ws.length,n(L),n(net),n(q.board),n(q.stud),n(q.track),n(q.ins),n(q.lab),n(cost)].join(',')+'\n'; });
+  s+=`,,,,,,,,,,TOTAL,${n(grand)}\n\nMEASUREMENT REGISTER\nRef,Zone,Type,Length m,Height m,Openings,Net m2,Cost ${cur}\n`;
+  S.walls.forEach(w=>{const c=calc(w); s+=[w.id,csv(w.zone||''),w.typeId,n(c.L),n(w.ht),w.op,n(c.net),n(c.cost)].join(',')+'\n';});
+  s+=`\nNotes\nDoor deduction,${DOOR.toFixed(2)} m2 per opening (0.9 x 2.1)\nScale,1 m = ${S.ppm.toFixed(1)} px\n`;
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([s],{type:'text/csv'}));
+  a.download=(P||'edm-bill').replace(/[^\w\- ]+/g,'').trim().replace(/ +/g,'-')+'-BOQ.csv'; a.click();
+  toast('Bill exported — opens straight into your pricing workbook.');
+  function n(x){return (Math.round(x*100)/100).toFixed(2);} function csv(x){return '"'+String(x).replace(/"/g,'""')+'"';}
+});
+
+// ---------- printable wall plan (for the site cabin) ----------
+$('#btnPlan').addEventListener('click',()=>{
+  if(!S.img){ toast('Load a drawing first.'); return; }
+  if(!S.walls.length){ toast('Trace at least one wall — the plan prints the refs.'); return; }
+  const MAXW=2600, sc=Math.min(1, MAXW/S.img.w);
+  const c=document.createElement('canvas'); c.width=S.img.w*sc; c.height=S.img.h*sc;
+  const g=c.getContext('2d');
+  g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height);
+  g.drawImage(S.img.bmp,0,0,c.width,c.height);
+  S.walls.forEach(w=>{
+    g.strokeStyle='#083819'; g.lineWidth=Math.max(3,4*sc); g.lineJoin='round'; g.lineCap='round';
+    g.beginPath(); g.moveTo(w.pts[0].x*sc,w.pts[0].y*sc);
+    for(let i=1;i<w.pts.length;i++) g.lineTo(w.pts[i].x*sc,w.pts[i].y*sc);
+    g.stroke();
+    const a=w.pts[Math.floor((w.pts.length-1)/2)], b=w.pts[Math.ceil((w.pts.length-1)/2)];
+    const mx=(a.x+b.x)/2*sc, my=(a.y+b.y)/2*sc, txt=w.id+' · '+w.typeId;
+    g.font='700 '+Math.max(15,18*sc)+'px Montserrat, sans-serif';
+    const tw=g.measureText(txt).width;
+    g.fillStyle='rgba(255,255,255,.94)'; g.fillRect(mx-tw/2-6,my-24,tw+12,22);
+    g.strokeStyle='#E4E6E0'; g.lineWidth=1; g.strokeRect(mx-tw/2-6,my-24,tw+12,22);
+    g.fillStyle='#083819'; g.textAlign='center'; g.fillText(txt,mx,my-8);
+  });
+  const P=$('#projName').value.replace(/[&<>"]/g,'');
+  let box=document.getElementById('wplan');
+  if(!box){ box=document.createElement('div'); box.id='wplan'; document.body.appendChild(box); }
+  box.innerHTML=`<div class="ph"><img src="assets/logo.png" alt="EDM Holdings">
+    <div><h1>Wall reference plan</h1><div class="pm">${P} · ${new Date().toLocaleDateString('en-GB')} · scale: refer to takeoff</div></div></div>
+    <img class="pimg" src="${c.toDataURL('image/jpeg',0.85)}" alt="Wall plan">
+    <table><tr><th>Ref</th><th>Type</th><th>Zone</th><th>LM</th><th>Height</th></tr>
+    ${S.walls.map(w=>`<tr><td><b>${w.id}</b></td><td>${w.typeId}</td><td>${(w.zone||'—').replace(/[&<>"]/g,'')}</td><td>${fmt(lenM(w.pts))}</td><td>${fmt(w.ht,2)} m</td></tr>`).join('')}</table>
+    <div class="pf">Laminate one for the cabin and one per floor — the refs on this sheet are the same refs in the bill, the inspection records and the weekly report. EDM Holdings · edmholdings.ae</div>`;
+  window.print();
+});
+
+// ---------- boot ----------
+ratesUI(); typesUI(); renderAll(); setMode('pan'); resize();
+</script>
+</body>
+</html>

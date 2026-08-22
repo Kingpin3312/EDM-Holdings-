@@ -1,0 +1,56 @@
+# EDM OS — full local stack. One command:  docker compose up --build
+# Brings up Postgres, the API (migrated + seeded), and the web app.
+# Production runs managed Postgres + Supabase auth — see DEPLOYMENT.md.
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: edmos-db
+    environment:
+      POSTGRES_USER: edm
+      POSTGRES_PASSWORD: edm
+      POSTGRES_DB: edmos
+    ports:
+      - "5432:5432"
+    volumes:
+      - edmos_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U edm -d edmos"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: edmos-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://edm:edm@db:5432/edmos?schema=public"
+      DB_HOST: "db"
+      API_PORT: "4000"
+      CORS_ORIGIN: "http://localhost:3000"
+      SUPABASE_JWT_SECRET: "${SUPABASE_JWT_SECRET:-dev-secret}"
+      NODE_ENV: "development"
+    ports:
+      - "4000:4000"
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: edmos-web
+    depends_on:
+      - api
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost:4000"
+      NODE_ENV: "development"
+    ports:
+      - "3000:3000"
+
+volumes:
+  edmos_pg:

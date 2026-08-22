@@ -1,0 +1,23 @@
+These are illustrative mockups (workwear, vehicle livery, phone wallpaper).
+The logo is correct. Nothing in this folder is a client hand-out.
+
+V12 CORRECTIONS APPLIED
+-----------------------
+The retired bone tints (#F5F2EA and variants) were the dominant ground of the
+workwear and livery renders. Removed — the ground is now #FFFFFF.
+
+The vehicle livery used #0E3A2C for the wrap, not #083819, and its swatch bar
+printed "EMERALD · #0E3A2C" and "IVORY · #F5F2EA" as if those were the brand
+palette. Both the fill and the swatch bar are corrected. The bar now reads
+EMERALD #083819 / WHITE #FFFFFF / STEEL #9AA3A0.
+
+This mattered because these are the two files most likely to be handed to a
+signwriter or a workwear supplier as a colour reference. In V11 that would have
+put the retired palette into physical production.
+
+STILL TO DO
+-----------
+These are still renders, not production artwork. Before any supplier quote,
+rebuild them from the logo masters at the correct scale with real vehicle and
+garment templates. The steel tone in the livery bar reads #9AA3A0 against the
+logo's #9EA3A2 — reconcile on rebuild.

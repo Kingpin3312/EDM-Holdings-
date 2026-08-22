@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EDM Board — Group Operations</title>
+<style>
+@font-face{font-family:'Montserrat';font-weight:400;font-display:swap;src:url('fonts/montserrat-400.woff2') format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:600;font-display:swap;src:url('fonts/montserrat-600.woff2') format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:700;font-display:swap;src:url('fonts/montserrat-700.woff2') format('woff2')}
+:root{--green:#083819;--ink:#0F231B;--muted:#5C6F66;--line:#E4E6E0;--wash:#F7F8F7;--bad:#8F2B1F;--warn:#8a5a00;--ok:#0B6B33}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Montserrat',system-ui,sans-serif;color:var(--ink);background:var(--wash);display:flex;flex-direction:column;overflow:hidden}
+button{font-family:inherit;cursor:pointer}
+input{font-family:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;padding:5px 7px}
+input:focus,button:focus-visible{outline:2px solid var(--green);outline-offset:1px}
+
+.top{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--line);background:#fff;flex:0 0 auto;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:9px}
+.brand img{height:26px}
+.brand .t{font-size:14px;font-weight:700}.brand .t span{color:var(--green)}
+.brand .d{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.grow{flex:1}
+.tbtn{font-size:11.5px;font-weight:600;border:1px solid var(--line);background:#fff;border-radius:5px;padding:6px 11px;color:var(--ink)}
+.tbtn:hover{border-color:var(--green);color:var(--green)}
+.tbtn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.tbtn.small{padding:4px 8px;font-size:10px}
+.tbtn.danger{color:var(--bad)}
+
+.body{flex:1;overflow-y:auto}
+.wrap{max-width:960px;margin:0 auto;padding:16px 18px 46px}
+.hint{font-size:11.5px;color:var(--muted);line-height:1.65;margin-bottom:12px}
+.card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:13px 15px;margin-bottom:11px}
+.card h3{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:9px}
+
+.kpis{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.kpi{flex:1;min-width:132px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.kpi b{display:block;font-size:17px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpi span{font-size:10px;color:var(--muted);line-height:1.4;display:block;margin-top:2px}
+.kpi.bad b{color:var(--bad)}.kpi.warn b{color:var(--warn)}
+
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th{font-size:8.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px;border-bottom:1px solid var(--line);white-space:nowrap}
+th.r,td.r{text-align:right;font-variant-numeric:tabular-nums}
+td{padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+.bar{display:inline-block;width:76px;height:8px;background:var(--wash);border:1px solid var(--line);border-radius:5px;overflow:hidden;vertical-align:middle;margin-right:6px}
+.bar i{display:block;height:100%;background:var(--green)}
+.flag{font-size:9px;font-weight:700;letter-spacing:.06em;padding:2px 7px;border-radius:4px}
+.flag.late{background:#f6e8e6;color:var(--bad)}
+.flag.ok{background:#e8f1ec;color:var(--ok)}
+.neg{color:var(--bad);font-weight:700}
+.dim{color:var(--muted)}
+.att{display:flex;gap:9px;align-items:baseline;padding:8px 2px;border-bottom:1px solid var(--line);font-size:12px}
+.att:last-child{border-bottom:none}
+.att .k{font-size:9px;font-weight:700;letter-spacing:.06em;padding:2px 7px;border-radius:4px;background:#f6e8e6;color:var(--bad);white-space:nowrap}
+.att .k.w{background:#f7efe0;color:var(--warn)}
+.emptyv{text-align:center;padding:46px 20px;color:var(--muted);font-size:12.5px;line-height:1.9}
+
+.toast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12px;padding:8px 15px;border-radius:6px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:9;max-width:86%;text-align:center}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+
+#rep{display:none}
+@media print{
+ body>*{display:none!important}
+ body{overflow:visible;display:block;background:#fff}
+ #rep{display:block!important;color:#0F231B;font-size:10pt}
+ .rhead{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #083819;padding-bottom:4mm;margin-bottom:5mm}
+ .rhead img{width:50mm}
+ .rhead h1{font-size:14pt;font-weight:700;margin:0;text-align:right}
+ .rhead .rm{font-size:9.5pt;color:#5C6F66;text-align:right}
+ h2{font-size:9pt;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#083819;margin:5mm 0 2mm}
+ .rk{display:flex;gap:4mm;margin-bottom:2mm}
+ .rk div{flex:1;border:1px solid #E4E6E0;border-radius:2mm;padding:3mm}
+ .rk b{display:block;font-size:12pt;color:#083819;white-space:nowrap}
+ .rk b.neg{color:#8F2B1F}
+ .rk span{font-size:7.5pt;color:#5C6F66}
+ table{width:100%;border-collapse:collapse;font-size:8.8pt}
+ th{text-align:left;font-size:7pt;letter-spacing:.07em;text-transform:uppercase;color:#5C6F66;border-bottom:1px solid #E4E6E0;padding:1.5mm 2mm}
+ td{border-bottom:1px solid #E4E6E0;padding:1.7mm 2mm;vertical-align:top}
+ th.r,td.r{text-align:right;font-variant-numeric:tabular-nums}
+ .lt{color:#8F2B1F;font-weight:700}.okc{color:#0B6B33;font-weight:700}
+ .rfoot{font-size:8pt;color:#5C6F66;border-top:1px solid #E4E6E0;margin-top:5mm;padding-top:2mm}
+ tr{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><img src="assets/cube.png" alt="EDM Holdings">
+    <div><div class="t">EDM <span>Board</span></div><div class="d">Group operations</div></div></div>
+  <div class="grow"></div>
+  <button class="tbtn" id="btnFeed">Load team files</button>
+  <button class="tbtn" id="btnOpen">Open board</button>
+  <button class="tbtn" id="btnSave">Save board</button>
+  <button class="tbtn primary" id="btnRep">Print weekly summary</button>
+  <input type="file" id="fileFeed" accept=".json" multiple hidden>
+  <input type="file" id="fileO" accept=".json" hidden>
+</header>
+
+<div class="body"><div class="wrap" id="main"></div></div>
+
+<div class="toast" id="toast"></div>
+<div id="rep"></div>
+
+<script>
+'use strict';
+/* EDM Board — the Monday screen.
+   It reads what the teams already save: progress files, the cashflow file,
+   the daybooks. Nobody types anything twice; the picture assembles itself. */
+
+const STAGES=[['set'],['frame'],['mep'],['ins'],['b1'],['b2'],['fire'],['dec']];
+const S={progress:[],cash:null,daybooks:[]};
+
+const $=q=>document.querySelector(q);
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2800);}
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function today(){return new Date().toISOString().slice(0,10);}
+const money=n=>(Math.round(n)).toLocaleString('en-GB');
+const fmtd=d=>{if(!d)return'—';return new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});};
+const norm=s=>String(s||'').trim().toLowerCase();
+function addMonths(iso,n){const d=new Date(iso+'T12:00:00');d.setMonth(d.getMonth()+n);return d.toISOString().slice(0,10);}
+
+// ---------- progress maths (same rules as EDM Progress) ----------
+function area(w){return (w.lm&&w.ht)? w.lm*w.ht : 1;}
+function zones(pr){const z=[];pr.walls.forEach(w=>{const n=w.zone||'Unzoned';if(!z.includes(n))z.push(n);});return z;}
+function wallsIn(pr,z){return pr.walls.filter(w=>(w.zone||'Unzoned')===z);}
+function zonePct(pr,z){let a=0,p=0;
+  wallsIn(pr,z).forEach(w=>{const rs=(pr.act||{})[w.id]||{};let ap=0,dn=0;
+    STAGES.forEach(st=>{const r=rs[st[0]];if(r&&r.s==='N')return;ap++;if(r&&r.s==='P')dn++;});
+    if(!ap)return;a+=area(w);p+=area(w)*(dn/ap);});
+  return a? p/a : 0;}
+function stagePct(pr,z,k){let a=0,p=0;
+  wallsIn(pr,z).forEach(w=>{const r=((pr.act||{})[w.id]||{})[k];
+    if(r&&r.s==='N')return;a+=area(w);if(r&&r.s==='P')p+=area(w);});
+  return a? p/a : 0;}
+function projPct(pr){const zs=zones(pr);const tot=pr.walls.reduce((s,w)=>s+area(w),0);
+  if(!tot)return 0;
+  return zs.reduce((s,z)=>{const a=wallsIn(pr,z).reduce((x,w)=>x+area(w),0);return s+zonePct(pr,z)*a;},0)/tot;}
+function lateStages(pr){const t=today(),out=[];
+  zones(pr).forEach(z=>STAGES.forEach(st=>{
+    const d=((pr.plan||{})[z]||{})[st[0]];
+    if(d&&d<t&&stagePct(pr,z,st[0])<1)out.push({z,k:st[0],d});}));
+  return out;}
+function openCons(pr){return (pr.cons||[]).filter(c=>!c.closed).length;}
+
+// ---------- cash maths (same rules as EDM Cashflow) ----------
+function cashFor(name){
+  if(!S.cash)return null;
+  const p=(S.cash.projects||[]).find(x=>norm(x.name)===norm(name))||null;
+  if(!p)return null;
+  let cert=0,ret=0,unpaid=0,overdue=0,short=0;
+  (p.apps||[]).forEach(a=>{const c=+a.cert||0,ap=+a.applied||0;
+    cert+=c;ret+=c*(p.retPct/100);
+    if(a.cert!==''&&a.cert!=null)short+=Math.max(0,ap-c);
+    const net=c-(c*(p.retPct/100));
+    if(!a.paid){unpaid+=net;if(a.due&&a.due<today())overdue+=net;}});
+  let retBack=0;if(p.m1rec)retBack+=ret/2;if(p.m2rec)retBack+=ret/2;
+  const retLate=[];const t=today();
+  if(p.pc&&!p.m1rec&&p.pc<t)retLate.push('first half');
+  if(p.pc&&!p.m2rec&&addMonths(p.pc,p.dlp)<t)retLate.push('second half');
+  return {cert,retHeld:ret-retBack,unpaid,overdue,short,retLate};
+}
+// ---------- daybook: latest labour per project ----------
+function labourFor(name){
+  const db=S.daybooks.find(d=>norm(d.name)===norm(name));
+  if(!db)return null;
+  const days=Object.keys(db.days||{}).sort();
+  if(!days.length)return null;
+  const k=days[days.length-1];
+  const tot=(db.days[k].labour||[]).reduce((s,l)=>s+(+l.n||0),0);
+  return {date:k,tot};
+}
+
+// ---------- rollup ----------
+function rollup(){
+  return S.progress.map(pr=>{
+    const late=lateStages(pr);
+    return {name:pr.name,pct:projPct(pr),late:late.length,cons:openCons(pr),
+      cash:cashFor(pr.name),lab:labourFor(pr.name),
+      walls:pr.walls.length,area:Math.round(pr.walls.reduce((s,w)=>s+area(w),0))};});
+}
+function attention(){
+  const out=[];
+  rollup().forEach(r=>{
+    if(r.late)out.push({k:'BEHIND',w:false,txt:`${r.name} — ${r.late} stage${r.late>1?'s':''} past their planned start`});
+    if(r.cash&&r.cash.overdue>0)out.push({k:'MONEY',w:false,txt:`${r.name} — ${money(r.cash.overdue)} certified, due and unpaid`});
+    if(r.cash&&r.cash.retLate.length)out.push({k:'RETENTION',w:true,txt:`${r.name} — ${r.cash.retLate.join(' and ')} past release date, unclaimed`});
+    if(r.cons)out.push({k:'CONSTRAINT',w:true,txt:`${r.name} — ${r.cons} open in the delay log`});
+  });
+  return out;
+}
+
+// ---------- render ----------
+function render(){
+  if(!S.progress.length){
+    $('#main').innerHTML=`<div class="emptyv">The board is empty.<br><br>
+     <b>Load team files</b> and pick everything at once — the weekly progress files,<br>
+     the cashflow file, the daybooks. It sorts out which is which,<br>
+     matches them up by project name, and the Monday picture builds itself.</div>`;return;}
+  const rs=rollup();
+  const totArea=rs.reduce((s,r)=>s+r.area,0);
+  const overall=totArea? rs.reduce((s,r)=>s+r.pct*r.area,0)/totArea : 0;
+  const lateT=rs.reduce((s,r)=>s+r.late,0);
+  const consT=rs.reduce((s,r)=>s+r.cons,0);
+  const overdueT=rs.reduce((s,r)=>s+(r.cash?r.cash.overdue:0),0);
+  const retT=rs.reduce((s,r)=>s+(r.cash?r.cash.retHeld:0),0);
+  const labT=rs.reduce((s,r)=>s+(r.lab?r.lab.tot:0),0);
+  const att=attention();
+  const curr=S.cash&&S.cash.curr?S.cash.curr:'AED';
+  $('#main').innerHTML=`
+   <div class="kpis">
+    <div class="kpi"><b>${rs.length}</b><span>live projects on the board</span></div>
+    <div class="kpi"><b>${Math.round(overall*100)}%</b><span>group completion, weighted by wall area</span></div>
+    <div class="kpi ${lateT?'bad':''}"><b>${lateT}</b><span>stages behind plan, group-wide</span></div>
+    <div class="kpi ${overdueT?'bad':''}"><b>${money(overdueT)} ${curr}</b><span>certified, due &amp; unpaid</span></div>
+    <div class="kpi warn"><b>${money(retT)} ${curr}</b><span>retention held by clients</span></div>
+    <div class="kpi"><b>${labT}</b><span>on site at last daybook count</span></div>
+   </div>
+   <div class="card"><h3>Projects</h3>
+    <table><thead><tr><th>Project</th><th>Complete</th><th>Status</th><th class="r">Open constraints</th><th class="r">Labour (latest)</th><th class="r">Cert. unpaid</th><th class="r">Overdue</th><th class="r">Retention held</th></tr></thead><tbody>
+    ${rs.map(r=>`<tr>
+      <td><b>${esc(r.name)}</b><br><small class="dim">${r.walls} walls · ${r.area.toLocaleString('en-GB')} m²</small></td>
+      <td><span class="bar"><i style="width:${Math.round(r.pct*100)}%"></i></span>${Math.round(r.pct*100)}%</td>
+      <td><span class="flag ${r.late?'late':'ok'}">${r.late?r.late+' LATE':'ON PLAN'}</span></td>
+      <td class="r">${r.cons||'—'}</td>
+      <td class="r">${r.lab?`${r.lab.tot} <small class="dim">${fmtd(r.lab.date)}</small>`:'<span class="dim">no daybook</span>'}</td>
+      <td class="r">${r.cash?money(r.cash.unpaid):'<span class="dim">no cash file</span>'}</td>
+      <td class="r ${r.cash&&r.cash.overdue?'neg':''}">${r.cash?(r.cash.overdue?money(r.cash.overdue):'—'):''}</td>
+      <td class="r">${r.cash?money(r.cash.retHeld):''}</td></tr>`).join('')}
+    </tbody></table></div>
+   <div class="card"><h3>Needs attention this week</h3>
+    ${att.length? att.map(a=>`<div class="att"><span class="k ${a.w?'w':''}">${a.k}</span><span>${esc(a.txt)}</span></div>`).join('')
+     : '<p class="hint" style="margin:0">Nothing flagged. A quiet board is allowed — enjoy the Monday.</p>'}
+   </div>`;
+}
+
+// ---------- feeding the board ----------
+$('#btnFeed').addEventListener('click',()=>$('#fileFeed').click());
+$('#fileFeed').addEventListener('change',async e=>{
+  const files=[...e.target.files];e.target.value='';if(!files.length)return;
+  let np=0,nc=0,nd=0,skip=0;
+  for(const f of files){
+    try{const d=JSON.parse(await f.text());
+      if(d.app==='EDM Progress'){
+        const i=S.progress.findIndex(x=>norm(x.name)===norm(d.name));
+        if(i>=0)S.progress[i]=d;else S.progress.push(d);np++;}
+      else if(d.app==='EDM Cashflow'){S.cash=d;nc++;}
+      else if(d.app==='EDM Daybook'){
+        const i=S.daybooks.findIndex(x=>norm(x.name)===norm(d.name));
+        if(i>=0)S.daybooks[i]=d;else S.daybooks.push(d);nd++;}
+      else skip++;
+    }catch(err){skip++;}
+  }
+  render();
+  const bits=[];if(np)bits.push(np+' progress');if(nc)bits.push('cashflow');if(nd)bits.push(nd+' daybook'+(nd>1?'s':''));
+  toast(bits.length?`Loaded: ${bits.join(', ')}${skip?` · ${skip} file${skip>1?'s':''} not recognised`:''}`:'None of those were team files.');
+});
+
+// ---------- save / open ----------
+$('#btnSave').addEventListener('click',()=>{
+  if(!S.progress.length){toast('Nothing on the board to save.');return;}
+  const out={app:'EDM Board',v:1,progress:S.progress,cash:S.cash,daybooks:S.daybooks,saved:today()};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(out)],{type:'application/json'}));
+  a.download='edm-board.json';a.click();
+  toast('Board saved — the whole group picture in one file.');});
+$('#btnOpen').addEventListener('click',()=>$('#fileO').click());
+$('#fileO').addEventListener('change',async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{const d=JSON.parse(await f.text());
+    if(d.app!=='EDM Board'){toast('That is not a Board file.');return;}
+    S.progress=d.progress||[];S.cash=d.cash||null;S.daybooks=d.daybooks||[];
+    render();toast('Board restored.');
+  }catch(err){toast('Could not read that file.');}});
+
+// ---------- weekly summary ----------
+$('#btnRep').addEventListener('click',()=>{
+  if(!S.progress.length){toast('Load the team files first.');return;}
+  const rs=rollup(),att=attention();
+  const totArea=rs.reduce((s,r)=>s+r.area,0);
+  const overall=totArea? rs.reduce((s,r)=>s+r.pct*r.area,0)/totArea : 0;
+  const overdueT=rs.reduce((s,r)=>s+(r.cash?r.cash.overdue:0),0);
+  const retT=rs.reduce((s,r)=>s+(r.cash?r.cash.retHeld:0),0);
+  const lateT=rs.reduce((s,r)=>s+r.late,0);
+  const labT=rs.reduce((s,r)=>s+(r.lab?r.lab.tot:0),0);
+  const curr=S.cash&&S.cash.curr?S.cash.curr:'AED';
+  $('#rep').innerHTML=`
+   <div class="rhead"><img src="assets/logo.png" alt="EDM Holdings">
+    <div><h1>Weekly operations summary</h1><div class="rm">All projects · week ending ${fmtd(today())}</div></div></div>
+   <div class="rk">
+    <div><b>${rs.length}</b><span>live projects</span></div>
+    <div><b>${Math.round(overall*100)}%</b><span>group completion (area-weighted)</span></div>
+    <div><b class="${lateT?'neg':''}">${lateT}</b><span>stages behind plan</span></div>
+    <div><b class="${overdueT?'neg':''}">${money(overdueT)} ${curr}</b><span>certified, due &amp; unpaid</span></div>
+    <div><b>${money(retT)} ${curr}</b><span>retention held</span></div>
+    <div><b>${labT}</b><span>on site, latest count</span></div>
+   </div>
+   <h2>Position by project</h2>
+   <table><tr><th>Project</th><th class="r">Complete</th><th>Status</th><th class="r">Constraints open</th><th class="r">Labour</th><th class="r">Cert. unpaid</th><th class="r">Overdue</th><th class="r">Retention held</th></tr>
+   ${rs.map(r=>`<tr><td>${esc(r.name)}</td><td class="r">${Math.round(r.pct*100)}%</td>
+    <td class="${r.late?'lt':'okc'}">${r.late?r.late+' late':'On plan'}</td>
+    <td class="r">${r.cons||'—'}</td><td class="r">${r.lab?r.lab.tot:'—'}</td>
+    <td class="r">${r.cash?money(r.cash.unpaid):'—'}</td>
+    <td class="r ${r.cash&&r.cash.overdue?'lt':''}">${r.cash?(r.cash.overdue?money(r.cash.overdue):'—'):'—'}</td>
+    <td class="r">${r.cash?money(r.cash.retHeld):'—'}</td></tr>`).join('')}</table>
+   <h2>Needs attention</h2>
+   ${att.length?`<table>${att.map(a=>`<tr><td style="width:24mm" class="${a.w?'':'lt'}">${a.k}</td><td>${esc(a.txt)}</td></tr>`).join('')}</table>`
+    :'<p style="font-size:9.5pt;color:#5C6F66">Nothing flagged this week.</p>'}
+   <div class="rfoot">Every figure on this page rolls up from the working files — takeoffs, signed inspections, site daybooks and the cash board. Nothing here was typed twice.
+   <br>EDM Holdings · Fit-Out &amp; Drywall Specialists · UAE · Ireland · UK · Australia · edmholdings.ae</div>`;
+  window.print();
+});
+
+render();
+</script>
+</body>
+</html>

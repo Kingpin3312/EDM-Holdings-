@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<!--
+  EDM HOLDINGS — BRAND GUIDELINES
+  Editable source. Render with:  weasyprint brand-guidelines.html out.pdf
+
+  Rebuilt in V12. Three defects in the V11 PDF are fixed here:
+   1. It embedded DejaVu Sans Bold — purely to render the ✕ glyphs on the
+      "Getting it wrong" page. The brand document that says "don't introduce a
+      second font" contained a second font. The crosses are now drawn in CSS.
+   2. The colour page did not include #0A4A21, which was already in use as the
+      nav hover state on all 20 website pages and documented nowhere.
+   3. The back page carried the four-market claim (Decision 3).
+
+  Colour swatches on the colour page are rendered from the token values in
+  assets/edm-doc.css, so a swatch cannot drift from the token it documents.
+-->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8"/>
+<title>EDM Holdings — Brand Guidelines</title>
+<link rel="stylesheet" href="assets/edm-doc.css"/>
+<style>
+  /* Page-specific components. Everything else comes from edm-doc.css. */
+  .sw { display: table; width: 100%; border-spacing: 4mm; margin: 6mm -4mm 0; }
+  .swrow { display: table-row; }
+  .swcell { display: table-cell; width: 50%; vertical-align: top; }
+  .chip { display: table; width: 100%; }
+  .chip .dot {
+    display: table-cell; width: 20mm; height: 20mm; vertical-align: top;
+    border-radius: 2mm; border: 1px solid var(--hairline);
+  }
+  .chip .txt { display: table-cell; vertical-align: top; padding-left: 5mm; }
+  .chip .nm { font-weight: 700; font-size: 10pt; margin-bottom: 1.4mm; }
+  .chip .hx { font-size: 8.4pt; color: var(--muted); line-height: 1.55; }
+
+  .dont { display: table; width: 100%; border-spacing: 4mm; margin: 4mm -4mm 0; }
+  .dontrow { display: table-row; }
+  .dontcell {
+    display: table-cell; width: 50%; vertical-align: top;
+    border: 1px solid var(--hairline); border-radius: 2mm; padding: 5mm 5mm 5.5mm;
+  }
+  /* Cross drawn with two rotated rules — no glyph, so no second font. */
+  .x { width: 6mm; height: 6mm; position: relative; margin-bottom: 3.5mm; }
+  .x::before, .x::after {
+    content: ""; position: absolute; left: 0; top: 2.7mm;
+    width: 6mm; height: 1.3pt; background: var(--emerald);
+  }
+  .x::before { transform: rotate(45deg); }
+  .x::after  { transform: rotate(-45deg); }
+  .dontcell p { font-size: 8.6pt; color: var(--muted); margin: 0; line-height: 1.62; }
+
+  .spec { font-weight: 700; font-size: 30pt; letter-spacing: -.02em; }
+  .spec .l { font-weight: 300; }
+  .spec .r { font-weight: 400; }
+  .spec .b { font-weight: 700; }
+  .voice li { font-size: 9.6pt; margin-bottom: 4mm; list-style: none; padding-left: 8mm; position: relative; }
+  .voice li::before {
+    content: ""; position: absolute; left: 0; top: 2.4mm;
+    width: 4.5mm; height: 1.6pt; background: var(--emerald);
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ 01 COVER ============ -->
+<section class="page cover">
+  <div class="cover-top">
+    <img src="assets/edm-logo.png" alt="EDM Holdings"/>
+    <div class="doc-label">BRAND<br/>GUIDELINES</div>
+  </div>
+  <div class="cover-headline">How we present<br/>EDM Holdings.</div>
+  <p class="cover-lead">A short, practical guide to using the EDM Holdings identity — the mark, the colours and the type — so everything we put our name to looks like it came from the same firm.</p>
+  <div class="cover-band">
+    <span>EDM HOLDINGS &nbsp;·&nbsp; FIT-OUT &amp; DRYWALL SPECIALISTS</span>
+    <span class="site">edmholdings.ae</span>
+  </div>
+</section>
+
+<!-- ============ 02 THE MARK ============ -->
+<section class="page dense">
+  <div class="eyebrow">The mark</div>
+  <h1>One logo, used properly.</h1>
+
+  <p class="lead">Our logo is the three-tone cube alongside the EDM Holdings wordmark and the line that says exactly what we do. Used together they are the primary lockup — the version to reach for first.</p>
+
+  <p class="muted">The cube is built from three faces: the dark emerald front, and two greys that give it depth. Those greys are part of the mark. Don't swap them for the accent green or flatten them to one tone.</p>
+
+  <div style="text-align:center; margin:12mm 0">
+    <img src="assets/edm-logo.png" alt="EDM Holdings primary lockup" style="width:96mm"/>
+  </div>
+
+  <div class="rows">
+    <div class="row2"><div class="k">Clear space</div><div class="v">Keep a margin around the logo at least as tall as the "E" in EDM on every side. Nothing — text, images or edges — should crowd it.</div></div>
+    <div class="row2"><div class="k">Minimum size</div><div class="v">Don't reproduce the full lockup below 30 mm wide in print, or 150 px on screen. Below that, use the cube on its own.</div></div>
+    <div class="row2"><div class="k">Source files</div><div class="v">Always use the masters in <span style="font-weight:700">12-Logo-Masters</span> or <span style="font-weight:700">01-Brand-Identity/Logo</span>. Never recreate the cube and never redraw the wordmark.</div></div>
+  </div>
+
+  <div class="foot-rule"></div>
+  <div class="foot"><span class="fl">Brand Guidelines</span><span class="pageno">02</span></div>
+</section>
+
+<!-- ============ 03 VARIANTS ============ -->
+<section class="page dense">
+  <div class="eyebrow">Variants</div>
+  <h1>Three versions, one identity.</h1>
+
+  <div class="rows">
+    <div class="row2"><div class="k">Primary — on white</div><div class="v">The full lockup on a white ground. Use it wherever there is room. This is the default for documents, letterheads, presentations and the website.</div></div>
+    <div class="row2"><div class="k">Reversed — on emerald</div><div class="v">For an emerald or dark ground. Use sparingly: pages and covers stay white with emerald as the accent. Bands, footers and table header rows are the exception.</div></div>
+    <div class="row2"><div class="k">Cube mark — icons and small sizes</div><div class="v">For favicons, app icons, avatars and anywhere the wordmark would be too small to read. In a social feed the mark renders at around 48–60 px, so the cube alone is correct there.</div></div>
+  </div>
+
+  <div class="callout">
+    <div class="lbl">Choosing between them</div>
+    <p>If the wordmark would fall below 150 px on screen or 30 mm in print, you want the cube. If in doubt, put both versions side by side at the size they will actually appear and pick the one that reads.</p>
+  </div>
+
+  <div class="foot-rule"></div>
+  <div class="foot"><span class="fl">Brand Guidelines</span><span class="pageno">03</span></div>
+</section>
+
+<!-- ============ 04 GETTING IT WRONG ============ -->
+<section class="page dense">
+  <div class="eyebrow">Getting it wrong</div>
+  <h1>Please don't.</h1>
+
+  <p class="lead">The quickest way to make the brand look cheap is to alter the logo. A few firm rules.</p>
+
+  <div class="dont">
+    <div class="dontrow">
+      <div class="dontcell"><div class="x"></div><p>Don't recolour the cube or the wordmark, or change the two panel greys.</p></div>
+      <div class="dontcell"><div class="x"></div><p>Don't rebuild the lockup or move the wordmark around the cube.</p></div>
+    </div>
+    <div class="dontrow">
+      <div class="dontcell"><div class="x"></div><p>Don't stretch, squash or rotate the logo.</p></div>
+      <div class="dontcell"><div class="x"></div><p>Don't place it on a busy photograph or a low-contrast colour.</p></div>
+    </div>
+    <div class="dontrow">
+      <div class="dontcell"><div class="x"></div><p>Don't add shadows, gradients, outlines or glows.</p></div>
+      <div class="dontcell"><div class="x"></div><p>Don't use the old bronze or bone versions. They are retired.</p></div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="lbl">Where this has actually gone wrong</div>
+    <p>Retired bone tints survived as the background of the workwear and vehicle livery renders as late as V11, and the livery swatch bar printed an off-system green as if it were the brand emerald. Both corrected in V12. The lesson is that mockups get sent to suppliers — check them against this page before anyone quotes from them.</p>
+  </div>
+
+  <div class="foot-rule"></div>
+  <div class="foot"><span class="fl">Brand Guidelines</span><span class="pageno">04</span></div>
+</section>
+
+<!-- ============ 05 COLOUR ============ -->
+<section class="page dense">
+  <div class="eyebrow">Colour</div>
+  <h1>White and emerald. That's the brand.</h1>
+
+  <p class="lead">We build on a white background with a single emerald accent. The rest are quiet neutrals for text and lines. No bone, no sage, no bronze.</p>
+
+  <div class="sw">
+    <div class="swrow">
+      <div class="swcell"><div class="chip"><div class="dot" style="background:#FFFFFF"></div><div class="txt"><div class="nm">White</div><div class="hx">#FFFFFF · RGB 255 255 255<br/>The ground.</div></div></div></div>
+      <div class="swcell"><div class="chip"><div class="dot" style="background:#5C6F66; border-color:#5C6F66"></div><div class="txt"><div class="nm">Muted</div><div class="hx">#5C6F66<br/>Secondary text, captions.</div></div></div></div>
+    </div>
+    <div class="swrow">
+      <div class="swcell"><div class="chip"><div class="dot" style="background:#083819; border-color:#083819"></div><div class="txt"><div class="nm">Emerald</div><div class="hx">#083819 · RGB 8 56 25<br/>The only accent.</div></div></div></div>
+      <div class="swcell"><div class="chip"><div class="dot" style="background:#E4E6E0; border-color:#E4E6E0"></div><div class="txt"><div class="nm">Hairline</div><div class="hx">#E4E6E0<br/>Rules and borders.</div></div></div></div>
+    </div>
+    <div class="swrow">
+      <div class="swcell"><div class="chip"><div class="dot" style="background:#0F231B; border-color:#0F231B"></div><div class="txt"><div class="nm">Ink</div><div class="hx">#0F231B<br/>Headings and body text.</div></div></div></div>
+      <div class="swcell"><div class="chip"><div class="dot" style="background:#7C8282; border-color:#7C8282"></div><div class="txt"><div class="nm">Cube greys</div><div class="hx">#7C8282 &amp; #9EA3A2<br/>The mark only. Never UI.</div></div></div></div>
+    </div>
+  </div>
+
+  <div class="rows" style="margin-top:8mm">
+    <div class="row2"><div class="k">Interaction state</div><div class="v"><span style="font-weight:700">#0A4A21</span> — a lighter emerald, used for the nav call-to-action hover on the website and nowhere else. Documented here because it was already in use across all 20 pages before it appeared in any guideline. Don't extend it to new elements.</div></div>
+    <div class="row2"><div class="k">Third-party</div><div class="v">#25D366 and #1EBE5B on the WhatsApp button only. They are WhatsApp's colours, not ours.</div></div>
+    <div class="row2"><div class="k">Regulated</div><div class="v">Hi-vis on PPE renders is a safety colour, not a brand colour. It is correct and it is not an exception to this page.</div></div>
+    <div class="row2"><div class="k">Never</div><div class="v">#F5F2EA, #F4F1E9, #F2EFE7 or any other bone or ivory tint. #0E3A2C or any green other than #083819. Any sage. Any bronze.</div></div>
+  </div>
+
+  <p class="muted" style="font-size:8.2pt; margin-top:5mm">The machine-readable list lives at 01-Brand-Identity/BRAND-TOKENS.md. The swatches above are drawn from those values, so a swatch cannot drift from the token it documents.</p>
+
+  <div class="foot-rule"></div>
+  <div class="foot"><span class="fl">Brand Guidelines</span><span class="pageno">05</span></div>
+</section>
+
+<!-- ============ 06 TYPOGRAPHY ============ -->
+<section class="page dense">
+  <div class="eyebrow">Typography</div>
+  <h1>Montserrat, throughout.</h1>
+
+  <p class="lead">One typeface does everything — headlines, body, captions. It is clean, modern and easy to read at any size. Keep it consistent and don't introduce a second font.</p>
+
+  <div style="margin:10mm 0 4mm">
+    <div class="spec"><span class="l">Aa</span> <span class="r">Bb</span> <span class="b">Cc</span></div>
+    <div style="font-weight:700; font-size:7.6pt; letter-spacing:.18em; color:var(--muted); margin-top:4mm">
+      MONTSERRAT &nbsp;·&nbsp; LIGHT 300 &nbsp;·&nbsp; REGULAR 400 &nbsp;·&nbsp; SEMIBOLD 600 &nbsp;·&nbsp; BOLD 700
+    </div>
+  </div>
+
+  <div class="cols3">
+    <div><h4>Headlines</h4><p>Bold (700), tight tracking. Short and direct.</p></div>
+    <div><h4>Body</h4><p>Regular (400), generous line spacing for easy reading.</p></div>
+    <div><h4>Labels</h4><p>Bold, uppercase, wide tracking, in emerald.</p></div>
+  </div>
+
+  <div class="callout">
+    <div class="lbl">Four weights, and only four</div>
+    <p>Light 300, Regular 400, SemiBold 600, Bold 700. <span style="font-weight:700">Medium 500 is not in the system.</span> The V11 capability statement and brochure used Medium — if you see a 500 weight anywhere, it is an error, not a variant.</p>
+  </div>
+
+  <div class="rows">
+    <div class="row2"><div class="k">Embedding</div><div class="v">Montserrat is embedded in the website, the documents and the templates, so it renders correctly everywhere. Never rely on a font being installed on someone else's machine.</div></div>
+    <div class="row2"><div class="k">Watch for glyphs</div><div class="v">A tick, a cross or an arrow typed as a character will pull a fallback typeface into the file and break the one-font rule silently. Draw them instead. Check any exported PDF with <span style="font-weight:700">pdffonts</span>: only Montserrat should be listed.</div></div>
+  </div>
+
+  <div class="foot-rule"></div>
+  <div class="foot"><span class="fl">Brand Guidelines</span><span class="pageno">06</span></div>
+</section>
+
+<!-- ============ 07 VOICE & CONTACT ============ -->
+<section class="page dense">
+  <div class="eyebrow">How we sound</div>
+  <h1>Plain, direct, specific.</h1>
+
+  <ul class="voice">
+    <li>Say what we do and what we've done. No jargon, no filler.</li>
+    <li>Lead with the point. Short sentences do more work than long ones.</li>
+    <li>Be specific — a real project, a real number, a real trade.</li>
+    <li>Confident, not boastful. We let the track record carry it.</li>
+    <li>UK English, always. Programme, metre, colour, organisation.</li>
+    <li>No absolutes. Nothing is "100%", "guaranteed", "world-class" or "leading".</li>
+  </ul>
+
+  <div class="callout">
+    <div class="lbl">Words we don't use</div>
+    <p>sublet &nbsp;·&nbsp; sub-letting &nbsp;·&nbsp; "let's talk about your package" &nbsp;·&nbsp; thrilled &nbsp;·&nbsp; excited to announce &nbsp;·&nbsp; delighted to share &nbsp;·&nbsp; reach out &nbsp;·&nbsp; leverage &nbsp;·&nbsp; seamless &nbsp;·&nbsp; robust &nbsp;·&nbsp; world-class</p>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="eyebrow" style="margin-top:0">Contact</div>
+  <div class="contact">
+    <div class="nm">EDM Holdings</div>
+    <div>Fit-Out &amp; Drywall Specialists</div>
+    <div>enquiries@edmholdings.ae</div>
+    <div>+971 (0) 58 601 2021</div>
+    <div>edmholdings.ae</div>
+  </div>
+
+  <div class="foot-rule"></div>
+  <div class="foot"><span class="fl">EDM Holdings · Fit-out &amp; Drywall Specialists · Dubai, UAE</span><span class="pageno">07</span></div>
+</section>
+
+</body>
+</html>

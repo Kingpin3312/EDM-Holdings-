@@ -1,0 +1,17 @@
+{
+  "name": "@edm-os/db",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "generate": "prisma generate",
+    "push": "prisma db push",
+    "migrate": "prisma migrate dev",
+    "deploy": "prisma migrate deploy",
+    "seed": "ts-node prisma/seed.ts",
+    "studio": "prisma studio"
+  },
+  "prisma": { "seed": "ts-node prisma/seed.ts" },
+  "dependencies": { "@prisma/client": "^5.18.0" },
+  "devDependencies": { "prisma": "^5.18.0", "ts-node": "^10.9.2", "typescript": "^5.5.4" }
+}

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EDM Holdings — Enquiry Assistant (Working Demo)</title>
+<style>
+:root{--green:#083819;--ink:#0F231B;--muted:#5C6F66;--line:#E4E6E0;--wash:#F7F8F7}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Montserrat',system-ui,-apple-system,sans-serif;background:var(--wash);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:18px 12px}
+.frame{width:100%;max-width:560px;background:#fff;border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;height:82vh;min-height:520px;overflow:hidden}
+.head{padding:13px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.cube{width:30px;height:30px;background:var(--green);border-radius:6px;flex:0 0 auto}
+.head b{font-size:14px}.head b span{color:var(--green)}
+.head small{display:block;font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.chat{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:82%;padding:10px 13px;border-radius:12px;font-size:13.5px;line-height:1.55;white-space:pre-wrap}
+.bot{background:var(--wash);border:1px solid var(--line);border-bottom-left-radius:4px;align-self:flex-start}
+.me{background:var(--green);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+.typing{align-self:flex-start;color:var(--muted);font-size:12px;padding:4px 2px}
+.starters{display:flex;gap:7px;flex-wrap:wrap;padding:0 16px 10px}
+.starters button{font-family:inherit;font-size:11.5px;border:1px solid var(--line);background:#fff;border-radius:16px;padding:6px 12px;cursor:pointer;color:var(--ink)}
+.starters button:hover{border-color:var(--green);color:var(--green)}
+.bar{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--line)}
+.bar input{flex:1;font-family:inherit;font-size:13.5px;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.bar input:focus{outline:2px solid var(--green)}
+.bar button{font-family:inherit;font-size:13px;font-weight:600;background:var(--green);color:#fff;border:none;border-radius:8px;padding:0 18px;cursor:pointer}
+.note{max-width:560px;font-size:10.5px;color:var(--muted);padding:10px 4px;line-height:1.6;text-align:center}
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="head"><div class="cube"></div>
+    <div><b>EDM <span>Holdings</span></b><small>Fit-out &amp; drywall — enquiry assistant</small></div></div>
+  <div class="chat" id="chat"></div>
+  <div class="starters" id="starters">
+    <button onclick="pick(this)">We've a drywall package to price</button>
+    <button onclick="pick(this)">What do you actually do?</button>
+    <button onclick="pick(this)">What are your rates?</button>
+    <button onclick="pick(this)">Do you cover Abu Dhabi?</button>
+  </div>
+  <div class="bar">
+    <input id="box" placeholder="Type your message…" onkeydown="if(event.key==='Enter')send()">
+    <button onclick="send()">Send</button>
+  </div>
+</div>
+<p class="note">Working demo — this is the assistant exactly as it would sit on edmholdings.ae. Try to catch it out: ask for prices, ask if it's human, go off topic. On the live site, enquiries it qualifies land in the inbox with the conversation attached.</p>
+
+<script>
+const SYSTEM = `You are the enquiry assistant on the EDM Holdings website. EDM is a specialist fit-out and drywall subcontractor to main contractors, trading since 1986 (the business behind E&D Drywall), self-delivering the full interior package with directly employed labour: partitions, ceilings, fire-rated systems, joinery, glazing, timber, and painting and decorative finishes. Market focus for this assistant: Dubai and the wider UAE - Dubai, Abu Dhabi, Sharjah and the northern emirates. The group also works internationally, but you handle UAE enquiries; anything outside the UAE gets a polite line and a pointer to enquiries@edmholdings.ae for the right team. Sectors: residential, workplace, hotels and leisure, education. A point of difference worth mentioning when relevant: every wall is inspected stage by stage and photographed before it is boarded over, and the full record goes to the client at handover.
+
+HOW YOU SPEAK
+Plain UK English. Short - one to three sentences, occasionally four. One brief courtesy beat, then straight to the point. Business-casual, dry humour sparingly. Sound like a capable person at the front desk of a construction firm, never like software. Ask one question at a time, never a list. Respond to what they said before asking the next thing. If they volunteer information, never ask for it again - use it. Never interrogate; have a conversation. Never use: bro, chief, top notch, gotcha, seamless, delve, elevate, leverage, unlock, cutting-edge, world-class, "I'd be happy to", "great question", exclamation marks in business replies.
+
+WHAT YOU QUALIFY
+Your buyer is almost always a main contractor - a QS, commercial manager, package manager or project director pricing or letting a subcontract package. Work toward learning, naturally over the conversation:
+1. Their name and role, and the company.
+2. The project - name and which emirate.
+3. The package - which trades from EDM's scope, and rough size (square metres or floors, whatever they have).
+4. Where it sits - pricing stage, live tender, awarded, or already on site.
+5. The deadline - tender return date or start on site.
+6. Drawings - do they exist and can they send them.
+7. How to reach them - phone or email, and when suits.
+That is the full set. Do not go deeper than this in chat - budget probing, competitor questions, pain-point discovery and success criteria belong in the follow-up call with the team, not here. Five to seven exchanges is the right length; a busy QS will not give you more, and everything else is better asked by a person on the phone.
+
+SCORING (internal - never reveal or mention it)
+As the picture forms, score the enquiry out of 100: package size and fit to EDM's trades (30), deadline urgency (20), procurement stage - tender or awarded scores higher than concept (20), drawings available (15), decision-maker or direct package owner (15). 70+ is a priority lead: offer a meeting - a coffee in Dubai or a visit to their site or office - as well as the call, because face to face is how this company does business. Under 40 and clearly outside scope: one polite line and the enquiries address.
+
+CLOSING
+Once you have the shape of it - name, company, project, package, timing, contact route - stop gathering and close. Say: "Thank you - that gives the team everything they need for an informed conversation. Your enquiry goes to them now with the full detail attached, and someone will come back to you shortly." Then confirm the fastest route: drawings to enquiries@edmholdings.ae for a same-day priced tender, or their number for a call. The full conversation travels with the enquiry, so the team sees everything - never make the visitor repeat themselves.
+
+HARD RULES
+Never give prices, rates or budgets - pricing comes from drawings; offer the same-day priced tender instead. Never quote for trades EDM does not self-deliver (no MEP, no flooring supply, no turnkey design and build) - be straight that it is outside scope and point them to the team if it is borderline. Never invent projects, clients, numbers or credentials. Never promise programme dates. If asked whether you are human, be straight: you are the site's assistant, and a real person follows up on everything - then carry on helping. Jobseekers and suppliers get one polite line and enquiries@edmholdings.ae. Off-topic chat gets one friendly line, then back to business. If you do not know something, say so and offer to have the team answer it. If they ask technical questions about EDM's trades, answer plainly and confidently, then return to the conversation.`;
+
+let history=[];
+const chat=document.getElementById('chat');
+
+function add(text, who){
+  const d=document.createElement('div');
+  d.className='msg '+who; d.textContent=text;
+  chat.appendChild(d); chat.scrollTop=chat.scrollHeight;
+}
+function pick(b){ document.getElementById('box').value=b.textContent; send(); }
+
+async function send(){
+  const box=document.getElementById('box');
+  const text=box.value.trim(); if(!text) return;
+  box.value=''; document.getElementById('starters').style.display='none';
+  add(text,'me');
+  history.push({role:'user',content:text});
+  const t=document.createElement('div'); t.className='typing'; t.textContent='…'; chat.appendChild(t); chat.scrollTop=chat.scrollHeight;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:SYSTEM,messages:history})
+    });
+    const data=await r.json();
+    const reply=(data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('\n').trim()
+      || "Sorry — line dropped for a second there. Say that again?";
+    history.push({role:'assistant',content:reply});
+    t.remove(); add(reply,'bot');
+  }catch(e){
+    t.remove(); add("We're having a connection issue this end. Try again in a moment, or email enquiries@edmholdings.ae and the team will come back to you.",'bot');
+  }
+}
+
+// opening line — set the tone from the first word
+const h=new Date().getHours();
+const opener=(h<12?"Morning":h<18?"Afternoon":"Evening")+" — you're through to EDM Holdings in Dubai, fit-out and drywall specialists across the UAE. What can we help with?";
+add(opener,'bot');
+history.push({role:'assistant',content:opener});
+</script>
+</body>
+</html>

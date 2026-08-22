@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EDM Cashflow — Applications, Retention &amp; Cash</title>
+<style>
+@font-face{font-family:'Montserrat';font-weight:400;font-display:swap;src:url('fonts/montserrat-400.woff2') format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:600;font-display:swap;src:url('fonts/montserrat-600.woff2') format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:700;font-display:swap;src:url('fonts/montserrat-700.woff2') format('woff2')}
+:root{--green:#083819;--ink:#0F231B;--muted:#5C6F66;--line:#E4E6E0;--wash:#F7F8F7;--bad:#8F2B1F;--warn:#8a5a00;--ok:#0B6B33}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Montserrat',system-ui,sans-serif;color:var(--ink);background:#fff;display:flex;flex-direction:column;overflow:hidden}
+button{font-family:inherit;cursor:pointer}
+input,select{font-family:inherit;font-size:12px;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:5px 7px;background:#fff}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--green);outline-offset:1px}
+input.money{text-align:right;width:104px;font-variant-numeric:tabular-nums}
+input[type=date]{width:128px}
+
+.top{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--line);flex:0 0 auto;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:9px}
+.brand img{height:26px}
+.brand .t{font-size:14px;font-weight:700}.brand .t span{color:var(--green)}
+.brand .d{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.grow{flex:1}
+.tbtn{font-size:11.5px;font-weight:600;border:1px solid var(--line);background:#fff;border-radius:5px;padding:6px 11px;color:var(--ink)}
+.tbtn:hover{border-color:var(--green);color:var(--green)}
+.tbtn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.tbtn.small{padding:4px 9px;font-size:10.5px}
+.tbtn.danger{color:var(--bad)}
+
+.tabs{display:flex;border-bottom:1px solid var(--line);flex:0 0 auto;padding:0 10px;align-items:center;gap:6px}
+.tab{border:none;background:none;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:11px 12px;border-bottom:2px solid transparent}
+.tab.on{color:var(--green);border-bottom-color:var(--green)}
+.tabs select{margin-left:auto;margin-bottom:6px;max-width:240px}
+.view{flex:1;overflow-y:auto;display:none;background:var(--wash)}
+.view.on{display:block}
+.vwrap{max-width:940px;margin:0 auto;padding:16px 18px 44px}
+.hint{font-size:11.5px;color:var(--muted);line-height:1.65;margin-bottom:12px}
+.card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:13px 15px;margin-bottom:11px}
+.card h3{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:9px}
+
+.kpis{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.kpi{flex:1;min-width:140px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.kpi b{display:block;font-size:17px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpi span{font-size:10px;color:var(--muted);line-height:1.4;display:block;margin-top:2px}
+.kpi.bad b{color:var(--bad)}
+.kpi.warn b{color:var(--warn)}
+
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th{font-size:8.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px;border-bottom:1px solid var(--line);white-space:nowrap}
+th.r,td.r{text-align:right;font-variant-numeric:tabular-nums}
+td{padding:6px;border-bottom:1px solid var(--line);vertical-align:middle}
+td .why{width:150px;font-size:11px}
+.gap{color:var(--bad);font-weight:700}
+.zero{color:var(--muted)}
+.due-over{color:var(--bad);font-weight:700}
+.due-soon{color:var(--warn);font-weight:600}
+.paid{color:var(--ok);font-weight:700}
+tfoot td{font-weight:700;border-bottom:none;padding-top:9px}
+.aged{display:flex;gap:8px;flex-wrap:wrap}
+.aged .b{flex:1;min-width:110px;border:1px solid var(--line);border-radius:7px;padding:9px 11px;text-align:center}
+.aged .b b{display:block;font-size:14px;font-variant-numeric:tabular-nums}
+.aged .b span{font-size:9px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.aged .b.hot{border-color:#e4c7c2;background:#fdf7f6}
+.aged .b.hot b{color:var(--bad)}
+.emptyv{text-align:center;padding:44px 20px;color:var(--muted);font-size:12.5px;line-height:1.8}
+.flagline{font-size:11px;color:var(--bad);font-weight:600;margin-top:8px}
+
+.toast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12px;padding:8px 15px;border-radius:6px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:9;max-width:86%;text-align:center}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+
+.dlgwrap{position:fixed;inset:0;background:rgba(15,35,27,.35);display:none;align-items:center;justify-content:center;z-index:20}
+.dlgwrap.show{display:flex}
+.dlg{background:#fff;border-radius:9px;padding:20px 22px;width:340px;max-width:92vw}
+.dlg h2{font-size:14px;font-weight:700;margin-bottom:12px}
+.frow{margin-bottom:10px}
+.frow label{display:block;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.frow input{width:100%}
+.f2{display:flex;gap:10px}.f2 .frow{flex:1}
+.dact{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+
+#rep{display:none}
+@media print{
+ body>*{display:none!important}
+ body{overflow:visible;display:block}
+ #rep{display:block!important;color:#0F231B;font-size:10pt}
+ .rhead{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #083819;padding-bottom:4mm;margin-bottom:5mm}
+ .rhead img{width:50mm}
+ .rhead h1{font-size:14pt;font-weight:700;margin:0;text-align:right}
+ .rhead .rm{font-size:9.5pt;color:#5C6F66;text-align:right}
+ h2{font-size:9pt;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#083819;margin:5mm 0 2mm}
+ .rk{display:flex;gap:4mm;margin-bottom:2mm}
+ .rk div{flex:1;border:1px solid #E4E6E0;border-radius:2mm;padding:3mm}
+ .rk b{display:block;font-size:12.5pt;color:#083819;white-space:nowrap}
+ .rk b.neg{color:#8F2B1F}
+ .rk span{font-size:7.5pt;color:#5C6F66}
+ table{width:100%;border-collapse:collapse;font-size:8.8pt}
+ th{text-align:left;font-size:7pt;letter-spacing:.07em;text-transform:uppercase;color:#5C6F66;border-bottom:1px solid #E4E6E0;padding:1.5mm 2mm}
+ td{border-bottom:1px solid #E4E6E0;padding:1.7mm 2mm;vertical-align:top}
+ th.r,td.r{text-align:right;font-variant-numeric:tabular-nums}
+ .lt{color:#8F2B1F;font-weight:700}.okc{color:#0B6B33;font-weight:700}
+ .rfoot{font-size:8pt;color:#5C6F66;border-top:1px solid #E4E6E0;margin-top:5mm;padding-top:2mm}
+ tr{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><img src="assets/cube.png" alt="EDM Holdings">
+    <div><div class="t">EDM <span>Cashflow</span></div><div class="d">Applications · retention · cash</div></div></div>
+  <div class="grow"></div>
+  <span style="font-size:11px;color:var(--muted)">Currency</span>
+  <input id="curr" value="AED" style="width:56px;text-align:center">
+  <button class="tbtn" id="btnProj">Add project</button>
+  <button class="tbtn" id="btnOpen">Open</button>
+  <button class="tbtn" id="btnSave">Save</button>
+  <button class="tbtn primary" id="btnRep">Print cash report</button>
+  <input type="file" id="fileO" accept=".json" hidden>
+</header>
+
+<nav class="tabs">
+  <button class="tab on" data-v="board">Board</button>
+  <button class="tab" data-v="apps">Applications</button>
+  <button class="tab" data-v="ret">Retention</button>
+  <select id="projSel" aria-label="Project"></select>
+</nav>
+
+<section class="view on" id="v-board"><div class="vwrap" id="board"></div></section>
+<section class="view" id="v-apps"><div class="vwrap">
+  <p class="hint">One row per monthly application. Fill in the certificate when it lands — the shortfall works itself out, and anything certified needs a reason logged before it's forgotten. Due date fills in from the payment terms; correct it if the certificate says otherwise.</p>
+  <div class="card" id="apps"></div>
+</div></section>
+<section class="view" id="v-ret"><div class="vwrap">
+  <p class="hint">Retention is your money sitting in someone else's account. Half comes back at practical completion, half after the defects period — set the dates and this page will tell you, loudly, when they've gone past.</p>
+  <div id="ret"></div>
+</div></section>
+
+<div class="toast" id="toast"></div>
+
+<div class="dlgwrap" id="dlg">
+  <div class="dlg">
+    <h2>Add project</h2>
+    <div class="frow"><label>Project name</label><input id="pName" placeholder="e.g. Marina Tower — L1-L14 partitions"></div>
+    <div class="frow"><label>Main contractor</label><input id="pClient" placeholder="e.g. Gilbert-Ash"></div>
+    <div class="f2">
+      <div class="frow"><label>Retention %</label><input id="pRet" type="number" step="0.5" min="0" max="10" value="5"></div>
+      <div class="frow"><label>Payment terms (days)</label><input id="pDays" type="number" step="1" min="0" value="60"></div>
+    </div>
+    <div class="f2">
+      <div class="frow"><label>Practical completion</label><input id="pPC" type="date"></div>
+      <div class="frow"><label>Defects period (months)</label><input id="pDLP" type="number" step="1" min="0" value="12"></div>
+    </div>
+    <div class="dact"><button class="tbtn" id="pCancel">Cancel</button><button class="tbtn primary" id="pOK">Add</button></div>
+  </div>
+</div>
+
+<div id="rep"></div>
+
+<script>
+'use strict';
+/* EDM Cashflow — because applied is not certified, certified is not paid,
+   and the gap between the three is where subcontractors quietly bleed. */
+
+const S={projects:[],sel:0,nextA:1};
+
+const $=q=>document.querySelector(q);
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2700);}
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function today(){return new Date().toISOString().slice(0,10);}
+const cur=()=>$('#curr').value||'AED';
+const money=n=>(Math.round(n)).toLocaleString('en-GB');
+const fmtd=d=>{if(!d)return'—';return new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});};
+function addDays(iso,n){const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+function addMonths(iso,n){const d=new Date(iso+'T12:00:00');d.setMonth(d.getMonth()+n);return d.toISOString().slice(0,10);}
+function P(){return S.projects[S.sel]||null;}
+
+// ---------- money maths ----------
+function appCalc(p,a){
+  const cert=+a.cert||0, applied=+a.applied||0;
+  const ret=cert*(p.retPct/100);
+  const net=cert-ret;
+  const short=(a.cert!==''&&a.cert!=null)? applied-cert : 0;
+  return {applied,cert,ret,net,short};
+}
+function projTotals(p){
+  let applied=0,cert=0,short=0,ret=0,net=0,paid=0,unpaid=0,overdue=0;
+  p.apps.forEach(a=>{const c=appCalc(p,a);
+    applied+=c.applied;cert+=c.cert;short+=Math.max(0,c.short);ret+=c.ret;net+=c.net;
+    if(a.paid){paid+=c.net;}
+    else{unpaid+=c.net; if(a.due&&a.due<today())overdue+=c.net;}});
+  // retention received back
+  let retBack=0;
+  if(p.m1rec)retBack+=ret/2; if(p.m2rec)retBack+=ret/2;
+  return {applied,cert,short,ret,retHeld:ret-retBack,net,paid,unpaid,overdue};
+}
+function agedUnpaid(p){
+  const t=new Date(today()+'T12:00:00'),b={cur:0,d30:0,d60:0,d90:0};
+  p.apps.forEach(a=>{if(a.paid||!a.due)return;const c=appCalc(p,a);
+    const days=Math.round((t-new Date(a.due+'T12:00:00'))/86400000);
+    if(days<=0)b.cur+=c.net; else if(days<=30)b.d30+=c.net; else if(days<=60)b.d60+=c.net; else b.d90+=c.net;});
+  return b;
+}
+function due90(p){
+  const t=today(),e=addDays(t,90),out=[];
+  p.apps.forEach(a=>{if(a.paid||!a.due)return;const c=appCalc(p,a);
+    if(a.due<=e)out.push({due:a.due,no:a.no,net:c.net,late:a.due<t});});
+  return out.sort((x,y)=>x.due<y.due?-1:1);
+}
+
+// ---------- board ----------
+function board(){
+  if(!S.projects.length){$('#board').innerHTML=`<div class="emptyv">No projects on the board yet.<br><br>
+    <b>Add project</b> sets the retention and payment terms once —<br>after that it's one row per monthly application.</div>`;return;}
+  let T={applied:0,cert:0,short:0,retHeld:0,unpaid:0,overdue:0};
+  const rows=S.projects.map((p,i)=>{const t=projTotals(p);
+    Object.keys(T).forEach(k=>T[k]+=t[k]);
+    return `<tr><td><b>${esc(p.name)}</b><br><small style="color:var(--muted)">${esc(p.client)}</small></td>
+      <td class="r">${money(t.applied)}</td><td class="r">${money(t.cert)}</td>
+      <td class="r ${t.short?'gap':'zero'}">${t.short?money(t.short):'—'}</td>
+      <td class="r">${money(t.retHeld)}</td>
+      <td class="r">${money(t.unpaid)}</td>
+      <td class="r ${t.overdue?'gap':'zero'}">${t.overdue?money(t.overdue):'—'}</td></tr>`;}).join('');
+  const allDue=[];S.projects.forEach(p=>due90(p).forEach(d=>allDue.push({...d,pn:p.name})));
+  allDue.sort((a,b)=>a.due<b.due?-1:1);
+  $('#board').innerHTML=`
+   <div class="kpis">
+    <div class="kpi"><b>${money(T.applied)} ${cur()}</b><span>applied to date, all projects</span></div>
+    <div class="kpi"><b>${money(T.cert)} ${cur()}</b><span>certified to date</span></div>
+    <div class="kpi ${T.short?'bad':''}"><b>${money(T.short)} ${cur()}</b><span>certified short of application — every dirham has a reason logged</span></div>
+    <div class="kpi warn"><b>${money(T.retHeld)} ${cur()}</b><span>retention held by clients right now</span></div>
+    <div class="kpi ${T.overdue?'bad':''}"><b>${money(T.overdue)} ${cur()}</b><span>certified, due, and not paid — the early warning</span></div>
+   </div>
+   <div class="card"><h3>By project</h3>
+    <table><thead><tr><th>Project</th><th class="r">Applied</th><th class="r">Certified</th><th class="r">Shortfall</th><th class="r">Retention held</th><th class="r">Cert. unpaid</th><th class="r">Overdue</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>
+   <div class="card"><h3>Cash due in — next 90 days</h3>
+    ${allDue.length?`<table><thead><tr><th>Due</th><th>Project</th><th>Application</th><th class="r">Net ${cur()}</th></tr></thead><tbody>
+     ${allDue.map(d=>`<tr><td class="${d.late?'due-over':''}">${d.late?'OVERDUE · ':''}${fmtd(d.due)}</td><td>${esc(d.pn)}</td><td>${esc(d.no)}</td><td class="r">${money(d.net)}</td></tr>`).join('')}
+    </tbody></table>`:'<p class="hint" style="margin:0">Nothing certified and unpaid falls due in the window.</p>'}
+   </div>`;
+}
+
+// ---------- applications ----------
+function apps(){
+  const p=P();
+  if(!p){$('#apps').innerHTML='<p class="hint" style="margin:0">Add a project first.</p>';return;}
+  const t=projTotals(p),b=agedUnpaid(p);
+  $('#apps').innerHTML=`
+   <div class="aged">
+    <div class="b"><b>${money(b.cur)}</b><span>not yet due</span></div>
+    <div class="b ${b.d30?'hot':''}"><b>${money(b.d30)}</b><span>1–30 days over</span></div>
+    <div class="b ${b.d60?'hot':''}"><b>${money(b.d60)}</b><span>31–60 over</span></div>
+    <div class="b ${b.d90?'hot':''}"><b>${money(b.d90)}</b><span>60+ over — escalate</span></div>
+   </div>
+   <table style="margin-top:12px"><thead><tr>
+    <th>No.</th><th>Submitted</th><th class="r">Applied</th><th class="r">Certified</th><th class="r">Short</th><th>Why short</th><th class="r">Retention</th><th class="r">Net due</th><th>Due</th><th>Paid</th><th></th>
+   </tr></thead><tbody>
+   ${p.apps.map((a,i)=>{const c=appCalc(p,a);
+     return `<tr>
+      <td><b>${esc(a.no)}</b></td>
+      <td><input type="date" value="${a.sub||''}" data-f="sub" data-i="${i}"></td>
+      <td class="r"><input class="money" type="number" step="1" value="${a.applied}" data-f="applied" data-i="${i}"></td>
+      <td class="r"><input class="money" type="number" step="1" value="${a.cert===''?'':a.cert}" placeholder="await" data-f="cert" data-i="${i}"></td>
+      <td class="r ${c.short>0?'gap':'zero'}">${c.short>0?money(c.short):'—'}</td>
+      <td><input class="why" value="${esc(a.why||'')}" placeholder="${c.short>0?'log the reason':''}" data-f="why" data-i="${i}"></td>
+      <td class="r">${a.cert!==''?money(c.ret):'—'}</td>
+      <td class="r"><b>${a.cert!==''?money(c.net):'—'}</b></td>
+      <td><input type="date" value="${a.due||''}" data-f="due" data-i="${i}"></td>
+      <td><input type="date" value="${a.paid||''}" data-f="paid" data-i="${i}" title="Date the money landed"></td>
+      <td><button class="tbtn small danger" data-del="${i}">×</button></td></tr>`;}).join('')}
+   </tbody><tfoot><tr><td colspan="2">Totals</td><td class="r">${money(t.applied)}</td><td class="r">${money(t.cert)}</td>
+    <td class="r ${t.short?'gap':''}">${money(t.short)}</td><td></td><td class="r">${money(t.ret)}</td><td class="r">${money(t.net)}</td><td colspan="3"></td></tr></tfoot></table>
+   ${p.apps.some(a=>{const c=appCalc(p,a);return c.short>0&&!(a.why||'').trim();})?'<p class="flagline">There are shortfalls with no reason logged. An unexplained shortfall becomes a discount.</p>':''}
+   <div style="margin-top:12px"><button class="tbtn primary" id="aAdd">Add application</button></div>`;
+  document.querySelectorAll('#apps [data-f]').forEach(el=>el.addEventListener('change',()=>{
+    const a=p.apps[+el.dataset.i],f=el.dataset.f;
+    a[f]= el.type==='number' ? (el.value===''?'':+el.value) : el.value;
+    if(f==='cert'&&el.value!==''&&!a.due){a.due=addDays(a.sub||today(),p.payDays);}
+    renderAll();}));
+  document.querySelectorAll('#apps [data-del]').forEach(b=>b.addEventListener('click',()=>{
+    if(confirm('Remove application '+p.apps[+b.dataset.del].no+'?')){p.apps.splice(+b.dataset.del,1);renderAll();}}));
+  const add=$('#aAdd');if(add)add.addEventListener('click',()=>{
+    p.apps.push({no:'App '+String(p.apps.length+1).padStart(2,'0'),sub:today(),applied:0,cert:'',why:'',due:'',paid:''});
+    renderAll();toast('Application row added — fill the certificate in when it lands.');});
+}
+
+// ---------- retention ----------
+function ret(){
+  if(!S.projects.length){$('#ret').innerHTML='<div class="card"><p class="hint" style="margin:0">Add a project first.</p></div>';return;}
+  const t=today();
+  $('#ret').innerHTML=S.projects.map((p,i)=>{const tt=projTotals(p);
+    const half=tt.ret/2;
+    const m1due=p.pc||''; const m2due=p.pc?addMonths(p.pc,p.dlp):'';
+    const m1state=p.m1rec?`<span class="paid">Received ${fmtd(p.m1rec)}</span>`:(m1due&&m1due<t?`<span class="due-over">OVERDUE since ${fmtd(m1due)} — chase it</span>`:`<span>${m1due?'Due '+fmtd(m1due):'Set the PC date'}</span>`);
+    const m2state=p.m2rec?`<span class="paid">Received ${fmtd(p.m2rec)}</span>`:(m2due&&m2due<t?`<span class="due-over">OVERDUE since ${fmtd(m2due)} — chase it</span>`:`<span>${m2due?'Due '+fmtd(m2due):'—'}</span>`);
+    return `<div class="card"><h3>${esc(p.name)} · ${esc(p.client)}</h3>
+     <table><thead><tr><th></th><th class="r">Amount ${cur()}</th><th>Status</th><th>Mark received</th></tr></thead><tbody>
+      <tr><td>Retention held to date (${p.retPct}%)</td><td class="r"><b>${money(tt.ret)}</b></td><td colspan="2"></td></tr>
+      <tr><td>First half — at practical completion</td><td class="r">${money(half)}</td><td>${m1state}</td>
+        <td><input type="date" value="${p.m1rec||''}" data-p="${i}" data-f="m1rec"></td></tr>
+      <tr><td>Second half — after defects period (${p.dlp} months)</td><td class="r">${money(half)}</td><td>${m2state}</td>
+        <td><input type="date" value="${p.m2rec||''}" data-p="${i}" data-f="m2rec"></td></tr>
+     </tbody></table>
+     <div style="display:flex;gap:14px;margin-top:10px;align-items:center;font-size:11.5px">
+      <span style="color:var(--muted)">Practical completion</span>
+      <input type="date" value="${p.pc||''}" data-p="${i}" data-f="pc">
+      <span style="color:var(--muted)">Defects period (months)</span>
+      <input type="number" style="width:64px" min="0" step="1" value="${p.dlp}" data-p="${i}" data-f="dlp">
+     </div></div>`;}).join('');
+  document.querySelectorAll('#ret [data-p]').forEach(el=>el.addEventListener('change',()=>{
+    const p=S.projects[+el.dataset.p];
+    p[el.dataset.f]= el.type==='number'? +el.value : el.value;
+    renderAll();}));
+}
+
+// ---------- projects ----------
+function projUI(){
+  $('#projSel').innerHTML=S.projects.length? S.projects.map((p,i)=>`<option value="${i}" ${i===S.sel?'selected':''}>${esc(p.name)}</option>`).join('') : '<option>No projects</option>';
+}
+$('#projSel').addEventListener('change',e=>{S.sel=+e.target.value||0;renderAll();});
+$('#btnProj').addEventListener('click',()=>{$('#dlg').classList.add('show');$('#pName').focus();});
+$('#pCancel').addEventListener('click',()=>$('#dlg').classList.remove('show'));
+$('#pOK').addEventListener('click',()=>{
+  const name=$('#pName').value.trim();
+  if(!name){toast('The project needs a name.');return;}
+  S.projects.push({name,client:$('#pClient').value.trim(),retPct:+$('#pRet').value||5,
+    payDays:+$('#pDays').value||60,pc:$('#pPC').value,dlp:+$('#pDLP').value||12,
+    m1rec:'',m2rec:'',apps:[]});
+  S.sel=S.projects.length-1;
+  $('#dlg').classList.remove('show');$('#pName').value='';$('#pClient').value='';
+  renderAll();toast('On the board. Add the first application when it goes in.');});
+
+// ---------- save / open ----------
+$('#btnSave').addEventListener('click',()=>{
+  const out={app:'EDM Cashflow',v:1,curr:cur(),projects:S.projects};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(out)],{type:'application/json'}));
+  a.download='edm-cashflow.json';a.click();
+  toast('Saved — the whole cash position in one file.');});
+$('#btnOpen').addEventListener('click',()=>$('#fileO').click());
+$('#fileO').addEventListener('change',async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{const d=JSON.parse(await f.text());
+    if(d.app!=='EDM Cashflow'){toast('That is not a Cashflow file.');return;}
+    S.projects=d.projects||[];S.sel=0;if(d.curr)$('#curr').value=d.curr;
+    renderAll();toast('Position restored.');
+  }catch(err){toast('Could not read that file.');}});
+$('#curr').addEventListener('input',renderAll);
+
+// ---------- monthly report ----------
+$('#btnRep').addEventListener('click',()=>{
+  if(!S.projects.length){toast('Nothing to report yet.');return;}
+  let T={applied:0,cert:0,short:0,retHeld:0,unpaid:0,overdue:0};
+  S.projects.forEach(p=>{const t=projTotals(p);Object.keys(T).forEach(k=>T[k]+=t[k]);});
+  const allDue=[];S.projects.forEach(p=>due90(p).forEach(d=>allDue.push({...d,pn:p.name})));
+  allDue.sort((a,b)=>a.due<b.due?-1:1);
+  const retRows=S.projects.map(p=>{const tt=projTotals(p),half=tt.ret/2,t=today();
+    const m2due=p.pc?addMonths(p.pc,p.dlp):'';
+    const lines=[];
+    if(!p.m1rec&&p.pc)lines.push({pn:p.name,what:'First half',amt:half,due:p.pc,late:p.pc<t});
+    if(!p.m2rec&&m2due)lines.push({pn:p.name,what:'Second half',amt:half,due:m2due,late:m2due<t});
+    return lines;}).flat().sort((a,b)=>a.due<b.due?-1:1);
+  $('#rep').innerHTML=`
+   <div class="rhead"><img src="assets/logo.png" alt="EDM Holdings">
+    <div><h1>Monthly cash report</h1><div class="rm">All projects · as at ${fmtd(today())} · ${cur()}</div></div></div>
+   <div class="rk">
+    <div><b>${money(T.applied)}</b><span>applied to date</span></div>
+    <div><b>${money(T.cert)}</b><span>certified to date</span></div>
+    <div><b class="${T.short?'neg':''}">${money(T.short)}</b><span>certification shortfall</span></div>
+    <div><b>${money(T.retHeld)}</b><span>retention held by clients</span></div>
+    <div><b class="${T.overdue?'neg':''}">${money(T.overdue)}</b><span>certified, due &amp; unpaid</span></div>
+   </div>
+   <h2>Position by project</h2>
+   <table><tr><th>Project</th><th>Client</th><th class="r">Applied</th><th class="r">Certified</th><th class="r">Shortfall</th><th class="r">Retention held</th><th class="r">Cert. unpaid</th><th class="r">Overdue</th></tr>
+   ${S.projects.map(p=>{const t=projTotals(p);
+     return `<tr><td>${esc(p.name)}</td><td>${esc(p.client)}</td><td class="r">${money(t.applied)}</td><td class="r">${money(t.cert)}</td>
+      <td class="r ${t.short?'lt':''}">${t.short?money(t.short):'—'}</td><td class="r">${money(t.retHeld)}</td>
+      <td class="r">${money(t.unpaid)}</td><td class="r ${t.overdue?'lt':''}">${t.overdue?money(t.overdue):'—'}</td></tr>`;}).join('')}</table>
+   <h2>Cash due in — next 90 days</h2>
+   ${allDue.length?`<table><tr><th>Due</th><th>Project</th><th>Application</th><th class="r">Net</th></tr>
+    ${allDue.map(d=>`<tr><td class="${d.late?'lt':''}">${d.late?'OVERDUE · ':''}${fmtd(d.due)}</td><td>${esc(d.pn)}</td><td>${esc(d.no)}</td><td class="r">${money(d.net)}</td></tr>`).join('')}</table>`
+    :'<p style="font-size:9.5pt;color:#5C6F66">Nothing certified and unpaid falls due in the window.</p>'}
+   <h2>Retention to recover</h2>
+   ${retRows.length?`<table><tr><th>Project</th><th>Release</th><th class="r">Amount</th><th>Due</th></tr>
+    ${retRows.map(r=>`<tr><td>${esc(r.pn)}</td><td>${r.what}</td><td class="r">${money(r.amt)}</td><td class="${r.late?'lt':''}">${r.late?'OVERDUE · ':''}${fmtd(r.due)}</td></tr>`).join('')}</table>`
+    :'<p style="font-size:9.5pt;color:#5C6F66">No retention currently awaiting release.</p>'}
+   <div class="rfoot">Applied is not certified; certified is not paid. This report tracks all three so the gaps get chased, not absorbed.
+   <br>EDM Holdings · Fit-Out &amp; Drywall Specialists · edmholdings.ae</div>`;
+  window.print();
+});
+
+// ---------- tabs & boot ----------
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+t.dataset.v));}));
+function renderAll(){projUI();board();apps();ret();}
+renderAll();
+</script>
+</body>
+</html>
