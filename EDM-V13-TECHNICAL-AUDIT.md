@@ -671,7 +671,7 @@ Ordered by what unblocks what. Each item is marked **[fix]** — an engineering 
 |---|---|---|---|
 | 1 | Remove the four superseded files from `13-Go-To-Market/Tender-Editions/`. Rebuild the named editions from the **current** sources, adding only the client naming. | Claude Code | **[fix]** |
 | 2 | Correct `_DISTRIBUTION-WARNING.txt` — it currently tells the reader the opposite of the truth. | Claude Code | **[fix]** |
-| 3 | Decide the position on JLL, Gilbert-Ash, Graham, John Sisk & Son and McLaughlin & Harvey. Five names are being used with no consent record. | Christopher | **[decide]** |
+| 3 | ~~Decide the position on JLL, Gilbert-Ash, Graham, John Sisk & Son and McLaughlin & Harvey.~~ **Decided 22/08/2026 — generalised.** Six names (Farrans too) removed from the public capability statement; page 17 now states the naming position itself. Rebuilt and verified. | Christopher · done | **[decide]** |
 | 4 | Remove `Markets: UAE · Ireland · UK · Australia` from the PQQ pack. | Claude Code | **[fix]** |
 | 5 | Chase written consent from PMK / Khazna. The 7 October LinkedIn date still stands. | Christopher | **[decide]** |
 
@@ -838,6 +838,28 @@ tracked rather than noted.
 | Chatbot | Wired to its relay; relay origin-restricted and rate-limited, all four cases tested |
 | CRM | KPI tiles readable; invented figures removed; charts with hover, table view and keyboard focus |
 | Tender editions | Moved to `_WITHDRAWN-do-not-issue/` with a note that states what they actually contain |
+
+**Resolved after the report was written:**
+
+**Client naming, decided 22 August 2026.** The audit found six firms named as
+clients in the *live public* capability statement — JLL, Gilbert-Ash, Graham,
+John Sisk & Son, McLaughlin & Harvey and Farrans — none in the consent register.
+It had survived every check because `build.sh` only ever searched for "khazna"
+and "PMK Group".
+
+Christopher's decision was to generalise. Page 17 no longer lists anyone; it
+answers its own question with the buyer, what is being appointed, the track
+record, and the naming position:
+
+> We do not publish a client list. Where a client requires consent before being
+> named we ask them first, including for our current UAE delivery — and we would
+> extend you the same courtesy.
+
+Rebuilt from source and verified: 19 pages unchanged, every printed page number
+matching its position, Montserrat only, no unconsented name, no banned wording,
+and the website download byte-identical to the corporate-documents copy. The
+route back — file the consent, restore the name in the source, rebuild — is
+recorded in `09-Document-Sources/_CLIENT-NAMING-DECIDED.md`.
 
 **Not fixed, and why:**
 
