@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EDM OS — Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --emerald:#083819; --emerald-dark:#083819; --emerald-soft:#ffffff;
+    --charcoal:#0f231b; --muted:#5c6f66; --bone:#ffffff; --sage:#5c6f66;
+    --line:#e4e6e0; --bronze:#083819; --white:#fff;
+    --font:"Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { scroll-behavior:smooth; }
+  body { font-family:var(--font); color:var(--charcoal); background:var(--bone); -webkit-font-smoothing:antialiased; }
+  a { text-decoration:none; color:inherit; }
+  a:focus-visible, button:focus-visible { outline:2px solid var(--emerald); outline-offset:2px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } * { transition:none !important; } }
+
+  /* layout */
+  .app { display:grid; grid-template-columns:220px 1fr; min-height:100vh; }
+  .side { background:var(--emerald); color:var(--white); padding:22px 0; position:sticky; top:0; height:100vh; overflow-y:auto; }
+  .brand { padding:0 22px 18px; }
+  .brand .logo { display:flex; align-items:center; gap:9px; font-weight:800; font-size:18px; letter-spacing:.3px; }
+  .brand .mark { width:22px; height:22px; background:var(--white); clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%); }
+  .brand .os { color:var(--sage); }
+  .brand .sub { font-size:10px; letter-spacing:2px; color:var(--sage); margin-top:4px; text-transform:uppercase; }
+  .nav { margin-top:6px; }
+  .nav a { display:block; padding:9px 22px; font-size:13.5px; color:rgba(255,255,255,.82); border-left:3px solid transparent; transition:background .15s, color .15s; }
+  .nav a:hover { background:rgba(255,255,255,.06); color:#fff; }
+  .nav a.on { background:rgba(255,255,255,.10); color:#fff; border-left-color:var(--sage); font-weight:600; }
+  .nav .grp { padding:14px 22px 6px; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,.4); }
+  .side .foot { padding:16px 22px 0; font-size:11px; color:rgba(255,255,255,.5); }
+
+  .main { min-width:0; }
+  .topbar { background:var(--white); border-bottom:1px solid var(--line); padding:14px 28px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:5; }
+  .topbar .loc { font-size:13px; color:var(--muted); }
+  .topbar .who { font-size:13px; } .topbar .who b { color:var(--charcoal); } .topbar .who span { color:var(--muted); }
+  .hamb { display:none; background:none; border:1px solid var(--line); border-radius:4px; padding:6px 10px; font-size:16px; cursor:pointer; }
+  .content { padding:26px 28px 60px; max-width:1180px; }
+
+  .demo-tag { background:var(--emerald-soft); color:var(--emerald); font-size:12px; font-weight:600; padding:7px 14px; border-radius:4px; display:inline-block; margin-bottom:18px; }
+
+  /* screens */
+  .screen { display:none; }
+  .screen.active { display:block; animation:fade .25s ease; }
+  @keyframes fade { from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
+  .phead { margin-bottom:18px; }
+  .phead h1 { font-size:22px; font-weight:700; letter-spacing:-.3px; }
+  .phead p { font-size:14px; color:var(--muted); margin-top:3px; }
+
+  /* components */
+  .card { background:var(--white); border:1px solid var(--line); border-radius:4px; }
+  .pad { padding:18px; }
+  .sec-title { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--emerald); margin-bottom:12px; }
+  .grid { display:grid; gap:12px; }
+  .g2 { grid-template-columns:repeat(2,1fr); } .g3 { grid-template-columns:repeat(3,1fr); } .g4 { grid-template-columns:repeat(4,1fr); }
+  .kpi { background:var(--white); border:1px solid var(--line); border-radius:4px; padding:16px; }
+  .kpi.acc { background:var(--emerald); border-color:var(--emerald); }
+  .kpi .k { font-size:11px; text-transform:uppercase; letter-spacing:.5px; font-weight:600; color:var(--muted); }
+  .kpi.acc .k { color:var(--sage); }
+  .kpi .v { font-size:25px; font-weight:700; margin-top:5px; } .kpi.acc .v { color:#fff; }
+  .badge { display:inline-block; font-size:11px; font-weight:600; padding:2px 8px; border-radius:4px; }
+  .b-em { background:var(--emerald); color:#fff; } .b-soft { background:var(--emerald-soft); color:var(--emerald); }
+  .b-sage { background:rgba(8,56,25,.4); color:var(--emerald-dark); } .b-line { background:var(--line); color:var(--muted); }
+  .b-bronze { background:rgba(8,56,25,.15); color:var(--bronze); } .b-charcoal { background:rgba(15,35,27,.1); color:var(--muted); }
+  .mono { font-variant-numeric:tabular-nums; }
+  .code { font-family:"SFMono-Regular", Consolas, monospace; font-size:12px; }
+
+  table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); font-weight:600; padding:0 8px 10px; border-bottom:1px solid var(--line); }
+  td { padding:13px 8px; border-bottom:1px solid rgba(255,255,255,.6); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  .r-name { font-weight:600; color:var(--charcoal); } .r-sub { font-size:11px; color:var(--muted); }
+  .bar { height:6px; border-radius:6px; background:var(--line); overflow:hidden; }
+  .bar > span { display:block; height:100%; border-radius:6px; background:var(--emerald); }
+  .bar > span.over { background:var(--bronze); }
+
+  .ic { display:block; }
+  .ic .card { height:100%; transition:border-color .15s; } .ic:hover .card { border-color:var(--emerald); }
+  .ic .top { display:flex; align-items:center; justify-content:space-between; }
+  .ic .lnk { font-size:11px; font-weight:600; color:var(--emerald); }
+  .ic .big { font-size:18px; font-weight:700; margin-top:6px; line-height:1.2; }
+  .ic .sub { font-size:12px; color:var(--muted); margin-top:2px; }
+
+  .col { background:var(--bone); border-radius:4px; padding:12px; }
+  .col h4 { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--emerald); }
+  .opp { background:#fff; border:1px solid var(--line); border-radius:4px; padding:12px; margin-top:9px; }
+  .opp .n { font-weight:600; font-size:13px; } .opp .c { font-size:11px; color:var(--muted); margin-top:1px; }
+  .opp .row { display:flex; align-items:center; justify-content:space-between; margin-top:8px; }
+
+  .feat { display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap; }
+  .feat .logo { width:46px; height:46px; border-radius:4px; color:#fff; display:grid; place-items:center; font-weight:700; font-size:19px; flex-shrink:0; }
+  .feat .body { flex:1; min-width:200px; }
+  .feat h3 { font-size:16px; font-weight:700; display:inline; margin-right:8px; }
+  .feat .desc { font-size:13px; color:var(--muted); margin-top:5px; }
+  .chips { display:flex; flex-wrap:wrap; gap:7px; margin-top:11px; }
+  .chip { font-size:11px; font-weight:600; background:var(--bone); color:var(--muted); padding:4px 10px; border-radius:4px; }
+  .btn { background:var(--emerald); color:#fff; font-size:13.5px; font-weight:600; padding:9px 15px; border-radius:4px; border:none; cursor:pointer; flex-shrink:0; }
+  .btn.ghost { background:#fff; color:var(--emerald); border:1px solid var(--emerald); }
+  .note { font-size:12px; color:var(--muted); margin-top:15px; padding-top:15px; border-top:1px solid var(--line); }
+  .tr { border:1px solid var(--line); border-radius:4px; padding:12px; margin-top:10px; }
+  .tr .h { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .tr .docln { font-size:12px; color:var(--muted); margin-top:5px; }
+
+  @media (max-width: 880px) {
+    .app { grid-template-columns:1fr; }
+    .side { position:fixed; left:0; top:0; width:230px; z-index:30; transform:translateX(-100%); transition:transform .2s; }
+    body.nav-open .side { transform:none; }
+    body.nav-open::after { content:""; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:20; }
+    .hamb { display:block; }
+    .g4 { grid-template-columns:repeat(2,1fr); } .g3 { grid-template-columns:1fr; } .g2 { grid-template-columns:1fr; }
+    .scroll-x { overflow-x:auto; } table { min-width:620px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side">
+    <div class="brand">
+      <div class="logo"><span class="mark"></span>EDM <span class="os">OS</span></div>
+      <div class="sub">Construction OS</div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="grp">Commercial</div>
+      <a href="#overview">Overview</a>
+      <a href="#pipeline">Pipeline</a>
+      <a href="#forecast">Forecast</a>
+      <a href="#accounts">Accounts</a>
+      <a href="#estimators">Estimators</a>
+      <div class="grp">Delivery</div>
+      <a href="#documents">Document control</a>
+      <div class="grp">Setup</div>
+      <a href="#integrations">Integrations</a>
+      <div class="foot">EDM Holdings</div>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamb" id="hamb" aria-label="Menu">☰</button>
+      <div class="loc">UAE · UK · Ireland · Australia</div>
+      <div class="who"><b>Damien Meenan</b> <span>· CEO</span></div>
+    </header>
+    <div class="content">
+
+      <!-- OVERVIEW -->
+      <section class="screen active" id="overview">
+        <span class="demo-tag">Demo · sample data</span>
+        <div class="phead"><h1>CRM</h1><p>Command centre — pipeline, wins and what needs attention</p></div>
+        <div class="grid g4" style="margin-bottom:14px;">
+          <div class="kpi acc"><div class="k">Weighted pipeline</div><div class="v">£1,275,000</div></div>
+          <div class="kpi"><div class="k">Win rate</div><div class="v">57%</div></div>
+          <div class="kpi"><div class="k">Open opportunities</div><div class="v">5</div></div>
+          <div class="kpi"><div class="k">Bids due this month</div><div class="v">4</div></div>
+        </div>
+        <p style="font-size:11px; color:var(--muted); margin:-4px 0 16px;">Group totals shown in GBP at indicative FX; all client and project figures in their local currency (AED · £ · € · A$).</p>
+        <div class="grid g3" style="margin-bottom:18px;">
+          <a class="ic" href="#forecast"><div class="card pad"><div class="top"><span class="sec-title" style="margin:0;">Capacity watch</span><span class="lnk">Forecast →</span></div><div class="big">2 months over capacity</div><div class="sub">Sep, Oct — plan to subcontract or hire</div></div></a>
+          <a class="ic" href="#accounts"><div class="card pad"><div class="top"><span class="sec-title" style="margin:0;">Top account</span><span class="lnk">Accounts →</span></div><div class="big">Prime Developer (UAE)</div><div class="sub">AED 2,400,000 won · 100% win <span class="badge b-em">Key account</span></div></div></a>
+          <a class="ic" href="#pipeline"><div class="card pad"><div class="top"><span class="sec-title" style="margin:0;">Next deadline</span><span class="lnk">Pipeline →</span></div><div class="big">Sydney retail</div><div class="sub">Harbour Constructions (AU) · <b>Today</b></div></div></a>
+        </div>
+        <div class="grid g2">
+          <div class="card pad">
+            <div class="sec-title">Top accounts</div>
+            <table><tbody>
+              <tr><td style="width:20px; color:var(--muted); font-weight:700;">1</td><td><div class="r-name">Prime Developer (UAE)</div><div class="r-sub">AED 2,400,000 won · 100% win</div></td><td style="text-align:right;"><span class="badge b-em">Key account</span></td></tr>
+              <tr><td style="color:var(--muted); font-weight:700;">2</td><td><div class="r-name">Mercia Construction (UK)</div><div class="r-sub">£680,000 won · 100% win</div></td><td style="text-align:right;"><span class="badge b-em">Key account</span></td></tr>
+              <tr><td style="color:var(--muted); font-weight:700;">3</td><td><div class="r-name">Shannon Build (IE)</div><div class="r-sub">€420,000 won · 50% win</div></td><td style="text-align:right;"><span class="badge b-soft">Grow</span></td></tr>
+              <tr><td style="color:var(--muted); font-weight:700;">4</td><td><div class="r-name">Harbour Constructions (AU)</div><div class="r-sub">A$1,250,000 won · 50% win</div></td><td style="text-align:right;"><span class="badge b-soft">Grow</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="card pad">
+            <div class="sec-title">Upcoming deadlines</div>
+            <table><tbody>
+              <tr><td><div class="r-name">Manchester Office — revised proposal</div><div class="r-sub">Mercia Construction (UK)</div></td><td style="text-align:right;"><span class="badge b-em">Bid</span><div class="r-sub" style="margin-top:3px;">Overdue</div></td></tr>
+              <tr><td><div class="r-name">Melbourne Residences — bid submission</div><div class="r-sub">Harbour Constructions (AU)</div></td><td style="text-align:right;"><span class="badge b-em">Bid</span><div class="r-sub" style="margin-top:3px;">Overdue</div></td></tr>
+              <tr><td><div class="r-name">Sydney retail — re-bid decision</div><div class="r-sub">Harbour Constructions (AU)</div></td><td style="text-align:right;"><span class="badge b-em">Bid</span><div class="r-sub" style="margin-top:3px;"><b>Today</b></div></td></tr>
+              <tr><td><div class="r-name">Quarterly review — Prime Developer (UAE)</div><div class="r-sub">Prime Developer (UAE)</div></td><td style="text-align:right;"><span class="badge b-sage">Follow-up</span><div class="r-sub" style="margin-top:3px;">in 4 days</div></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- PIPELINE -->
+      <section class="screen" id="pipeline">
+        <span class="demo-tag">Demo · sample data</span>
+        <div class="phead"><h1>Pipeline</h1><p>Live opportunities by stage</p></div>
+        <div class="grid g3">
+          <div class="col"><h4>Qualifying · 2 bids</h4>
+            <div class="opp"><div class="n">Sydney CBD Retail Fit-out</div><div class="c">Harbour Constructions (AU)</div><div class="row"><b>A$1,650,000</b><span class="badge b-soft">55%</span></div></div>
+            <div class="opp"><div class="n">Dublin Campus Block C</div><div class="c">Shannon Build (IE)</div><div class="row"><b>€640,000</b><span class="badge b-soft">25%</span></div></div>
+          </div>
+          <div class="col"><h4>Proposal · 2 bids</h4>
+            <div class="opp"><div class="n">Manchester Office</div><div class="c">Mercia Construction (UK)</div><div class="row"><b>£540,000</b><span class="badge b-soft">20%</span></div></div>
+            <div class="opp"><div class="n">Melbourne Residences</div><div class="c">Harbour Constructions (AU)</div><div class="row"><b>A$2,100,000</b><span class="badge b-soft">35%</span></div></div>
+          </div>
+          <div class="col"><h4>Negotiation · 1 bid</h4>
+            <div class="opp"><div class="n">Downtown Tower L40–45</div><div class="c">Prime Developer (UAE)</div><div class="row"><b>AED 1,180,000</b><span class="badge b-soft">70%</span></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FORECAST -->
+      <section class="screen" id="forecast">
+        <span class="demo-tag">Demo · sample data</span>
+        <div class="phead"><h1>Revenue vs capacity</h1><p>Weighted pipeline against delivery capacity — where you'd be over-committed</p></div>
+        <div class="card pad">
+          <div class="sec-title">Next six months</div>
+          <table><thead><tr><th>Month</th><th>Projected (weighted)</th><th style="width:40%;">Load vs capacity</th><th style="text-align:right;">Status</th></tr></thead><tbody id="fc"></tbody></table>
+          <div class="note">Capacity here is a group view in GBP at indicative FX — £600k/month. September and October run hot — the signal to line up subcontract labour or bring a crew on before you win the work, not after.</div>
+        </div>
+      </section>
+
+      <!-- ACCOUNTS -->
+      <section class="screen" id="accounts">
+        <span class="demo-tag">Demo · sample data</span>
+        <div class="phead"><h1>Client scorecards</h1><p>Every client ranked by your actual win rate with them — so the chasing goes where the wins are</p></div>
+        <div class="card pad scroll-x">
+          <table><thead><tr><th>Client</th><th>Type</th><th style="text-align:right;">Won value</th><th>Win rate</th><th style="text-align:right;">Focus</th></tr></thead><tbody>
+            <tr><td class="r-name">Prime Developer (UAE)</td><td class="r-sub">Developer</td><td style="text-align:right;">AED 2,400,000</td><td><div style="display:flex; align-items:center; gap:8px;"><div class="bar" style="width:90px;"><span style="width:100%;"></span></div><b>100%</b></div></td><td style="text-align:right;"><span class="badge b-em">Key account</span></td></tr>
+            <tr><td class="r-name">Mercia Construction (UK)</td><td class="r-sub">Main contractor</td><td style="text-align:right;">£680,000</td><td><div style="display:flex; align-items:center; gap:8px;"><div class="bar" style="width:90px;"><span style="width:100%;"></span></div><b>100%</b></div></td><td style="text-align:right;"><span class="badge b-em">Key account</span></td></tr>
+            <tr><td class="r-name">Shannon Build (IE)</td><td class="r-sub">Main contractor</td><td style="text-align:right;">€420,000</td><td><div style="display:flex; align-items:center; gap:8px;"><div class="bar" style="width:90px;"><span style="width:50%;"></span></div><b>50%</b></div></td><td style="text-align:right;"><span class="badge b-soft">Grow</span></td></tr>
+            <tr><td class="r-name">Harbour Constructions (AU)</td><td class="r-sub">Main contractor</td><td style="text-align:right;">A$1,250,000</td><td><div style="display:flex; align-items:center; gap:8px;"><div class="bar" style="width:90px;"><span style="width:50%;"></span></div><b>50%</b></div></td><td style="text-align:right;"><span class="badge b-soft">Grow</span></td></tr>
+          </tbody></table>
+        </div>
+      </section>
+
+      <!-- ESTIMATORS -->
+      <section class="screen" id="estimators">
+        <span class="demo-tag">Demo · sample data</span>
+        <div class="phead"><h1>Estimator workload &amp; turnaround</h1><p>Balance the bid queue — who's loaded, and whose pricing wins</p></div>
+        <div class="grid g4" style="margin-bottom:14px;">
+          <div class="kpi"><div class="k">Estimating team</div><div class="v">4</div></div>
+          <div class="kpi"><div class="k">Live bids in flight</div><div class="v">16</div></div>
+          <div class="kpi"><div class="k">Avg turnaround</div><div class="v">4.8 days</div></div>
+          <div class="kpi acc"><div class="k">At capacity</div><div class="v">1</div></div>
+        </div>
+        <div class="card pad scroll-x">
+          <table><thead><tr><th>Estimator</th><th style="width:22%;">Workload</th><th style="text-align:right;">Value pricing</th><th>Win rate</th><th style="text-align:right;">Turnaround</th><th>Status</th></tr></thead><tbody>
+            <tr><td><div class="r-name">Aoife Byrne</div><div class="r-sub">Senior Estimator · UAE</div></td><td><div style="display:flex; align-items:center; gap:8px;"><div class="bar" style="flex:1;"><span class="over" style="width:100%;"></span></div><span class="r-sub mono">6/6</span></div></td><td style="text-align:right; font-weight:600;">AED 7,800,000</td><td><div style="display:flex; align-items:center; gap:8px;"><div class="bar" style="width:60px;"><span style="width:64%;"></span></div><b>64%</b></div></td><td style="text-align:right;" class="r-sub">5.1 d</td><td><span class="badge b-bronze">At capacity</span></td></tr>
+            <tr><td><div class="r-name">Liam Doyle</div><div class="r-sub">Senior Estimator · UK</div></td><td><div style="display:flex; align-items:center; gap:8px;"><div class="bar" style="flex:1;"><span style="width:83%;"></span></div><span class="r-sub mono">5/6</span></div></td><td style="text-align:right; font-weight:600;">£1,350,000</td><td><div style="display:flex; align-items:center; gap:8px;"><div class="bar" style="width:60px;"><span style="width:73%;"></span></div><b>73%</b></div></td><td style="text-align:right;" class="r-sub">4.2 d</td><td><span class="badge b-sage">Busy</span></td></tr>
+            <tr><td><div class="r-name">Mark Stephens</div><div class="r-sub">Estimator · Ireland</div></td><td><div style="display:flex; align-items:center; gap:8px;"><div class="bar" style="flex:1;"><span style="width:60%;"></span></div><span class="r-sub mono">3/5</span></div></td><td style="text-align:right; font-weight:600;">€590,000</td><td><div style="display:flex; align-items:center; gap:8px;"><div class="bar" style="width:60px;"><span style="width:56%;"></span></div><b>56%</b></div></td><td style="text-align:right;" class="r-sub">6.0 d</td><td><span class="badge b-soft">Available</span></td></tr>
+            <tr><td><div class="r-name">Priya Nair</div><div class="r-sub">Estimator · Australia</div></td><td><div style="display:flex; align-items:center; gap:8px;"><div class="bar" style="flex:1;"><span style="width:40%;"></span></div><span class="r-sub mono">2/5</span></div></td><td style="text-align:right; font-weight:600;">A$2,400,000</td><td><div style="display:flex; align-items:center; gap:8px;"><div class="bar" style="width:60px;"><span style="width:75%;"></span></div><b>75%</b></div></td><td style="text-align:right;" class="r-sub">3.8 d</td><td><span class="badge b-soft">Available</span></td></tr>
+          </tbody></table>
+          <div class="note">Aoife's at capacity and Liam's close — route the next tender to Priya, who has headroom and the strongest win rate at 75%.</div>
+        </div>
+      </section>
+
+      <!-- DOCUMENTS -->
+      <section class="screen" id="documents">
+        <span class="demo-tag">Demo · sample data</span>
+        <div class="phead"><h1>Document control</h1><p>Controlled register, revisions and transmittals</p></div>
+        <div class="grid g4" style="margin-bottom:14px;">
+          <div class="kpi acc"><div class="k">Documents</div><div class="v">8</div></div>
+          <div class="kpi"><div class="k">Awaiting review</div><div class="v">2</div></div>
+          <div class="kpi"><div class="k">For construction</div><div class="v">2</div></div>
+          <div class="kpi"><div class="k">Open transmittals</div><div class="v">3</div></div>
+        </div>
+        <div class="card pad scroll-x" style="margin-bottom:16px;">
+          <div class="sec-title">Document register</div>
+          <table><thead><tr><th>Number</th><th>Title</th><th>Discipline</th><th>Rev</th><th>Status</th></tr></thead><tbody>
+            <tr><td class="code" style="color:var(--emerald); font-weight:600;">EDM-DW-DR-001</td><td class="r-name">Level 3 Partition Layout</td><td><span class="badge b-soft">Drywall/Partition</span></td><td class="code">C</td><td><span class="badge b-em">For Construction</span></td></tr>
+            <tr><td class="code" style="color:var(--emerald); font-weight:600;">EDM-DW-DR-002</td><td class="r-name">Level 4 Partition Layout</td><td><span class="badge b-soft">Drywall/Partition</span></td><td class="code">B</td><td><span class="badge b-sage">For Review</span></td></tr>
+            <tr><td class="code" style="color:var(--emerald); font-weight:600;">EDM-CL-DR-010</td><td class="r-name">Level 3 Ceiling RCP</td><td><span class="badge b-sage">Ceilings</span></td><td class="code">B</td><td><span class="badge b-soft">Approved</span></td></tr>
+            <tr><td class="code" style="color:var(--emerald); font-weight:600;">EDM-FS-DR-201</td><td class="r-name">Fire-rated Shaft Wall Layout</td><td><span class="badge b-bronze">Fire</span></td><td class="code">B</td><td><span class="badge b-soft">Approved</span></td></tr>
+            <tr><td class="code" style="color:var(--emerald); font-weight:600;">EDM-DW-DR-003</td><td class="r-name">Level 5 Partition Layout</td><td><span class="badge b-soft">Drywall/Partition</span></td><td class="code">A</td><td><span class="badge b-line">Draft</span></td></tr>
+          </tbody></table>
+        </div>
+        <div class="card pad">
+          <div class="sec-title">Transmittals</div>
+          <div class="tr"><div class="h"><div><span class="code" style="font-weight:600;">EDM-T-0012</span> <span class="r-sub">to Mercia Construction (UK)</span></div><div><span class="badge b-em">For Construction</span> <span class="badge b-soft">Issued</span> <span class="r-sub">14 Jun 2026</span></div></div><div class="docln"><span class="code">EDM-DW-DR-001</span> · Rev C — Level 3 Partition Layout</div></div>
+          <div class="tr"><div class="h"><div><span class="code" style="font-weight:600;">EDM-T-0011</span> <span class="r-sub">to Design Consultants</span></div><div><span class="badge b-sage">For Approval</span> <span class="badge b-bronze">Returned</span> <span class="r-sub">11 Jun 2026</span></div></div><div class="docln"><span class="code">EDM-DW-DR-002</span> · Rev B — Level 4 Partition Layout</div></div>
+          <div class="tr"><div class="h"><div><span class="code" style="font-weight:600;">EDM-T-0009</span> <span class="r-sub">to Design Consultants</span></div><div><span class="badge b-sage">For Approval</span> <span class="badge b-em">Approved w/ comments</span> <span class="r-sub">09 Jun 2026</span></div></div><div class="docln"><span class="code">EDM-FS-DR-201</span> · Rev B — Fire-rated Shaft Wall Layout</div></div>
+        </div>
+      </section>
+
+      <!-- INTEGRATIONS -->
+      <section class="screen" id="integrations">
+        <span class="demo-tag">Demo · sample data</span>
+        <div class="phead"><h1>Integrations</h1><p>Connect EDM OS to the tools your team already uses</p></div>
+        <div class="card pad" style="margin-bottom:12px;"><div class="feat"><div class="logo" style="background:var(--emerald);">M</div><div class="body"><div><h3>Microsoft 365</h3><span class="badge b-em">Recommended</span> <span class="badge b-line">Not connected</span></div><div class="desc">One connection covers four jobs — mail, calendar, files and Teams off a single sign-in.</div><div class="chips"><span class="chip">Bid calendar → Outlook</span><span class="chip">Email logging</span><span class="chip">Document storage</span><span class="chip">Single sign-on</span></div></div><button class="btn">Connect Microsoft 365</button></div></div>
+        <div class="card pad" style="margin-bottom:12px;"><div class="feat"><div class="logo" style="background:var(--charcoal);">X</div><div class="body"><div><h3>Xero</h3><span class="badge b-soft">Accounting</span> <span class="badge b-line">Not connected</span></div><div class="desc">Makes a won bid mean something financially — won deal becomes a draft invoice, no double entry.</div><div class="chips"><span class="chip">Won deal → draft invoice</span><span class="chip">Contact sync</span><span class="chip">Payment status</span></div></div><button class="btn">Connect Xero</button></div></div>
+        <div class="card pad" style="margin-bottom:12px;"><div class="feat"><div class="logo" style="background:var(--emerald);">W</div><div class="body"><div><h3>WhatsApp Business</h3><span class="badge b-sage">Messaging</span> <span class="badge b-line">Not connected</span></div><div class="desc">Deadline and follow-up alerts on the channel your clients and team actually read.</div><div class="chips"><span class="chip">Bid deadline alerts</span><span class="chip">Follow-up reminders</span><span class="chip">English &amp; Arabic</span></div></div><button class="btn">Connect WhatsApp</button></div></div>
+        <div class="card pad" style="margin-bottom:18px;"><div class="feat"><div class="logo" style="background:var(--bronze);">D</div><div class="body"><div><h3>DocuSign</h3><span class="badge b-bronze">E-signature</span> <span class="badge b-line">Not connected</span></div><div class="desc">Send subcontract agreements and transmittal sign-offs for signature, from document control.</div><div class="chips"><span class="chip">Subcontract agreements</span><span class="chip">Transmittal sign-off</span></div></div><button class="btn">Connect DocuSign</button></div></div>
+        <div class="sec-title">More integrations</div>
+        <div class="grid g2">
+          <div class="card pad"><div style="display:flex; justify-content:space-between; align-items:center;"><b>QuickBooks Online</b><span class="badge b-soft">Accounting</span></div><div class="desc" style="margin-top:6px;">Accounting alternative to Xero, across UK, Ireland and Australia.</div><button class="btn ghost" style="margin-top:12px;">Connect</button></div>
+          <div class="card pad"><div style="display:flex; justify-content:space-between; align-items:center;"><b>PlanRadar</b><span class="badge b-line">Site &amp; QA</span></div><div class="desc" style="margin-top:6px;">Bring site snagging and quality records back into EDM OS.</div><button class="btn ghost" style="margin-top:12px;">Connect</button></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // forecast rows (group view in GBP; capacity 600k/month)
+  var CAP = 600000;
+  var months = [
+    ["Jun 2026", 450000], ["Jul 2026", 540000], ["Aug 2026", 580000],
+    ["Sep 2026", 730000], ["Oct 2026", 660000], ["Nov 2026", 510000]
+  ];
+  var fmt = function (n) { return "£" + n.toLocaleString("en-US"); };
+  var fc = document.getElementById("fc");
+  if (fc) {
+    fc.innerHTML = months.map(function (m) {
+      var over = m[1] > CAP;
+      var pct = Math.min(Math.round((m[1] / CAP) * 100), 100);
+      return '<tr><td class="r-name">' + m[0] + '</td><td>' + fmt(m[1]) +
+        '</td><td><div class="bar"><span class="' + (over ? "over" : "") + '" style="width:' + pct + '%;"></span></div></td>' +
+        '<td style="text-align:right;">' + (over ? '<span class="badge b-bronze">Over capacity</span>' : '<span class="badge b-soft">Within</span>') + '</td></tr>';
+    }).join("");
+  }
+
+  // hash router
+  var screens = document.querySelectorAll(".screen");
+  var links = document.querySelectorAll("#nav a");
+  function route() {
+    var hash = location.hash || "#overview";
+    var found = false;
+    screens.forEach(function (s) { var on = ("#" + s.id) === hash; if (on) found = true; s.classList.toggle("active", on); });
+    if (!found) { document.getElementById("overview").classList.add("active"); hash = "#overview"; }
+    links.forEach(function (a) { a.classList.toggle("on", a.getAttribute("href") === hash); });
+    document.body.classList.remove("nav-open");
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener("hashchange", route);
+  route();
+
+  // mobile nav
+  var hamb = document.getElementById("hamb");
+  if (hamb) hamb.addEventListener("click", function () { document.body.classList.toggle("nav-open"); });
+  document.body.addEventListener("click", function (e) { if (document.body.classList.contains("nav-open") && !e.target.closest(".side") && !e.target.closest("#hamb")) document.body.classList.remove("nav-open"); });
+</script>
+</body>
+</html>

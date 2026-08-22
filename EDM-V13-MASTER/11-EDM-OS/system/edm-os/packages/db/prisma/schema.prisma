@@ -1,0 +1,1328 @@
+// =====================================================================
+// EDM OS — Production Data Model (Prisma schema)
+// Postgres. Multi-tenant by organisationId on every business table.
+// This is the complete backbone: core modules, trade modules, AI logs,
+// audit + notifications. Reference modules (Tender, Project) are wired
+// end-to-end in the API; the rest follow the identical pattern.
+// =====================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------- ENUMS ---------------------------------
+
+enum Role {
+  OWNER
+  DIRECTOR
+  GENERAL_MANAGER
+  COMMERCIAL_MANAGER
+  ESTIMATOR
+  PROJECT_MANAGER
+  SITE_ENGINEER
+  FOREMAN
+  ADMINISTRATOR
+  CLIENT
+  CONSULTANT
+  MAIN_CONTRACTOR
+}
+
+enum CompanyType {
+  DEVELOPER
+  CONSULTANT
+  ARCHITECT
+  MAIN_CONTRACTOR
+  CLIENT
+  SUPPLIER
+  SUBCONTRACTOR
+  OTHER
+}
+
+enum LeadStage {
+  NEW
+  QUALIFYING
+  ENGAGED
+  PROPOSAL
+  WON
+  LOST
+}
+
+enum OpportunityStatus {
+  OPEN
+  WON
+  LOST
+  ON_HOLD
+}
+
+// Pipeline columns for OPEN opportunities (the kanban board).
+// Outcome (won/lost) is tracked by OpportunityStatus; stage is the live
+// position while open. Stage names/order are mirrored in OrgConfig.crmPipeline.
+enum OpportunityStage {
+  QUALIFYING
+  ENGAGED
+  PROPOSAL
+  NEGOTIATION
+}
+
+enum ActivityType {
+  CALL
+  EMAIL
+  MEETING
+  NOTE
+  SITE_VISIT
+  TASK
+}
+
+enum TenderStatus {
+  IDENTIFIED
+  REGISTERED
+  IN_PROGRESS
+  SUBMITTED
+  SHORTLISTED
+  AWARDED
+  LOST
+  NO_BID
+  WITHDRAWN
+}
+
+enum EstimateStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  ISSUED
+  SUPERSEDED
+}
+
+enum RateType {
+  LABOUR
+  MATERIAL
+  PLANT
+  SUBCONTRACT
+  PRELIM
+}
+
+enum Trade {
+  DRYWALL
+  CEILINGS
+  JOINERY
+  TIMBER_CLADDING
+  ALUMINIUM_GLAZING
+  PAINTING
+  FITOUT
+  REFURBISHMENT
+  TECHNICAL
+}
+
+enum ProjectStatus {
+  PRECONSTRUCTION
+  ACTIVE
+  ON_HOLD
+  SNAGGING
+  COMPLETED
+  CLOSED
+}
+
+enum TaskStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  BLOCKED
+  COMPLETED
+}
+
+enum VariationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  PAID
+}
+
+enum RfiStatus {
+  OPEN
+  ANSWERED
+  CLOSED
+  OVERDUE
+}
+
+enum InspectionResult {
+  PASS
+  FAIL
+  PASS_WITH_COMMENTS
+  PENDING
+}
+
+enum SnagStatus {
+  OPEN
+  IN_PROGRESS
+  READY_FOR_INSPECTION
+  CLOSED
+}
+
+enum NcrStatus {
+  OPEN
+  CORRECTIVE_ACTION
+  VERIFIED
+  CLOSED
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum IncidentType {
+  NEAR_MISS
+  FIRST_AID
+  MEDICAL_TREATMENT
+  LOST_TIME
+  PROPERTY_DAMAGE
+  ENVIRONMENTAL
+}
+
+enum PoStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_RECEIVED
+  RECEIVED
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SUBMITTED
+  CERTIFIED
+  PAID
+  OVERDUE
+  DISPUTED
+}
+
+enum DocStatus {
+  DRAFT
+  FOR_REVIEW
+  APPROVED
+  SUPERSEDED
+  ARCHIVED
+}
+
+enum AiJobType {
+  ESTIMATING_TAKEOFF
+  RFI_DRAFT
+  PROGRESS_REPORT
+  PROPOSAL
+  MANAGEMENT_ADVICE
+}
+
+enum AiJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+// --------------------------- TENANCY / AUTH --------------------------
+
+model Organisation {
+  id        String   @id @default(cuid())
+  name      String
+  tradeName String?
+  trn       String? // UAE Tax Registration Number
+  licenceNo String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users                  User[]
+  memberships            Membership[]
+  companies              Company[]
+  leads                  Lead[]
+  opportunities          Opportunity[]
+  activities             Activity[]
+  tenders                Tender[]
+  estimates              Estimate[]
+  integrationConnections IntegrationConnection[]
+  costItems              CostItem[]
+  rates                  Rate[]
+  projects               Project[]
+  workers                Worker[]
+  labourAllocations      LabourAllocation[]
+  attendanceDays         AttendanceDay[]
+  labourRates            LabourRate[]
+  variations             Variation[]
+  rfis                   Rfi[]
+  inspections            Inspection[]
+  ncrs                   Ncr[]
+  incidents              Incident[]
+  toolboxTalks           ToolboxTalk[]
+  riskAssess             RiskAssessment[]
+  suppliers              Supplier[]
+  purchaseOrders         PurchaseOrder[]
+  budgets                Budget[]
+  costCodes              CostCode[]
+  invoices               Invoice[]
+  documents              Document[]
+  aiJobs                 AiJob[]
+  auditLogs              AuditLog[]
+  notifications          Notification[]
+  settings               OrganisationSettings?
+}
+
+model User {
+  id             String       @id @default(cuid())
+  supabaseId     String?      @unique // maps to Supabase auth user
+  email          String       @unique
+  firstName      String
+  lastName       String
+  phone          String?
+  jobTitle       String?
+  isActive       Boolean      @default(true)
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  memberships            Membership[]
+  ownedActivities        Activity[]     @relation("ActivityOwner")
+  estimatedOpportunities Opportunity[]  @relation("OpportunityEstimator")
+  managedProjects        Project[]      @relation("ProjectManager")
+  assignedTasks          Task[]         @relation("TaskAssignee")
+  dailyReports           DailyReport[]
+  raisedRfis             Rfi[]          @relation("RfiRaisedBy")
+  raisedVariations       Variation[]    @relation("VariationRaisedBy")
+  inspectionsDone        Inspection[]   @relation("InspectionInspector")
+  notifications          Notification[]
+  auditLogs              AuditLog[]
+  ownedLeads             Lead[]         @relation("LeadOwner")
+  reportedIncidents      Incident[]     @relation("IncidentReporter")
+}
+
+// A user's role within an organisation (supports multi-org and external parties).
+model Membership {
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  role           Role
+  createdAt      DateTime     @default(now())
+
+  @@unique([userId, organisationId])
+  @@index([organisationId])
+}
+
+// ------------------------------- CRM ---------------------------------
+
+model Company {
+  id             String       @id @default(cuid())
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  name           String
+  type           CompanyType
+  website        String?
+  phone          String?
+  address        String?
+  city           String?
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  contacts                Contact[]
+  leads                   Lead[]
+  opportunities           Opportunity[]
+  tendersAsClient         Tender[]      @relation("TenderClient")
+  tendersAsConsultant     Tender[]      @relation("TenderConsultant")
+  tendersAsMainContractor Tender[]      @relation("TenderMainContractor")
+  projects                Project[]
+
+  @@index([organisationId])
+  @@index([type])
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+  firstName String
+  lastName  String
+  email     String?
+  phone     String?
+  jobTitle  String?
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  activities Activity[]
+
+  @@index([companyId])
+}
+
+model Lead {
+  id             String       @id @default(cuid())
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  companyId      String?
+  company        Company?     @relation(fields: [companyId], references: [id])
+  title          String
+  source         String?
+  stage          LeadStage    @default(NEW)
+  estValue       Decimal?     @db.Decimal(14, 2)
+  nextFollowUpAt DateTime?
+  ownerUserId    String?
+  owner          User?        @relation("LeadOwner", fields: [ownerUserId], references: [id])
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  activities    Activity[]
+  opportunities Opportunity[]
+
+  @@index([organisationId])
+  @@index([stage])
+}
+
+model Opportunity {
+  id              String            @id @default(cuid())
+  organisationId  String
+  organisation    Organisation      @relation(fields: [organisationId], references: [id])
+  companyId       String?
+  company         Company?          @relation(fields: [companyId], references: [id])
+  leadId          String?
+  lead            Lead?             @relation(fields: [leadId], references: [id])
+  estimatorUserId String?
+  estimator       User?             @relation("OpportunityEstimator", fields: [estimatorUserId], references: [id])
+  name            String
+  value           Decimal           @db.Decimal(14, 2)
+  probability     Int               @default(20) // 0-100, drives weighted pipeline
+  status          OpportunityStatus @default(OPEN)
+  stage           OpportunityStage  @default(QUALIFYING)
+  expectedClose   DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  activities Activity[]
+  tender     Tender?
+
+  @@index([organisationId])
+  @@index([status])
+}
+
+model Activity {
+  id             String       @id @default(cuid())
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  type           ActivityType
+  subject        String
+  body           String?
+  dueAt          DateTime?
+  completedAt    DateTime?
+  ownerUserId    String?
+  owner          User?        @relation("ActivityOwner", fields: [ownerUserId], references: [id])
+  contactId      String?
+  contact        Contact?     @relation(fields: [contactId], references: [id])
+  leadId         String?
+  lead           Lead?        @relation(fields: [leadId], references: [id])
+  opportunityId  String?
+  opportunity    Opportunity? @relation(fields: [opportunityId], references: [id])
+  projectId      String?
+  project        Project?     @relation(fields: [projectId], references: [id])
+  createdAt      DateTime     @default(now())
+
+  @@index([organisationId])
+  @@index([dueAt])
+}
+
+// --------------------------- TENDERS ---------------------------------
+
+model Tender {
+  id               String       @id @default(cuid())
+  organisationId   String
+  organisation     Organisation @relation(fields: [organisationId], references: [id])
+  tenderNo         String
+  projectName      String
+  clientId         String?
+  client           Company?     @relation("TenderClient", fields: [clientId], references: [id])
+  consultantId     String?
+  consultant       Company?     @relation("TenderConsultant", fields: [consultantId], references: [id])
+  mainContractorId String?
+  mainContractor   Company?     @relation("TenderMainContractor", fields: [mainContractorId], references: [id])
+  opportunityId    String?      @unique
+  opportunity      Opportunity? @relation(fields: [opportunityId], references: [id])
+  trades           Trade[]
+  value            Decimal?     @db.Decimal(14, 2)
+  dueDate          DateTime?
+  status           TenderStatus @default(IDENTIFIED)
+  awardProbability Int          @default(20)
+  notes            String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  estimates Estimate[]
+  documents Document[]
+  events    TenderEvent[]
+  project   Project?
+
+  @@unique([organisationId, tenderNo])
+  @@index([organisationId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+model TenderEvent {
+  id        String       @id @default(cuid())
+  tenderId  String
+  tender    Tender       @relation(fields: [tenderId], references: [id], onDelete: Cascade)
+  status    TenderStatus
+  note      String?
+  createdAt DateTime     @default(now())
+
+  @@index([tenderId])
+}
+
+// -------------------------- ESTIMATING -------------------------------
+
+model CostItem {
+  id             String       @id @default(cuid())
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  code           String
+  description    String
+  trade          Trade
+  unit           String // m2, m, nr, item...
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  rates         Rate[]
+  estimateLines EstimateLine[]
+
+  @@unique([organisationId, code])
+  @@index([trade])
+}
+
+model Rate {
+  id             String       @id @default(cuid())
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  costItemId     String?
+  costItem       CostItem?    @relation(fields: [costItemId], references: [id])
+  type           RateType
+  description    String
+  unit           String
+  rate           Decimal      @db.Decimal(12, 4)
+  currency       String       @default("AED")
+  supplierId     String?
+  supplier       Supplier?    @relation(fields: [supplierId], references: [id])
+  validFrom      DateTime     @default(now())
+  validTo        DateTime?
+
+  @@index([organisationId])
+  @@index([type])
+}
+
+model Estimate {
+  id             String         @id @default(cuid())
+  organisationId String
+  organisation   Organisation   @relation(fields: [organisationId], references: [id])
+  tenderId       String?
+  tender         Tender?        @relation(fields: [tenderId], references: [id])
+  ref            String
+  title          String
+  status         EstimateStatus @default(DRAFT)
+  overheadPct    Decimal        @default(8) @db.Decimal(5, 2)
+  profitPct      Decimal        @default(12) @db.Decimal(5, 2)
+  contingencyPct Decimal        @default(2) @db.Decimal(5, 2)
+  currency       String         @default("AED")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  lines      EstimateLine[]
+  quotations Quotation[]
+
+  @@unique([organisationId, ref])
+  @@index([status])
+}
+
+model EstimateLine {
+  id           String    @id @default(cuid())
+  estimateId   String
+  estimate     Estimate  @relation(fields: [estimateId], references: [id], onDelete: Cascade)
+  costItemId   String?
+  costItem     CostItem? @relation(fields: [costItemId], references: [id])
+  description  String
+  trade        Trade
+  unit         String
+  qty          Decimal   @db.Decimal(14, 3)
+  labourRate   Decimal   @default(0) @db.Decimal(12, 4)
+  materialRate Decimal   @default(0) @db.Decimal(12, 4)
+  plantRate    Decimal   @default(0) @db.Decimal(12, 4)
+  subRate      Decimal   @default(0) @db.Decimal(12, 4)
+  sortOrder    Int       @default(0)
+
+  // lineTotal is computed in the service: qty * (sum of rates), then est markups applied
+  @@index([estimateId])
+}
+
+model Quotation {
+  id         String    @id @default(cuid())
+  estimateId String
+  estimate   Estimate  @relation(fields: [estimateId], references: [id])
+  quoteNo    String
+  revision   Int       @default(0)
+  total      Decimal   @db.Decimal(14, 2)
+  validUntil DateTime?
+  issuedAt   DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@unique([estimateId, quoteNo, revision])
+}
+
+// ------------------------- PROJECTS ----------------------------------
+
+model Project {
+  id             String        @id @default(cuid())
+  organisationId String
+  organisation   Organisation  @relation(fields: [organisationId], references: [id])
+  code           String
+  name           String
+  clientId       String?
+  client         Company?      @relation(fields: [clientId], references: [id])
+  tenderId       String?       @unique
+  tender         Tender?       @relation(fields: [tenderId], references: [id])
+  trades         Trade[]
+  status         ProjectStatus @default(PRECONSTRUCTION)
+  contractValue  Decimal?      @db.Decimal(14, 2)
+  retentionPct   Decimal       @default(5) @db.Decimal(5, 2)
+  startDate      DateTime?
+  endDate        DateTime?
+  location       String?
+  emirate        String? // Dubai, Abu Dhabi, Sharjah...
+  managerUserId  String?
+  manager        User?         @relation("ProjectManager", fields: [managerUserId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  phases            Phase[]
+  milestones        Milestone[]
+  tasks             Task[]
+  dailyReports      DailyReport[]
+  variations        Variation[]
+  rfis              Rfi[]
+  inspections       Inspection[]
+  ncrs              Ncr[]
+  incidents         Incident[]
+  toolboxTalks      ToolboxTalk[]
+  riskAssess        RiskAssessment[]
+  purchaseOrders    PurchaseOrder[]
+  budgets           Budget[]
+  invoices          Invoice[]
+  documents         Document[]
+  activities        Activity[]
+  tradeProgress     TradeProgress[]
+  aiJobs            AiJob[]
+  snags             Snag[]
+  labourAllocations LabourAllocation[]
+  attendanceDays    AttendanceDay[]
+
+  @@unique([organisationId, code])
+  @@index([status])
+  @@index([emirate])
+}
+
+model Phase {
+  id        String    @id @default(cuid())
+  projectId String
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name      String
+  startDate DateTime?
+  endDate   DateTime?
+  sortOrder Int       @default(0)
+  tasks     Task[]
+
+  @@index([projectId])
+}
+
+model Milestone {
+  id         String    @id @default(cuid())
+  projectId  String
+  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name       String
+  dueDate    DateTime?
+  achievedAt DateTime?
+
+  @@index([projectId])
+}
+
+model Task {
+  id              String     @id @default(cuid())
+  projectId       String
+  project         Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  phaseId         String?
+  phase           Phase?     @relation(fields: [phaseId], references: [id])
+  name            String
+  status          TaskStatus @default(NOT_STARTED)
+  trade           Trade?
+  assigneeId      String?
+  assignee        User?      @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  plannedStart    DateTime?
+  plannedEnd      DateTime?
+  actualStart     DateTime?
+  actualEnd       DateTime?
+  percentComplete Int        @default(0)
+  dependsOnId     String?
+  dependsOn       Task?      @relation("TaskDeps", fields: [dependsOnId], references: [id])
+  dependents      Task[]     @relation("TaskDeps")
+
+  @@index([projectId])
+  @@index([status])
+}
+
+// ------------------------ SITE REPORTING -----------------------------
+
+model DailyReport {
+  id           String       @id @default(cuid())
+  projectId    String
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reportDate   DateTime
+  authorId     String?
+  author       User?        @relation(fields: [authorId], references: [id])
+  weather      String?
+  temperatureC Int?
+  delays       String?
+  notes        String?
+  status       ReportStatus @default(DRAFT)
+  instructions String?
+  hoursLost    Decimal?     @db.Decimal(5, 2)
+  safetyNote   String?
+  createdAt    DateTime     @default(now())
+
+  labour     LabourEntry[]
+  plant      PlantEntry[]
+  deliveries DeliveryEntry[]
+  events     SiteEvent[]
+
+  @@unique([projectId, reportDate])
+  @@index([reportDate])
+}
+
+model LabourEntry {
+  id            String      @id @default(cuid())
+  dailyReportId String
+  dailyReport   DailyReport @relation(fields: [dailyReportId], references: [id], onDelete: Cascade)
+  trade         Trade
+  headcount     Int
+  hours         Decimal     @db.Decimal(6, 2)
+
+  @@index([dailyReportId])
+}
+
+model PlantEntry {
+  id            String      @id @default(cuid())
+  dailyReportId String
+  dailyReport   DailyReport @relation(fields: [dailyReportId], references: [id], onDelete: Cascade)
+  item          String
+  quantity      Int
+  hours         Decimal?    @db.Decimal(6, 2)
+
+  @@index([dailyReportId])
+}
+
+model DeliveryEntry {
+  id            String      @id @default(cuid())
+  dailyReportId String
+  dailyReport   DailyReport @relation(fields: [dailyReportId], references: [id], onDelete: Cascade)
+  material      String
+  quantity      Decimal     @db.Decimal(14, 3)
+  unit          String
+  supplierId    String?
+  supplier      Supplier?   @relation(fields: [supplierId], references: [id])
+
+  @@index([dailyReportId])
+}
+
+// -------------------------- VARIATIONS -------------------------------
+
+model Variation {
+  id             String          @id @default(cuid())
+  organisationId String
+  organisation   Organisation    @relation(fields: [organisationId], references: [id])
+  projectId      String
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  ref            String
+  title          String
+  description    String?
+  status         VariationStatus @default(DRAFT)
+  value          Decimal         @db.Decimal(14, 2)
+  raisedById     String?
+  raisedBy       User?           @relation("VariationRaisedBy", fields: [raisedById], references: [id])
+  submittedAt    DateTime?
+  decidedAt      DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  documents      Document[]
+
+  @@unique([projectId, ref])
+  @@index([status])
+}
+
+// ----------------------------- RFIs ----------------------------------
+
+model Rfi {
+  id             String       @id @default(cuid())
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  projectId      String
+  project        Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  ref            String
+  subject        String
+  question       String
+  response       String?
+  status         RfiStatus    @default(OPEN)
+  raisedById     String?
+  raisedBy       User?        @relation("RfiRaisedBy", fields: [raisedById], references: [id])
+  dueDate        DateTime?
+  answeredAt     DateTime?
+  createdAt      DateTime     @default(now())
+  documents      Document[]
+
+  @@unique([projectId, ref])
+  @@index([status])
+}
+
+// -------------------------- QUALITY ----------------------------------
+
+model ChecklistTemplate {
+  id          String       @id @default(cuid())
+  name        String
+  trade       Trade?
+  items       Json // [{ id, text, required }]
+  createdAt   DateTime     @default(now())
+  inspections Inspection[]
+}
+
+model Inspection {
+  id             String             @id @default(cuid())
+  organisationId String
+  organisation   Organisation       @relation(fields: [organisationId], references: [id])
+  projectId      String
+  project        Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  templateId     String?
+  template       ChecklistTemplate? @relation(fields: [templateId], references: [id])
+  ref            String
+  title          String
+  trade          Trade?
+  result         InspectionResult   @default(PENDING)
+  responses      Json? // answers against template items
+  inspectorId    String?
+  inspector      User?              @relation("InspectionInspector", fields: [inspectorId], references: [id])
+  inspectedAt    DateTime?
+  createdAt      DateTime           @default(now())
+  snags          Snag[]
+
+  @@unique([projectId, ref])
+  @@index([result])
+}
+
+model Snag {
+  id           String      @id @default(cuid())
+  inspectionId String?
+  inspection   Inspection? @relation(fields: [inspectionId], references: [id])
+  projectId    String
+  project      Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  ref          String
+  description  String
+  location     String?
+  trade        Trade?
+  status       SnagStatus  @default(OPEN)
+  photoUrl     String?
+  closedAt     DateTime?
+  createdAt    DateTime    @default(now())
+
+  @@index([projectId])
+  @@index([status])
+}
+
+model Ncr {
+  id               String       @id @default(cuid())
+  organisationId   String
+  organisation     Organisation @relation(fields: [organisationId], references: [id])
+  projectId        String
+  project          Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  ref              String
+  title            String
+  description      String
+  severity         Severity     @default(MEDIUM)
+  status           NcrStatus    @default(OPEN)
+  correctiveAction String?
+  closedAt         DateTime?
+  createdAt        DateTime     @default(now())
+
+  @@unique([projectId, ref])
+  @@index([status])
+}
+
+// ----------------------------- HSE -----------------------------------
+
+model Incident {
+  id             String       @id @default(cuid())
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  projectId      String?
+  project        Project?     @relation(fields: [projectId], references: [id])
+  ref            String
+  type           IncidentType
+  severity       Severity     @default(LOW)
+  description    String
+  occurredAt     DateTime
+  reportedById   String?
+  reportedBy     User?        @relation("IncidentReporter", fields: [reportedById], references: [id])
+  rootCause      String?
+  actionsTaken   String?
+  createdAt      DateTime     @default(now())
+
+  @@index([organisationId])
+  @@index([type])
+}
+
+model ToolboxTalk {
+  id             String       @id @default(cuid())
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  projectId      String?
+  project        Project?     @relation(fields: [projectId], references: [id])
+  topic          String
+  conductedAt    DateTime
+  attendees      Int          @default(0)
+  notes          String?
+  createdAt      DateTime     @default(now())
+
+  @@index([organisationId])
+}
+
+model RiskAssessment {
+  id             String       @id @default(cuid())
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  projectId      String?
+  project        Project?     @relation(fields: [projectId], references: [id])
+  ref            String
+  activity       String
+  hazards        Json // [{ hazard, likelihood, severity, control }]
+  residualRisk   Severity     @default(LOW)
+  reviewedAt     DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([organisationId])
+}
+
+// -------------------------- PROCUREMENT ------------------------------
+
+model Supplier {
+  id             String          @id @default(cuid())
+  organisationId String
+  organisation   Organisation    @relation(fields: [organisationId], references: [id])
+  name           String
+  trade          Trade?
+  contactName    String?
+  email          String?
+  phone          String?
+  rating         Int? // 1-5
+  createdAt      DateTime        @default(now())
+  rates          Rate[]
+  purchaseOrders PurchaseOrder[]
+  deliveries     DeliveryEntry[]
+
+  @@index([organisationId])
+}
+
+model PurchaseOrder {
+  id             String              @id @default(cuid())
+  organisationId String
+  organisation   Organisation        @relation(fields: [organisationId], references: [id])
+  projectId      String?
+  project        Project?            @relation(fields: [projectId], references: [id])
+  supplierId     String
+  supplier       Supplier            @relation(fields: [supplierId], references: [id])
+  poNo           String
+  status         PoStatus            @default(DRAFT)
+  currency       String              @default("AED")
+  total          Decimal             @default(0) @db.Decimal(14, 2)
+  issuedAt       DateTime?
+  expectedAt     DateTime?
+  createdAt      DateTime            @default(now())
+  lines          PurchaseOrderLine[]
+
+  @@unique([organisationId, poNo])
+  @@index([status])
+}
+
+model PurchaseOrderLine {
+  id              String        @id @default(cuid())
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  description     String
+  qty             Decimal       @db.Decimal(14, 3)
+  unit            String
+  unitPrice       Decimal       @db.Decimal(12, 4)
+  receivedQty     Decimal       @default(0) @db.Decimal(14, 3)
+
+  @@index([purchaseOrderId])
+}
+
+// ------------------------ FINANCIALS ---------------------------------
+
+model CostCode {
+  id             String       @id @default(cuid())
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  code           String
+  description    String
+  trade          Trade?
+  budgets        Budget[]
+
+  @@unique([organisationId, code])
+}
+
+model Budget {
+  id              String       @id @default(cuid())
+  organisationId  String
+  organisation    Organisation @relation(fields: [organisationId], references: [id])
+  projectId       String
+  project         Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  costCodeId      String?
+  costCode        CostCode?    @relation(fields: [costCodeId], references: [id])
+  description     String
+  budgetAmount    Decimal      @db.Decimal(14, 2)
+  committedAmount Decimal      @default(0) @db.Decimal(14, 2)
+  actualAmount    Decimal      @default(0) @db.Decimal(14, 2)
+
+  @@index([projectId])
+}
+
+model Invoice {
+  id              String        @id @default(cuid())
+  organisationId  String
+  organisation    Organisation  @relation(fields: [organisationId], references: [id])
+  projectId       String
+  project         Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  invoiceNo       String
+  status          InvoiceStatus @default(DRAFT)
+  grossAmount     Decimal       @db.Decimal(14, 2)
+  retentionAmount Decimal       @default(0) @db.Decimal(14, 2)
+  netAmount       Decimal       @db.Decimal(14, 2)
+  issuedAt        DateTime?
+  dueAt           DateTime?
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+
+  @@unique([organisationId, invoiceNo])
+  @@index([status])
+  @@index([dueAt])
+}
+
+// ------------------------ DOCUMENT CONTROL ---------------------------
+
+model Document {
+  id             String             @id @default(cuid())
+  organisationId String
+  organisation   Organisation       @relation(fields: [organisationId], references: [id])
+  title          String
+  category       String // drawing, contract, spec, submittal...
+  status         DocStatus          @default(DRAFT)
+  currentRev     String             @default("A")
+  projectId      String?
+  project        Project?           @relation(fields: [projectId], references: [id])
+  tenderId       String?
+  tender         Tender?            @relation(fields: [tenderId], references: [id])
+  variationId    String?
+  variation      Variation?         @relation(fields: [variationId], references: [id])
+  rfiId          String?
+  rfi            Rfi?               @relation(fields: [rfiId], references: [id])
+  createdAt      DateTime           @default(now())
+  revisions      DocumentRevision[]
+
+  @@index([organisationId])
+  @@index([category])
+}
+
+model DocumentRevision {
+  id         String   @id @default(cuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  revision   String
+  storageKey String // Supabase Storage object key
+  fileName   String
+  fileSize   Int?
+  uploadedBy String?
+  note       String?
+  createdAt  DateTime @default(now())
+
+  @@unique([documentId, revision])
+}
+
+// -------------------- SPECIALISED TRADE MODULES ----------------------
+// One flexible progress table keyed by trade, with trade-specific
+// metrics held in JSON, plus typed columns for the common quantities.
+
+model TradeProgress {
+  id         String   @id @default(cuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  trade      Trade
+  area       String? // zone / level / room
+  date       DateTime @default(now())
+  quantity   Decimal  @db.Decimal(14, 3) // m2 installed, nr, etc.
+  unit       String
+  // trade-specific attributes:
+  //  DRYWALL  -> { boardType, fireRating, acousticRating, partitionType }
+  //  CEILINGS -> { gridSystem, tileSystem }
+  //  JOINERY  -> { stage: production|delivery|installation, approvalStatus }
+  //  TIMBER   -> { material, fixingSystem }
+  //  GLAZING  -> { stage: fabrication|delivery|installation, system }
+  //  PAINTING -> { stage: prep|primer|finish, coats, system }
+  attributes Json?
+  notes      String?
+
+  @@index([projectId])
+  @@index([trade])
+}
+
+// ----------------------------- AI ------------------------------------
+
+model AiJob {
+  id             String       @id @default(cuid())
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  projectId      String?
+  project        Project?     @relation(fields: [projectId], references: [id])
+  type           AiJobType
+  status         AiJobStatus  @default(QUEUED)
+  provider       String       @default("anthropic") // anthropic | openai
+  model          String?
+  inputRef       String? // storage key for uploaded drawing/BOQ, or source id
+  prompt         String?
+  output         Json?
+  tokensIn       Int?
+  tokensOut      Int?
+  error          String?
+  createdAt      DateTime     @default(now())
+  completedAt    DateTime?
+
+  @@index([organisationId])
+  @@index([type])
+  @@index([status])
+}
+
+// ----------------------- AUDIT / NOTIFICATIONS -----------------------
+
+model AuditLog {
+  id             String       @id @default(cuid())
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  userId         String?
+  user           User?        @relation(fields: [userId], references: [id])
+  action         String // CREATE | UPDATE | DELETE | LOGIN | EXPORT...
+  entity         String // model name
+  entityId       String?
+  before         Json?
+  after          Json?
+  ip             String?
+  createdAt      DateTime     @default(now())
+
+  @@index([organisationId])
+  @@index([entity, entityId])
+}
+
+model Notification {
+  id             String       @id @default(cuid())
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  title          String
+  body           String?
+  link           String?
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([userId])
+  @@index([readAt])
+}
+
+// ----------------- ORGANISATION SETTINGS / CONFIG --------------------
+// The configuration layer. Trades, workflow stages, feature flags and
+// branding live here as data — never hardcoded — so the platform can be
+// shaped per organisation. This is what keeps the SaaS option open at
+// near-zero cost: nothing about "how EDM works" is baked into the code.
+
+model OrganisationSettings {
+  id             String       @id @default(cuid())
+  organisationId String       @unique
+  organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  // config shape (see apps/api/src/config/org-config.ts):
+  //  { enabledTrades: Trade[], features: { tenders, estimating, ... },
+  //    tenderWorkflow: { stages[], transitions{} }, projectWorkflow: { stages[] },
+  //    fiscal: { currency, retentionPctDefault } }
+  config         Json
+  // optional white-label branding for the product path (logo, colours)
+  branding       Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+// ---- Integrations (Microsoft 365 / Graph, accounting, messaging, e-sign) ----
+// One row per connected provider per organisation. Tokens stored encrypted at
+// rest in production (the column holds the encrypted blob, not a raw token).
+enum IntegrationProvider {
+  MICROSOFT
+  XERO
+  QUICKBOOKS
+  WHATSAPP
+  DOCUSIGN
+  PLANRADAR
+}
+
+enum IntegrationStatus {
+  CONNECTED
+  DISCONNECTED
+  ERROR
+}
+
+model IntegrationConnection {
+  id               String              @id @default(cuid())
+  organisationId   String
+  organisation     Organisation        @relation(fields: [organisationId], references: [id])
+  provider         IntegrationProvider
+  status           IntegrationStatus   @default(DISCONNECTED)
+  accountEmail     String?
+  externalTenantId String? // e.g. Xero org id / DocuSign account id / WhatsApp phone number id
+  apiBaseUrl       String? // per-account API base, e.g. DocuSign account base URI
+  accessToken      String? // encrypted blob in production
+  refreshToken     String? // encrypted blob in production
+  expiresAt        DateTime?
+  scopes           String?
+  lastSyncedAt     DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@unique([organisationId, provider])
+}
+
+// ---- Labour / operations core ----
+enum WorkerStatus {
+  ACTIVE
+  ON_LEAVE
+  INACTIVE
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  SICK
+  LEAVE
+}
+
+model Worker {
+  id             String       @id @default(cuid())
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  code           String // payroll / badge number
+  name           String
+  trade          Trade
+  grade          String? // e.g. Charge hand, Operative, Apprentice
+  dayRate        Decimal      @db.Decimal(10, 2) // labour cost of a standard day (org/region currency)
+  status         WorkerStatus @default(ACTIVE)
+  phone          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  allocations LabourAllocation[]
+  attendance  AttendanceDay[]
+
+  @@unique([organisationId, code])
+  @@index([organisationId, trade])
+}
+
+model LabourAllocation {
+  id               String       @id @default(cuid())
+  organisationId   String
+  organisation     Organisation @relation(fields: [organisationId], references: [id])
+  projectId        String
+  project          Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  workerId         String? // a specific worker, or null for a planned crew by trade
+  worker           Worker?      @relation(fields: [workerId], references: [id])
+  trade            Trade
+  plannedHeadcount Int          @default(1)
+  zone             String? // area / level on site
+  supervisor       String?
+  startDate        DateTime
+  endDate          DateTime?
+  createdAt        DateTime     @default(now())
+
+  @@index([organisationId, projectId])
+}
+
+model AttendanceDay {
+  id             String           @id @default(cuid())
+  organisationId String
+  organisation   Organisation     @relation(fields: [organisationId], references: [id])
+  projectId      String
+  project        Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  workerId       String
+  worker         Worker           @relation(fields: [workerId], references: [id])
+  date           DateTime         @db.Date
+  status         AttendanceStatus @default(PRESENT)
+  hours          Decimal          @default(0) @db.Decimal(5, 2)
+  overtimeHours  Decimal          @default(0) @db.Decimal(5, 2)
+  createdAt      DateTime         @default(now())
+
+  @@unique([workerId, date])
+  @@index([organisationId, projectId, date])
+}
+
+// ---- Supervisor daily report: submit status + structured claim events ----
+enum ReportStatus {
+  DRAFT
+  SUBMITTED
+}
+
+enum SiteEventType {
+  DELAY
+  INSTRUCTION
+  DISRUPTION
+}
+
+model SiteEvent {
+  id            String        @id @default(cuid())
+  dailyReportId String
+  dailyReport   DailyReport   @relation(fields: [dailyReportId], references: [id], onDelete: Cascade)
+  type          SiteEventType
+  description   String
+  cause         String?
+  hoursLost     Decimal       @default(0) @db.Decimal(5, 2)
+  chargeable    Boolean       @default(false) // potentially recoverable from MC/client
+  createdAt     DateTime      @default(now())
+
+  @@index([dailyReportId])
+}
+
+// ---- Labour charge-out rate card (billing rates to the main contractor) ----
+model LabourRate {
+  id             String       @id @default(cuid())
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  trade          Trade
+  grade          String // Charge hand / Operative / Apprentice
+  chargeRate     Decimal      @db.Decimal(10, 2) // man-hour charge-out to the main contractor
+  unit           String       @default("hour")
+  validFrom      DateTime     @default(now())
+  validTo        DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@unique([organisationId, trade, grade])
+  @@index([organisationId, trade])
+}

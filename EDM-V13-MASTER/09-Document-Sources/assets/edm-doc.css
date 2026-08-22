@@ -1,0 +1,300 @@
+/* EDM HOLDINGS — DOCUMENT STYLESHEET
+   Renders with WeasyPrint. Tokens match 01-Brand-Identity/BRAND-TOKENS.md.
+   Four Montserrat weights only: 300 / 400 / 600 / 700. Medium 500 is not in
+   the system — the V11 PDFs used it in error. */
+
+@font-face { font-family: Montserrat; font-weight: 300; src: url(fonts/montserrat-300.ttf); }
+@font-face { font-family: Montserrat; font-weight: 400; src: url(fonts/montserrat-400.ttf); }
+@font-face { font-family: Montserrat; font-weight: 600; src: url(fonts/montserrat-600.ttf); }
+@font-face { font-family: Montserrat; font-weight: 700; src: url(fonts/montserrat-700.ttf); }
+
+:root {
+  --ground:   #FFFFFF;
+  --emerald:  #083819;
+  --ink:      #0F231B;
+  --muted:    #5C6F66;
+  --hairline: #E4E6E0;
+}
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Montserrat, sans-serif;
+  font-weight: 400;
+  color: var(--ink);
+  background: var(--ground);
+  font-size: 9.4pt;
+  line-height: 1.62;
+  hyphens: none;
+}
+
+.page {
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  padding: 22mm 20mm 20mm 20mm;
+  page-break-after: always;
+  overflow: hidden;
+}
+.page:last-child { page-break-after: auto; }
+
+/* ---------- COVER ---------- */
+.cover { padding: 18mm 20mm 0 20mm; }
+.cover-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.cover-top img { width: 48mm; }
+.doc-label {
+  font-weight: 700; font-size: 8pt; letter-spacing: .22em;
+  color: var(--muted); text-align: right; line-height: 1.7;
+}
+.cover-headline {
+  margin-top: 78mm;
+  font-weight: 700; font-size: 30pt; line-height: 1.14;
+  letter-spacing: -.018em; color: var(--ink);
+}
+.cover-lead {
+  margin-top: 9mm; max-width: 108mm;
+  font-size: 9.4pt; color: var(--muted); line-height: 1.7;
+}
+.cover-band {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 16mm; background: var(--emerald);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20mm; color: #fff;
+  font-size: 7.4pt; font-weight: 600; letter-spacing: .16em;
+}
+.cover-band .site { letter-spacing: .10em; font-weight: 400; }
+
+/* ---------- SECTION FURNITURE ---------- */
+.eyebrow {
+  display: flex; align-items: center; gap: 5mm;
+  font-weight: 700; font-size: 7.4pt; letter-spacing: .2em;
+  color: var(--emerald); text-transform: uppercase;
+  margin-bottom: 12mm;
+}
+.eyebrow::before {
+  content: ""; width: 9mm; height: 1.6pt;
+  background: var(--emerald); display: block;
+}
+h1 {
+  font-weight: 700; font-size: 19pt; line-height: 1.24;
+  letter-spacing: -.014em; margin-bottom: 7mm; max-width: 145mm;
+}
+p { margin-bottom: 4.6mm; }
+p.lead { font-size: 10pt; line-height: 1.7; max-width: 152mm; }
+.muted { color: var(--muted); }
+
+.foot {
+  position: absolute; left: 20mm; right: 20mm; bottom: 15mm;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.foot .fl {
+  font-weight: 700; font-size: 7pt; letter-spacing: .2em;
+  color: var(--muted); text-transform: uppercase;
+}
+.pageno {
+  background: var(--emerald); color: #fff;
+  font-weight: 700; font-size: 7.4pt; letter-spacing: .06em;
+  padding: 1.6mm 2.6mm; border-radius: 1mm;
+}
+.foot-rule {
+  position: absolute; left: 20mm; right: 20mm; bottom: 23mm;
+  height: 1px; background: var(--hairline);
+}
+
+/* ---------- CARDS ----------
+   Table layout, not flex-wrap or floats: WeasyPrint handles tables exactly and
+   keeps equal-height cells, which flex-wrap and floats did not. */
+.grid2 {
+  display: table; width: 100%;
+  border-spacing: 3mm; margin: 0 -3mm 2mm -3mm;
+}
+.grow { display: table-row; }
+.card {
+  display: table-cell; width: 50%; vertical-align: top;
+  border: 1px solid var(--hairline);
+  border-radius: 2mm;
+  padding: 6mm 6mm 6.5mm 6mm;
+}
+/* Tick drawn in CSS — no glyph, so no second font is embedded. The V11 PDFs
+   pulled in DejaVu Sans for their tick marks; this avoids that. */
+.card .tick {
+  width: 6mm; height: 6mm; border: 1.4pt solid var(--emerald);
+  border-radius: 1.2mm; margin-bottom: 4mm; position: relative;
+}
+.card .tick::after {
+  content: ""; position: absolute;
+  left: 1.5mm; top: 0.9mm; width: 1.7mm; height: 3.1mm;
+  border-right: 1.3pt solid var(--emerald);
+  border-bottom: 1.3pt solid var(--emerald);
+  transform: rotate(42deg);
+}
+.card h3 { font-weight: 700; font-size: 10pt; margin-bottom: 2.6mm; }
+.card p { font-size: 8.6pt; color: var(--muted); line-height: 1.65; margin: 0; }
+
+/* ---------- THREE-COLUMN NOTES ---------- */
+.cols3 { display: flex; gap: 8mm; margin-top: 10mm; }
+.cols3 > div { width: 33.33%; }
+.cols3 h4 {
+  font-weight: 700; font-size: 9.4pt; margin-bottom: 2.8mm;
+  padding-top: 3mm; border-top: 1.6pt solid var(--emerald);
+}
+.cols3 p { font-size: 8.4pt; color: var(--muted); line-height: 1.62; margin: 0; }
+
+/* ---------- CALLOUT ---------- */
+.callout {
+  border: 1px solid var(--hairline); border-left: 2.4pt solid var(--emerald);
+  border-radius: 2mm; padding: 6mm 7mm; margin: 9mm 0;
+}
+.callout .lbl {
+  font-weight: 700; font-size: 7.2pt; letter-spacing: .2em;
+  color: var(--emerald); text-transform: uppercase; margin-bottom: 3mm;
+}
+.callout p { font-size: 9pt; color: var(--ink); margin: 0; }
+
+/* ---------- STAGES ---------- */
+.stages { display: flex; gap: 7mm; margin-top: 9mm; }
+.stages > div { width: 33.33%; }
+.stages h4 {
+  font-weight: 700; font-size: 9pt; color: var(--emerald); margin-bottom: 2.6mm;
+}
+.stages p { font-size: 8.4pt; color: var(--muted); margin: 0; line-height: 1.6; }
+
+/* ---------- MARKETS ---------- */
+.markets { display: flex; gap: 5mm; margin: 4mm 0 8mm; }
+.markets > div {
+  flex: 1; border: 1px solid var(--hairline); border-radius: 2mm;
+  padding: 5mm 4mm; text-align: center; min-height: 20mm;
+}
+.markets .m { font-weight: 700; font-size: 9.4pt; }
+.markets .r { font-size: 7.6pt; color: var(--muted); letter-spacing: .06em; margin-top: 1.6mm; }
+.markets .live { border-color: var(--emerald); border-width: 1.4pt; }
+
+/* ---------- PARTNERS ---------- */
+.partners { display: flex; flex-wrap: wrap; gap: 4mm; margin: 5mm 0 2mm; }
+.partners span {
+  border: 1px solid var(--hairline); border-radius: 1.6mm;
+  padding: 3mm 5mm; font-weight: 600; font-size: 9pt; color: var(--ink);
+}
+
+/* ---------- PEOPLE ---------- */
+.people { display: flex; flex-wrap: wrap; gap: 6mm; margin-top: 4mm; }
+.person { width: calc(50% - 3mm); display: flex; align-items: center; gap: 4mm; }
+.person .ini {
+  width: 11mm; height: 11mm; border-radius: 50%;
+  border: 1.4pt solid var(--emerald); color: var(--emerald);
+  font-weight: 700; font-size: 8.6pt; text-align: center; line-height: 10mm;
+}
+.person .nm { font-weight: 700; font-size: 9.6pt; }
+.person .rl { font-size: 8.4pt; color: var(--muted); }
+
+/* ---------- CONTACT ---------- */
+.contact { margin-top: 6mm; font-size: 9.4pt; line-height: 1.9; }
+.contact .nm { font-weight: 700; }
+.rule { height: 1px; background: var(--hairline); margin: 9mm 0; }
+
+/* ================= COMPONENTS ADDED FOR THE EXPANDED EDITIONS ================= */
+
+/* Two-column body text */
+.twocol { column-count: 2; column-gap: 9mm; margin-top: 2mm; }
+.twocol p { margin-bottom: 4mm; }
+
+/* Numbered process list */
+.steps { margin-top: 6mm; }
+.step { display: table; width: 100%; margin-bottom: 5.5mm; }
+.step .n {
+  display: table-cell; width: 12mm; vertical-align: top;
+  font-weight: 700; font-size: 15pt; color: var(--emerald);
+  line-height: 1;
+}
+.step .b { display: table-cell; vertical-align: top; }
+.step h4 { font-weight: 700; font-size: 9.6pt; margin-bottom: 1.6mm; }
+.step p { font-size: 8.6pt; color: var(--muted); margin: 0; line-height: 1.62; }
+
+/* Specification / definition rows */
+.rows { margin-top: 5mm; }
+.row2 {
+  display: table; width: 100%;
+  border-top: 1px solid var(--hairline); padding: 4mm 0;
+}
+.row2:last-child { border-bottom: 1px solid var(--hairline); }
+.row2 .k {
+  display: table-cell; width: 48mm; vertical-align: top;
+  font-weight: 700; font-size: 9pt; padding-right: 6mm;
+}
+.row2 .v {
+  display: table-cell; vertical-align: top;
+  font-size: 8.6pt; color: var(--muted); line-height: 1.62;
+}
+
+/* Pull statement */
+.pull {
+  border-top: 2pt solid var(--emerald); border-bottom: 1px solid var(--hairline);
+  padding: 6mm 0; margin: 8mm 0;
+  font-weight: 700; font-size: 12.5pt; line-height: 1.4;
+  letter-spacing: -.01em; max-width: 150mm;
+}
+
+/* Sector strip */
+.sectors { display: table; width: 100%; border-spacing: 3mm; margin: 4mm -3mm; }
+.sectors .srow { display: table-row; }
+.sectors .s {
+  display: table-cell; width: 25%; vertical-align: top;
+  border: 1px solid var(--hairline); border-radius: 2mm; padding: 5mm;
+}
+.sectors .s h4 { font-weight: 700; font-size: 9.2pt; margin-bottom: 2.2mm; }
+.sectors .s p { font-size: 8.2pt; color: var(--muted); margin: 0; line-height: 1.6; }
+
+/* Thread — the four systems */
+.thread { display: table; width: 100%; border-spacing: 3mm; margin: 5mm -3mm; }
+.thread .trow { display: table-row; }
+.thread .t {
+  display: table-cell; width: 50%; vertical-align: top;
+  border: 1px solid var(--hairline); border-radius: 2mm; padding: 6mm;
+}
+.thread .t .tag {
+  font-weight: 700; font-size: 7pt; letter-spacing: .18em;
+  color: var(--emerald); text-transform: uppercase; margin-bottom: 2.6mm;
+}
+.thread .t h4 { font-weight: 700; font-size: 10.5pt; margin-bottom: 2.6mm; }
+.thread .t p { font-size: 8.5pt; color: var(--muted); margin: 0 0 2.6mm 0; line-height: 1.62; }
+.thread .t p:last-child { margin-bottom: 0; }
+
+/* Inline emphasis inside muted paragraphs */
+strong { font-weight: 700; color: var(--ink); }
+
+/* Tighter page for content-heavy spreads */
+.dense p { margin-bottom: 3.6mm; }
+.dense h1 { margin-bottom: 5mm; }
+
+/* ---------- LEADERSHIP (matched across website, capability statement, brochure) ---------- */
+.lead-grid { display: table; width: 100%; border-spacing: 4mm; margin: 4mm -4mm 0; }
+.lrow { display: table-row; }
+.lcard {
+  display: table-cell; width: 50%; vertical-align: top;
+  border: 1px solid var(--hairline); border-radius: 2mm; padding: 5mm;
+}
+.lhead { display: table; width: 100%; margin-bottom: 3.5mm; }
+.lhead .ph {
+  display: table-cell; width: 19mm; vertical-align: top;
+}
+.lhead .ph img {
+  width: 19mm; height: 23.75mm; object-fit: cover; object-position: center top;
+  border-radius: 1.6mm; display: block;
+}
+.lhead .mono {
+  width: 19mm; height: 23.75mm; border-radius: 1.6mm;
+  background: var(--hairline); color: var(--emerald);
+  font-weight: 700; font-size: 13pt; text-align: center; line-height: 23.75mm;
+}
+.lhead .who { display: table-cell; vertical-align: top; padding-left: 4mm; }
+.lhead .rl {
+  font-weight: 700; font-size: 6.4pt; letter-spacing: .13em;
+  color: var(--muted); text-transform: uppercase; margin-bottom: 1.8mm;
+}
+.lhead .nm { font-weight: 700; font-size: 11pt; line-height: 1.2; }
+.lcard p { font-size: 8.4pt; color: var(--muted); line-height: 1.62; margin: 0; }

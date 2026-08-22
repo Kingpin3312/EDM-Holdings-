@@ -21,7 +21,7 @@ EDM Consultant FZCO.
 
 ## READ FIRST
 
-`_V12-DECISIONS.md` at the root settles five positions: the licensed-scope
+`DECISIONS.md` at the root settles five positions: the licensed-scope
 mismatch, the turnover figure, the safety claim, market wording and the 1986
 attribution. Those decisions override anything you find in an older document.
 
@@ -55,7 +55,7 @@ documents and in the LinkedIn specialties list.
 5. **Never use absolute claims.** No "100%", "guaranteed", "always", "zero
    defects", "world-class", "leading", "premier". The "100% safety record"
    currently in the capability statement and corporate brochure is to be
-   removed, not softened — replacement copy is in `_V12-DECISIONS.md`.
+   removed, not softened — replacement copy is in `DECISIONS.md`.
 
 6. **No turnover figure in public documents.** It is removed from all
    public-facing material and lives only in the PQQ pack alongside the accounts
@@ -145,13 +145,18 @@ opening with a rhetorical question, closing by summarising what you just said.
 ## Known open issues — do not "fix" silently, raise them
 
 1. Trade licence copy to be filed in the PQQ pack — the scope is confirmed, the
-   attachment is not yet on file.
-2. Turnover and the safety claim are both settled in `_V12-DECISIONS.md` but
-   cannot be applied until the capability statement and corporate brochure have
-   editable sources. Building those sources is the first job worth doing.
+   attachment is not yet on file. The pack now has a row and a checklist item for
+   it, so it will be obvious if it goes out without one.
+2. **Closed.** Turnover and the "100% safety record" are both out of the
+   capability statement and the corporate brochure, and `tools/compliance-check.py`
+   fails the build if either returns. The turnover figure lives only in the PQQ
+   pack, as Decision 1 requires.
 3. DET registered email still points to the formation agent.
 4. Four PDFs contain unembedded Helvetica. See the asset audit.
 5. Corrected in V12: bone `#F5F2EA` had survived as the dominant colour in the workwear and vehicle
    livery mockups and the livery green was `#0E3A2C`.
-6. There are no editable sources for the capability statement, corporate
-   brochure, handover standard or brand guidelines. Only output PDFs exist.
+6. **Closed 22/08/2026.** Every client-facing document now has an editable source
+   in `09-Document-Sources` — capability statement, corporate brochure, handover
+   standard, brand guidelines and the PQQ pack. All five are built by `build.sh`
+   and checked by `tools/compliance-check.py` and
+   `tools/check-page-overflow.py`. Never edit one of these PDFs by hand.

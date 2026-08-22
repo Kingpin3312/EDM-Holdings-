@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EDM Daybook — Daily Site Record</title>
+<style>
+@font-face{font-family:'Montserrat';font-weight:400;font-display:swap;src:url('fonts/montserrat-400.woff2') format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:600;font-display:swap;src:url('fonts/montserrat-600.woff2') format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:700;font-display:swap;src:url('fonts/montserrat-700.woff2') format('woff2')}
+:root{--green:#083819;--ink:#0F231B;--muted:#5C6F66;--line:#E4E6E0;--wash:#F7F8F7;--fail:#8F2B1F;--ok:#0B6B33}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Montserrat',system-ui,sans-serif;color:var(--ink);background:var(--wash);min-height:100vh}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:13px;color:var(--ink);border:1px solid var(--line);border-radius:5px;padding:7px 9px;background:#fff}
+textarea{resize:vertical;min-height:52px}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--green);outline-offset:1px}
+
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid var(--line);background:#fff;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:8px}
+.brand img{height:24px}
+.brand .t{font-size:13.5px;font-weight:700}.brand .t span{color:var(--green)}
+.brand .d{font-size:8.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+.grow{flex:1}
+.tbtn{font-size:11.5px;font-weight:600;border:1px solid var(--line);background:#fff;border-radius:5px;padding:7px 11px;color:var(--ink)}
+.tbtn:hover{border-color:var(--green);color:var(--green)}
+.tbtn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.tbtn.small{padding:5px 9px;font-size:10.5px}
+.tbtn.danger{color:var(--fail)}
+
+.bar{display:flex;gap:9px;align-items:center;padding:10px 12px;flex-wrap:wrap;max-width:680px;margin:0 auto}
+.bar input[type=date]{font-weight:600}
+.bar .pn{flex:1;min-width:150px;font-weight:600}
+
+.wrap{max-width:680px;margin:0 auto;padding:0 12px 60px}
+.card{background:#fff;border:1px solid var(--line);border-radius:9px;padding:13px 14px;margin-bottom:11px}
+.card h2{font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--green);margin-bottom:9px;display:flex;align-items:center}
+.card h2 .cnt{margin-left:auto;font-size:10px;color:var(--muted);letter-spacing:0;text-transform:none;font-weight:600}
+.hint{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:9px}
+
+.row{display:flex;gap:7px;margin-bottom:7px;align-items:flex-start;flex-wrap:wrap}
+.row input,.row select{flex:1;min-width:90px}
+.row .n{flex:0 0 74px}
+.row textarea{flex:1 1 100%}
+.item{border:1px solid var(--line);border-radius:7px;padding:9px 11px;margin-bottom:8px;font-size:12.5px;line-height:1.55}
+.item b{font-weight:600}
+.item small{color:var(--muted)}
+.item .ihead{display:flex;gap:8px;align-items:baseline}
+.item .ihead .del{margin-left:auto}
+.item img{height:58px;border-radius:5px;border:1px solid var(--line);margin-top:6px;margin-right:5px;cursor:pointer}
+.pill{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.06em;padding:2px 7px;border-radius:4px;background:#f6e8e6;color:var(--fail)}
+.pill.done{background:#e8f1ec;color:var(--ok)}
+.pbtn{font-size:10.5px;font-weight:600;border:1px dashed var(--line);background:none;border-radius:5px;padding:6px 10px;color:var(--muted)}
+.pbtn:hover{border-color:var(--green);color:var(--green)}
+.tot{font-size:12px;font-weight:700;text-align:right;padding-top:4px}
+.emptyc{font-size:11.5px;color:var(--muted);padding:2px 0 4px}
+
+.toast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12px;padding:8px 15px;border-radius:6px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:9;max-width:86%;text-align:center}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+
+#rep{display:none}
+@media print{
+ body>*{display:none!important}
+ body{background:#fff;display:block}
+ #rep{display:block!important;color:#0F231B;font-size:10.5pt}
+ .rhead{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #083819;padding-bottom:4mm;margin-bottom:5mm}
+ .rhead img{width:50mm}
+ .rhead .rt{text-align:right}
+ .rhead h1{font-size:14pt;font-weight:700;margin:0}
+ .rhead .rm{font-size:9.5pt;color:#5C6F66}
+ h2{font-size:9pt;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#083819;margin:5mm 0 2mm}
+ table{width:100%;border-collapse:collapse;font-size:9.5pt}
+ th{text-align:left;font-size:7.5pt;letter-spacing:.07em;text-transform:uppercase;color:#5C6F66;border-bottom:1px solid #E4E6E0;padding:1.5mm 2mm}
+ td{border-bottom:1px solid #E4E6E0;padding:1.8mm 2mm;vertical-align:top}
+ .rimg img{height:32mm;margin:1mm 2mm 1mm 0;border:1px solid #E4E6E0;border-radius:2mm}
+ .rfoot{font-size:8pt;color:#5C6F66;border-top:1px solid #E4E6E0;margin-top:5mm;padding-top:2mm}
+ tr{page-break-inside:avoid}
+ p.blk{font-size:9.5pt;line-height:1.6}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><img src="assets/cube.png" alt="EDM Holdings">
+    <div><div class="t">EDM <span>Daybook</span></div><div class="d">Daily site record</div></div></div>
+  <div class="grow"></div>
+  <button class="tbtn" id="btnOpen">Open</button>
+  <button class="tbtn" id="btnSave">Save</button>
+  <button class="tbtn primary" id="btnPrint">Print day</button>
+  <input type="file" id="fileO" accept=".json" hidden>
+  <input type="file" id="filePh" accept="image/*" capture="environment" hidden>
+</header>
+
+<div class="bar">
+  <input class="pn" id="projName" value="Untitled project" aria-label="Project">
+  <input type="date" id="day" aria-label="Day">
+</div>
+
+<div class="wrap">
+  <div class="card"><h2>Labour on site <span class="cnt" id="labTot"></span></h2>
+    <div id="labour"></div>
+    <div class="row"><input id="lTrade" placeholder="Trade — e.g. Fixers" list="trades">
+      <input id="lN" class="n" type="number" min="0" step="1" placeholder="No.">
+      <button class="tbtn small" id="lAdd">Add</button></div>
+    <datalist id="trades"><option>Fixers</option><option>Tapers</option><option>Ceiling fixers</option><option>Joiners</option><option>Painters</option><option>Labourers</option><option>Supervision</option></datalist>
+  </div>
+
+  <div class="card"><h2>Weather &amp; access</h2>
+    <div class="row"><input id="weather" placeholder="e.g. 41°C, humid — slab pour above cancelled" style="flex:1"></div>
+  </div>
+
+  <div class="card"><h2>Instructions received <span class="cnt" id="insCnt"></span></h2>
+    <p class="hint">The one that pays for itself. Anything you're told to do beyond the drawings — who said it, what they said, photo if there's something to see. Dated today, automatically. This is what the QS turns into a variation instead of free work.</p>
+    <div id="instr"></div>
+    <div class="row"><input id="iWho" placeholder="Who — name &amp; role" style="flex:1"><input id="iRef" placeholder="Wall / zone ref" style="flex:0 0 110px"></div>
+    <div class="row"><textarea id="iWhat" placeholder="What was said, in their words"></textarea></div>
+    <div class="row"><button class="pbtn" id="iPh">Attach photo</button><span id="iPhN" class="hint" style="margin:0"></span><span class="grow"></span><button class="tbtn small primary" id="iAdd">Log instruction</button></div>
+  </div>
+
+  <div class="card"><h2>Deliveries <span class="cnt" id="delCnt"></span></h2>
+    <div id="dels"></div>
+    <div class="row"><input id="dWhat" placeholder="What arrived" style="flex:1"><select id="dOK" style="flex:0 0 118px"><option>Complete</option><option>Short</option><option>Damaged</option><option>Rejected</option></select><button class="tbtn small" id="dAdd">Add</button></div>
+  </div>
+
+  <div class="card"><h2>Snags raised <span class="cnt" id="snCnt"></span></h2>
+    <div id="snags"></div>
+    <div class="row"><input id="sRef" placeholder="Wall / zone ref" style="flex:0 0 110px"><input id="sNote" placeholder="What needs putting right" style="flex:1"></div>
+    <div class="row"><button class="pbtn" id="sPh">Attach photo</button><span id="sPhN" class="hint" style="margin:0"></span><span class="grow"></span><button class="tbtn small" id="sAdd">Add snag</button></div>
+  </div>
+
+  <div class="card"><h2>Notes</h2>
+    <div class="row"><textarea id="notes" placeholder="Anything else worth remembering about today"></textarea></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="rep"></div>
+
+<script src="assets/edm-autosave.js"></script>
+<script>
+'use strict';
+/* EDM Daybook — one page a day, kept the day it happened.
+   Paper forgets. This doesn't. */
+
+const S={days:{}};
+let phTarget=null, phTemp={i:null,s:null};
+
+const $=q=>document.querySelector(q);
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2500);}
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function today(){return new Date().toISOString().slice(0,10);}
+function hhmm(){return new Date().toTimeString().slice(0,5);}
+const fmtd=d=>{if(!d)return'—';return new Date(d+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});};
+
+function day(){const k=$('#day').value||today();
+  return S.days[k]=S.days[k]||{labour:[],weather:'',instr:[],dels:[],snags:[],notes:''};}
+
+// ---------- render ----------
+function render(){
+  const d=day();
+  $('#weather').value=d.weather; $('#notes').value=d.notes;
+  const tot=d.labour.reduce((s,l)=>s+l.n,0);
+  $('#labTot').textContent=tot?tot+' on site':'';
+  $('#labour').innerHTML=d.labour.length? d.labour.map((l,i)=>`
+    <div class="item"><div class="ihead"><b>${esc(l.trade)}</b><span>× ${l.n}</span>
+      <button class="tbtn small danger del" data-lx="${i}">Remove</button></div></div>`).join('')
+   : '<p class="emptyc">Nobody logged yet.</p>';
+  $('#insCnt').textContent=d.instr.length||'';
+  $('#instr').innerHTML=d.instr.length? d.instr.map((x,i)=>`
+    <div class="item"><div class="ihead"><b>${esc(x.who)}</b><small>${x.t}${x.ref?' · '+esc(x.ref):''}</small>
+      <button class="tbtn small danger del" data-ix="${i}">Remove</button></div>
+      ${esc(x.what)}${x.photo?`<br><img src="${x.photo}" alt="Instruction photo" data-big="1">`:''}</div>`).join('')
+   : '<p class="emptyc">Nothing received today — yet.</p>';
+  $('#delCnt').textContent=d.dels.length||'';
+  $('#dels').innerHTML=d.dels.length? d.dels.map((x,i)=>`
+    <div class="item"><div class="ihead"><b>${esc(x.what)}</b>
+      <span class="pill ${x.ok==='Complete'?'done':''}">${esc(x.ok)}</span>
+      <button class="tbtn small danger del" data-dx="${i}">Remove</button></div></div>`).join('')
+   : '<p class="emptyc">No deliveries logged.</p>';
+  $('#snCnt').textContent=d.snags.length||'';
+  $('#snags').innerHTML=d.snags.length? d.snags.map((x,i)=>`
+    <div class="item"><div class="ihead"><b>${esc(x.ref)||'—'}</b>
+      <span class="pill ${x.done?'done':''}">${x.done?'CLOSED':'OPEN'}</span>
+      <button class="tbtn small" data-sd="${i}">${x.done?'Reopen':'Close'}</button>
+      <button class="tbtn small danger del" data-sx="${i}">Remove</button></div>
+      ${esc(x.note)}${x.photo?`<br><img src="${x.photo}" alt="Snag photo" data-big="1">`:''}</div>`).join('')
+   : '<p class="emptyc">No snags raised.</p>';
+  hook();
+}
+function hook(){
+  const d=day();
+  document.querySelectorAll('[data-lx]').forEach(b=>b.onclick=()=>{d.labour.splice(+b.dataset.lx,1);render();});
+  document.querySelectorAll('[data-ix]').forEach(b=>b.onclick=()=>{d.instr.splice(+b.dataset.ix,1);render();});
+  document.querySelectorAll('[data-dx]').forEach(b=>b.onclick=()=>{d.dels.splice(+b.dataset.dx,1);render();});
+  document.querySelectorAll('[data-sx]').forEach(b=>b.onclick=()=>{d.snags.splice(+b.dataset.sx,1);render();});
+  document.querySelectorAll('[data-sd]').forEach(b=>b.onclick=()=>{const s=d.snags[+b.dataset.sd];s.done=!s.done;render();});
+  document.querySelectorAll('[data-big]').forEach(im=>im.onclick=()=>{
+    const w=window.open('');w.document.write('<img src="'+im.src+'" style="max-width:100%">');});
+}
+
+// ---------- adds ----------
+$('#lAdd').addEventListener('click',()=>{const t=$('#lTrade').value.trim(),n=parseInt($('#lN').value,10);
+  if(!t||!(n>0)){toast('Trade and a number.');return;}
+  day().labour.push({trade:t,n});$('#lTrade').value='';$('#lN').value='';render();});
+$('#weather').addEventListener('input',()=>{day().weather=$('#weather').value;});
+$('#notes').addEventListener('input',()=>{day().notes=$('#notes').value;});
+$('#iAdd').addEventListener('click',()=>{const who=$('#iWho').value.trim(),what=$('#iWhat').value.trim();
+  if(!who||!what){toast('Who said it, and what they said — both.');return;}
+  day().instr.push({who,what,ref:$('#iRef').value.trim(),t:hhmm(),photo:phTemp.i});
+  $('#iWho').value='';$('#iWhat').value='';$('#iRef').value='';phTemp.i=null;$('#iPhN').textContent='';
+  render();toast('On the record, timed '+hhmm()+'. The QS will thank you at month-end.');});
+$('#dAdd').addEventListener('click',()=>{const w=$('#dWhat').value.trim();
+  if(!w){toast('What arrived?');return;}
+  day().dels.push({what:w,ok:$('#dOK').value});$('#dWhat').value='';render();});
+$('#sAdd').addEventListener('click',()=>{const n=$('#sNote').value.trim();
+  if(!n){toast('What needs putting right?');return;}
+  day().snags.push({ref:$('#sRef').value.trim(),note:n,photo:phTemp.s,done:false});
+  $('#sRef').value='';$('#sNote').value='';phTemp.s=null;$('#sPhN').textContent='';render();});
+
+// photos
+$('#iPh').addEventListener('click',()=>{phTarget='i';$('#filePh').click();});
+$('#sPh').addEventListener('click',()=>{phTarget='s';$('#filePh').click();});
+$('#filePh').addEventListener('change',e=>{
+  const f=e.target.files[0];e.target.value='';if(!f||!phTarget)return;
+  const img=new Image();
+  img.onload=()=>{const M=1100,r=Math.min(1,M/Math.max(img.width,img.height));
+    const c=document.createElement('canvas');c.width=img.width*r;c.height=img.height*r;
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    phTemp[phTarget]=c.toDataURL('image/jpeg',0.8);
+    $(phTarget==='i'?'#iPhN':'#sPhN').textContent='Photo ready — it attaches when you log the entry.';
+    phTarget=null;};
+  img.src=URL.createObjectURL(f);});
+
+// ---------- save / open ----------
+$('#btnSave').addEventListener('click',()=>{
+  const out={app:'EDM Daybook',v:1,name:$('#projName').value,days:S.days};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(out)],{type:'application/json'}));
+  a.download=($('#projName').value||'edm-daybook').replace(/[^\w\- ]+/g,'').trim().replace(/ +/g,'-')+'.daybook.json';
+  a.click();toast('Saved — every day so far, photos included, one file.');});
+$('#btnOpen').addEventListener('click',()=>$('#fileO').click());
+$('#fileO').addEventListener('change',async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{const d=JSON.parse(await f.text());
+    if(d.app!=='EDM Daybook'){toast('That is not a Daybook file.');return;}
+    $('#projName').value=d.name||'Untitled project';S.days=d.days||{};render();toast('Daybook restored.');
+  }catch(err){toast('Could not read that file.');}});
+
+// ---------- print ----------
+$('#btnPrint').addEventListener('click',()=>{
+  const k=$('#day').value||today(),d=day();
+  const P=esc($('#projName').value);
+  const tot=d.labour.reduce((s,l)=>s+l.n,0);
+  $('#rep').innerHTML=`
+   <div class="rhead"><img src="assets/logo.png" alt="EDM Holdings">
+    <div class="rt"><h1>Daily site record</h1><div class="rm">${P} · ${fmtd(k)}</div></div></div>
+   <h2>Labour on site — ${tot} total</h2>
+   ${d.labour.length?`<table><tr><th>Trade</th><th>Number</th></tr>${d.labour.map(l=>`<tr><td>${esc(l.trade)}</td><td>${l.n}</td></tr>`).join('')}</table>`:'<p class="blk">None recorded.</p>'}
+   <h2>Weather &amp; access</h2><p class="blk">${esc(d.weather)||'Not recorded.'}</p>
+   <h2>Instructions received</h2>
+   ${d.instr.length?`<table><tr><th>Time</th><th>From</th><th>Ref</th><th>Instruction</th></tr>
+    ${d.instr.map(x=>`<tr><td>${x.t}</td><td>${esc(x.who)}</td><td>${esc(x.ref)||'—'}</td><td>${esc(x.what)}${x.photo?`<div class="rimg"><img src="${x.photo}"></div>`:''}</td></tr>`).join('')}</table>`
+    :'<p class="blk">None received.</p>'}
+   <h2>Deliveries</h2>
+   ${d.dels.length?`<table><tr><th>Item</th><th>Condition</th></tr>${d.dels.map(x=>`<tr><td>${esc(x.what)}</td><td>${esc(x.ok)}</td></tr>`).join('')}</table>`:'<p class="blk">None.</p>'}
+   <h2>Snags</h2>
+   ${d.snags.length?`<table><tr><th>Ref</th><th>Detail</th><th>Status</th></tr>${d.snags.map(x=>`<tr><td>${esc(x.ref)||'—'}</td><td>${esc(x.note)}${x.photo?`<div class="rimg"><img src="${x.photo}"></div>`:''}</td><td>${x.done?'Closed':'Open'}</td></tr>`).join('')}</table>`:'<p class="blk">None raised.</p>'}
+   <h2>Notes</h2><p class="blk">${esc(d.notes)||'—'}</p>
+   <div class="rfoot">Recorded on the day by EDM site management. Instructions listed here are notice of change; formal confirmation follows through the commercial process.
+   <br>EDM Holdings · Fit-Out &amp; Drywall Specialists · edmholdings.ae</div>`;
+  window.print();
+});
+
+// ---------- boot ----------
+$('#day').value=today();
+$('#day').addEventListener('change',render);
+render();
+
+/* Autosave: keeps this device's copy up to date between manual saves. */
+var edmSave = EDMAutosave.attach({ key: 'daybook', state: S, onRestore: function(){ try{ render(); }catch(e){} } });
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "edm-os",
+  "private": true,
+  "version": "0.1.0",
+  "description": "EDM OS \u2014 construction operating system for EDM Holdings (UAE fit-out & drywall)",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm --workspace apps/api run start:dev",
+    "dev:web": "npm --workspace apps/web run dev",
+    "db:generate": "npm --workspace packages/db run generate",
+    "db:push": "npm --workspace packages/db run push",
+    "db:migrate": "npm --workspace packages/db run migrate",
+    "db:seed": "npm --workspace packages/db run seed",
+    "setup": "npm install && npm run db:generate && npm run db:push && npm run db:seed",
+    "test": "npm --workspace apps/api run test",
+    "typecheck": "tsc --noEmit -p apps/api/tsconfig.json && tsc --noEmit -p apps/web/tsconfig.json"
+  }
+}

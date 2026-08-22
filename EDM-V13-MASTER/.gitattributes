@@ -1,0 +1,20 @@
+# Treat design and document output as binary so git doesn't try to diff it.
+*.pdf    binary
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.pptx   binary
+*.xlsx   binary
+*.docx   binary
+*.ttf    binary
+*.woff2  binary
+
+# Normalise line endings for everything text.
+*.md     text eol=lf
+*.html   text eol=lf
+*.css    text eol=lf
+*.js     text eol=lf
+*.ts     text eol=lf
+*.py     text eol=lf
+*.sh     text eol=lf
+*.txt    text eol=lf

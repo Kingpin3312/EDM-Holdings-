@@ -1,0 +1,360 @@
+EDM MASTER — VERSION LOG
+========================
+V13 (current)
+- Released after a full technical audit of the codebase, not just the documents.
+  V13 = V12 plus: the EDM OS technical audit, the GitHub repository scaffolding,
+  and a fix to the capability statement download form.
+- EDM OS audited properly for the first time: dependencies installed, both
+  applications built, Prisma schema and API source read line by line. Verdict —
+  ready for GitHub, not ready to go live. The web app renders from mock data (0
+  of 40 pages call the API while 182 endpoints sit unused), there is no sign-in,
+  no migrations, no tests, no CI, and 11 dependency vulnerabilities including a
+  critical Next.js advisory. The architecture underneath is sound. Full findings
+  and a ten-step go-live sequence: 11-EDM-OS/EDM-OS-TECH-AUDIT.md.
+- Repository scaffolding: README.md as the GitHub landing page, .gitignore,
+  .gitattributes, and the consents/ folder CLAUDE.md had been referencing.
+- CORRECTION (22/08/2026 audit): this entry was inaccurate. Comparing V12 to
+  V13 file by file, capability-statement.html did not change, and the V12
+  archive already carried the same live Web3Forms key. Nothing was fixed here
+  in V13. The same applies to the "repository scaffolding" line below —
+  README.md, .gitignore, .gitattributes and consents/ all existed in V12.
+- Version-stamped record documents renamed so they read correctly inside any
+  future pack: _V12-DECISIONS.md is DECISIONS.md, _V12-FIXES.md is
+  CHANGES-FROM-V11.md, _V12-QA-REPORT.md is QA-REPORT.md. All 13 files that
+  referenced them updated; zero stale references.
+- Build artefacts from the audit removed. EDM OS verified byte-identical to V11
+  apart from the audit document.
+
+V12
+- Vehicle livery corrected: wrap green was #0E3A2C, now #083819. The swatch
+  bar printed "EMERALD · #0E3A2C" and "IVORY · #F5F2EA" as the brand palette
+  and has been rebuilt as EMERALD #083819 / WHITE #FFFFFF / STEEL #9AA3A0.
+- The workwear render also used #0E3A2C for the hard-hat band and vest tag;
+  corrected to #083819.
+- Retired bone tints (#F5F2EA, #F4F1E9, #F2EFE7) removed from the workwear,
+  livery and wallpaper renders. Ground is now #FFFFFF throughout. These were
+  the two files most likely to reach a signwriter or workwear supplier.
+- Contact page headline changed from "Let's talk about your package." to
+  "Send the drawings and the programme." Callout reworded to avoid the echo.
+- START-HERE turnover line corrected. One figure now in circulation:
+  £21m+ average annual turnover (AED 90m+), 11 schemes a year, 4 sectors.
+  The £20.31m total has been removed.
+- 01-Brand-Identity/BRAND-TOKENS.md added. The palette existed only inside a
+  PDF; it is now machine-readable and includes the previously undocumented
+  #0A4A21 hover state used on all 20 site pages.
+- LinkedIn assets rebuilt to correct specification. The V11 banner was
+  1584x396 (personal profile size) and would have been cropped on a company
+  page. Company banner now 1128x191 with @2x, plus separate CEO and COO
+  personal banners and a tighter avatar. Old file in _ARCHIVE-superseded.
+- CLAUDE.md added at root for Claude Code sessions.
+- Open items not fixed, and why: see CHANGES-FROM-V11.md.
+- Steel tone reconciled. The livery swatch bar said #9AA3A0; both vector logo
+  sources and the 1024px cube master use #9EA3A2. Render corrected to match.
+- Website stylesheets extracted. Every page previously carried its own inline
+  <style> block, which is why one hover colour lived in 20 files and no
+  guideline. Now assets/edm-base.css (14 pages), assets/edm-landing.css (4 SEO
+  pages) and assets/edm-whatsapp.css (all 20). Two pages keep a bespoke block
+  because theirs genuinely differ. CSS moved byte-for-byte, not rewritten; all
+  38 substitutions verified to reconstruct the original pages exactly.
+  Pre-refactor site kept at _ARCHIVE-superseded/edm-site-inline-styles/.
+- DECISIONS.md added. Five positions settled: licensed scope, turnover,
+  the safety claim, market wording, 1986 attribution. Overrides older documents.
+- BLOCKING flagged: the LLC's licensed activities do not cover aluminium and
+  glazing or joinery, both advertised across the estate (joinery on 20 pages,
+  glazing on 13, both in the capability statement and the new LinkedIn copy).
+  Nothing deleted — the licence may have been amended — but this must resolve
+  before any PQQ or the LinkedIn page going live.
+- Turnover: removed from public documents by decision. £21m+ average annual /
+  11 schemes a year cannot be reconciled with £20.31m+ across 11 schemes total,
+  and the figure wins nothing while risking everything in a PQQ. Replacement
+  copy for the capability statement track-record block is in DECISIONS.md.
+  The earlier V12 note treating £21m+ as settled is superseded.
+- "100% safety record": removed by decision, not softened. Replacement copy
+  supplied. Cannot be applied until the PDFs have editable sources.
+- 1986 attribution completed. The July 2026 correction had not fully landed:
+  V11 still carried "foundingDate": "1986" in schema.org on all 20 pages, a
+  hero line reading "EDM Holdings delivers the interior shell across four
+  markets, and has done since 1986", and a London card tagged "Operating since
+  1986". 29 string replacements across the site; foundingDate removed from all
+  20 pages. Est. 1986 also removed from LinkedIn fields and banners.
+- Market wording applied site-wide: delivery is the UAE through EDM Technical
+  Services L.L.C; the UK, Ireland and Australia are the team's track record.
+- Typography rule corrected in CLAUDE.md and BRAND-TOKENS.md: four weights only
+  (300/400/600/700). Medium 500 is not in the system. Logo minimum size and the
+  no-green-background rule added.
+- URGENT finding: the capability statement and corporate brochure in
+  03-Corporate-Documents and in the live website folder — the downloads linked
+  from edmholdings.ae — named Khazna Data Centers, QAJ01 and PMK Group (6 and 7
+  occurrences). Consent is verbal only, and 13-Go-To-Market/Tender-Editions did
+  not exist in V11 despite the V10 changelog saying named editions were moved
+  there. All four named files quarantined with a distribution warning.
+- New public capability statement built from an editable HTML source and
+  installed in both public locations. Zero client or project names. Seven pages,
+  layout matched to the original.
+- 09-Document-Sources added: HTML source, brand stylesheet, the four permitted
+  Montserrat weights, build script and README. Run ./build.sh to render.
+- Three defects fixed in the rebuild beyond the decisions: the V11 PDF used
+  Montserrat Medium 500, which is not in the brand system; it embedded no second
+  font but the Brand Guidelines pattern of typing glyphs would have — ticks are
+  now drawn in CSS; and the source is now editable so future corrections are a
+  one-line change.
+- Corporate brochure download replaced on the homepage and About page with
+  "Request a copy" until a generalised edition exists. No broken links: every
+  PDF href on the site resolves.
+- Capability statement expanded from 7 pages to 17, and roughly 1,100 words to
+  4,170. New content: the interface argument in full; the five details that
+  carry the cost risk (setting out, head-of-wall, fire-stopping, risers,
+  acoustic continuity); sectors and what each demands; the four in-house
+  systems (Measure, Evidence, Progress, Daybook) and what the thread means
+  commercially; the handover standard in four steps; what we check before we
+  price; mobilisation and the first two weeks; the workforce argument; and an
+  onboarding page. All drawn from material already in the pack — the systems
+  READMEs and the handover standard were carrying substance the client-facing
+  documents never used.
+- Corporate brochure rebuilt from scratch as an editable source, 16 pages,
+  3,359 words. Deliberately a different document from the capability statement:
+  the model, the craft, sectors, mission-critical delivery, evidence, safety,
+  people, working with us, pre-qualification, careers. Includes a Chief
+  Executive's introduction which requires Damien's approval before issue.
+- Brochure download restored on the homepage and About page, now pointing at
+  the clean public edition. Descriptor updated from eight to sixteen pages;
+  capability statement page count on the site corrected from 9 to 17.
+- build.sh now renders both documents and runs automated public-edition checks:
+  client names, turnover figure and "100%" must all return zero, and only
+  Montserrat may be embedded.
+- Capability deck corrected. It was the most out-of-date asset in the pack and
+  is a live BD document. Slide 1 and 11 carried "UAE · IRELAND · UK · AUSTRALIA"
+  and "ESTABLISHED 1986"; slide 6 printed £20.31m delivered across 11 schemes;
+  slide 7 was "Four markets, one standard"; slide 11 opened "Let's talk about
+  your package." Slides 4 and 9 used "sublet", which is on the do-not-use list.
+  All corrected. Track record stat block now reads 4 sectors / 11 schemes
+  delivered / 13 zones live in the UAE / in this trade since 1986. Deck verified
+  intact: 11 slides, Montserrat still embedded. V11 copy archived.
+- Handover standard rebuilt from a new editable source. Its footer carried the
+  four-market claim and it had no source. Now one page, generalised, built from
+  the same stylesheet.
+- START-HERE turnover paragraph aligned with Decision 1 — no figure, pointer to
+  the PQQ pack.
+- Content bank Week 10 post rewritten off the four-market framing.
+- Final sweep run across every HTML, MD, TXT and PDF in the pack: no remaining
+  occurrence of the client names, the turnover figures, "four markets",
+  "sublet", the salesy closer or the safety absolute outside the decision
+  records, the quarantined tender editions and the archive.
+- Unembedded Helvetica removed from all four affected PDFs (Labour Productivity
+  Programme, Developer Engagement Brief, OS Commercial Engine Spec, Email
+  Signature Install Guide). The font was declared but never drawn, so it was
+  dropped rather than substituted. Rendering verified identical to the
+  originals bar antialiasing — 172 differing pixels out of 293,000 on a
+  page-one comparison. Originals kept in _ARCHIVE-superseded.
+  Pack-wide check: zero unembedded fonts remaining in any PDF.
+- Brand guidelines rebuilt from an editable source, 7 pages. Three defects
+  fixed: it embedded DejaVu Sans Bold purely to draw the crosses on the
+  "Getting it wrong" page, so the document forbidding a second typeface
+  contained one (crosses are now drawn in CSS); the colour page omitted
+  #0A4A21, already live on all 20 site pages and documented nowhere; and the
+  back page carried the four-market claim. Added: the four-weights rule with
+  Medium 500 named as an error, a words-we-don't-use list, a note on typed
+  glyphs pulling in fallback fonts, and a worked example of where the palette
+  actually drifted. Colour swatches are drawn from the token values, so a
+  swatch cannot drift from the token it documents.
+- build.sh now renders all four documents and checks each for client names,
+  turnover, absolutes and banned wording. The guidelines are exempt from the
+  last two, because they quote them deliberately.
+- Leadership made consistent across the website, capability statement,
+  corporate brochure and capability deck. All four people now appear in every
+  source with the same job title and, in the three long-form sources, the same
+  bio word for word. Bios equalised in length — previously Kenny had a full
+  paragraph and the other three had one line each.
+- Photo slots added for all four in every source. The website carries an <img>
+  for each with an onerror fallback to the on-brand initials monogram, so a
+  missing file degrades gracefully rather than breaking. The documents use the
+  same component from edm-doc.css.
+- Three portraits are still missing (Eddie, Damien, Christopher). Shoot brief
+  with exact specs, file names and drop-in instructions:
+  09-Document-Sources/PHOTOGRAPHY-BRIEF-leadership.md
+- Capability statement gained a full leadership page — previously four initials
+  in a strip at the foot of the contact page. Now 19 pages. Its contact page was
+  rebuilt at the same time (it had a duplicated section label after the split).
+- schema.org corrections on all 20 pages: areaServed reduced from four
+  countries to the UAE, matching Decision 3. Person entries now carry an image
+  for all four leaders. The lone "nationality" attribute on one person removed —
+  it was applied to nobody else and served no purpose.
+- About page h1 reattributed: "A specialist trade, self-delivered for forty
+  years" implied EDM Holdings had traded that long. Now "...by people who have
+  done it for forty years."
+- Capability statement page count corrected on both pages that cite it.
+- Damien Meenan's portrait added. Supplied as a 1024 x 1024 frame, cropped to
+  4:5 at 760 x 950 to match Kenny's framing (eyes on the upper third, head and
+  upper chest). Installed on the website, in the capability statement and in the
+  brochure — the monogram fallback is now only used for Eddie and Christopher.
+  As-supplied original and a 1520 x 1900 master kept in
+  09-Document-Sources/assets/people/_originals/.
+- Damien's bio updated across all three sources: twenty-five years in the trade,
+  running the business day to day, remit spanning the group's interests in
+  Dubai, Ireland, Australia and London.
+  NOTE ON WORDING: stated as a remit over the group's interests, not as EDM
+  Technical Services L.L.C delivering in four markets. Decision 3 stands —
+  delivery is the UAE. A personal remit across group entities and a UAE-only
+  delivery claim are both true and do not conflict; "operations in Dubai,
+  Ireland, Australia and London" as a flat statement would have contradicted
+  every other page. Raise with Christopher if he wants it stated differently.
+- Christopher Simon's portrait added. Supplied as a 640 x 641 studio headshot,
+  cropped to 4:5 at 760 x 950. Installed on the website, in the capability
+  statement and in the brochure. Original and a 1520 x 1900 master kept in
+  09-Document-Sources/assets/people/_originals/. Eddie Duffy is the last
+  monogram remaining.
+- Christopher's bio updated across all three sources: over twenty-two years,
+  responsible for operations in the Middle East, named contact for tender and
+  pre-qualification.
+  NOTE ON WORDING: the supplied phrasing — "maximising opportunities and
+  effective and efficient business development and operational excellence" — was
+  not used. Every term in it is on the brand guidelines' own no-jargon list, and
+  it says nothing a procurement manager can check. The substance is kept; the
+  filler is not.
+  This also resolves the overlap flagged when Damien's bio landed: Damien runs
+  the business day to day at group level, Christopher runs the Middle East. The
+  two bios no longer claim the same role.
+- Photography brief updated: three of four portraits now exist, from three
+  different shoots. The framing, lighting and background differ visibly when
+  the four sit on one page. Christopher's studio setup is the best reference to
+  brief a matching set against.
+- Eddie Duffy's portrait added, cropped to 4:5 at 760 x 950 from a 945 x 2048
+  original. All four leadership portraits now in place across the website, the
+  capability statement and the brochure. No monograms remain in use; the
+  fallback stays in the stylesheet for future joiners.
+- Eddie's bio updated across all three sources: co-founder and Chairman,
+  strategic direction across the group, growth, client relationships and build
+  quality in the UAE, four decades in specialist interiors.
+  NOTE ON WORDING: "operational excellence", "sustainable growth", "strong
+  partnerships" and "solutions" were not used — all four are on the brand
+  guidelines' no-jargon list, and "operational excellence" had already appeared
+  in a second bio, which would have made two directors sound identical. The
+  substance is kept.
+- Photography brief rewritten. It is no longer a gap list. All four portraits
+  come from four different shoots: grey studio, open-plan office, warm hotel
+  interior and outdoors; two posed, two candid; colour temperature cool to warm.
+  Usable individually, visibly inconsistent as a set. Brief now specifies a
+  single half-day session against Christopher's studio setup as the reference.
+- 22-Social-Media-System added. Playbook covering LinkedIn and Instagram, an
+  Instagram content bank (30 captions, 6 carousel scripts, 6 reel scripts), and
+  a template generator producing 19 rendered assets.
+- Templates are generated by make-templates.py from the brand tokens and the
+  master cube artwork rather than drawn by hand, so a social asset cannot drift
+  off-palette the way the workwear and livery renders did in V11. Change the
+  copy in the script and re-run.
+- Every template is type-led on white and works with no photograph, because
+  there is still no site photography. Photographic variants are built in for
+  when it arrives. In a UAE feed of hi-vis and drone shots, a white type-led
+  grid is also the most distinctive option available.
+- Instagram positioned as a recruitment, craft and search-credibility channel,
+  not a lead channel — no business-development pillar, and it is not measured on
+  enquiries. LinkedIn remains the pipeline channel.
+- CTA system added and applied across every asset. One ask — "Send the drawings
+  and the programme" — with five defined variants (package, contact, hiring,
+  document, coffee) held in a single dictionary in make-templates.py, so a change
+  in one place re-renders everywhere and none can drift.
+- The CTA sits in the furniture, not the copy: a quiet footer line on artwork, a
+  contact block at the foot of documents, a fixed line in profiles. Present on
+  100% of assets and in roughly 10% of captions. "Contact us today" in every post
+  is what makes procurement stop reading; a footer line costs nothing and is
+  there when someone is ready.
+- All 19 social templates re-rendered with CTAs in place. Carousel end card
+  de-duplicated (headline and footer were saying the same thing).
+- Website: persistent CTA block added to the footer of all 20 pages, with
+  mailto and tel links. Previously only two pages carried the ask.
+- Thank-you copy on the capability statement page rewritten — it used "feel free
+  to", which is on the no-use list and reads as filler.
+- CTA-SYSTEM.md added: the primary CTA and why it works, the five variants, an
+  asset-by-asset placement table, the five approved caption asks, the banned
+  closers, and a humanisation section listing the structural and vocabulary
+  tells that make copy read as generated.
+- SOCIAL-PLAYBOOK.md updated: LinkedIn restated as the primary lead generation
+  channel, not one of two. If a week only allows one channel to be done properly
+  it is LinkedIn. Instagram can go quiet for a fortnight without cost.
+- Swept every published surface for banned closers and jargon. Clean, except
+  where the brand guidelines quote them deliberately as the list of things not
+  to write. "Robust detailing" kept in the sector copy — that is literal trade
+  usage about durability, not the marketing sense.
+- QA pass run across the whole pack. Six defects found and fixed; see
+  QA-REPORT.md. In short: the brochure was mis-paginated from page 12
+  onwards after the leadership page was added; every stated page count for both
+  documents was wrong; the standalone social kit crashed on first run because it
+  resolved fonts through paths that only exist inside the master pack; the
+  capability deck sat outside every automated check; one leadership image lacked
+  the fallback the other three had; and two documented CTA variants were used
+  nowhere.
+- Five of the six were introduced by this week's own improvements rather than
+  inherited from V11, which is the argument for the regression sweep rather than
+  for more care.
+- build.sh now also checks the capability deck by reading its slide XML.
+- 22-Social-Media-System now ships its own fonts and cube master so the kit runs
+  standalone. Retested from a fresh unzip.
+- Decision 0 CLOSED 20/08/2026. Licensed scope confirmed by Christopher Simon as
+  covering the trades advertised, including aluminium and glazing and joinery.
+  Blocking comments removed from both document sources; CLAUDE.md, the decisions
+  record and the LinkedIn verification table updated. Pre-qualification and
+  tender submissions are unblocked. One action remains: file the licence copy in
+  the PQQ pack — the scope is confirmed, the attachment is not yet on file.
+- Corporate brochure page 3, the Chief Executive's introduction, read and
+  approved by Damien Meenan 20/08/2026. Recorded in the source. Any future edit
+  to that page needs his approval again.
+- _BOARD-SIGN-OFF.md added. Full release approved with one item held: anything
+  naming Khazna, QAJ01 or PMK Group, pending written consent. Unnamed
+  alternatives are written, so the LinkedIn programme runs on schedule either
+  way. Post 08 on 7 October is the date that matters.
+- Repository scaffolding added for GitHub: README.md (renders as the landing
+  page), .gitignore, .gitattributes with binary handling and LF normalisation,
+  and the consents/ folder that CLAUDE.md already referenced but which did not
+  exist.
+- Pre-commit security scan run. No credentials in the repository. The chatbot
+  relay reads its Anthropic key from process.env. .env.example holds
+  placeholders only. The Web3Forms access key is client-side by design and is
+  flagged in the README with a note to rotate it if the repo is made public.
+- BUG FOUND AND FIXED during the scan: the capability statement download form
+  still carried WEB3FORMS_KEY = "REPLACE_WITH_YOUR_WEB3FORMS_ACCESS_KEY". The
+  contact form had the live key; this one did not. Every capability statement
+  download request submitted through that form would have failed silently.
+  Now wired to the same key.
+- EDM OS technical audit run: dependencies installed, both applications built,
+  Prisma schema and API source read. EDM-OS-TECH-AUDIT.md added.
+  Headline: the web app renders from mock data — 0 of 40 pages call the API,
+  while 182 endpoints sit unused. There is no sign-in (nothing sets the
+  edm_token cookie the client reads), no migrations directory, no tests, no CI,
+  and 11 dependency vulnerabilities including a critical Next.js advisory.
+  What is good: correct global auth guards, multi-tenant isolation taken from
+  the verified token and applied through a shared helper, global validation
+  pipe, boot-time config validation that refuses an insecure production start,
+  and a 51-model schema built by someone who understands construction.
+  Verdict: ready for GitHub, not ready to go live. Six to eight weeks of
+  finishing work, sequenced in the audit.
+- Build artefacts from the audit (node_modules, .next) removed; repo verified
+  clean before packaging.
+
+
+V11
+- Client consent received for public naming. Single edition restored:
+  website and corporate documents carry the full named versions
+  (Khazna QAJ01, PMK Group) with JLL and the complete trusted list.
+  Tender-Editions quarantine retired.
+  NOTE: consent verbal as of 19/07/2026 — obtain and file written
+  confirmation.
+
+V10
+- Public editions rebuilt from the tender editions: JLL and the full
+  trusted list retained; project naming generalised to "a major UAE
+  data centre" / "Tier-1 main contractor" across all pages. Verified
+  free of restricted names.
+- Public/tender split on capability statement and corporate brochure.
+  Website and 03-Corporate-Documents carry PUBLIC editions (project
+  unnamed). Named editions moved to 13-Go-To-Market/Tender-Editions
+  with distribution warning.
+- Downloads sections live on homepage and About page.
+
+V9
+- Downloads added to homepage + About; NOC template, corrected stamp
+  proof (licence 1627658), signature install guide folded in.
+
+V8
+- Web3Forms key wired; careers descriptor fix; contact consolidation
+  (company assets to enquiries@ / +971 (0) 58 601 2021, personal
+  signatures restored); full 13-point verification.

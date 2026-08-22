@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EDM Evidence — Quality & Fire-Stopping Records</title>
+<style>
+@font-face{font-family:'Montserrat';font-weight:400;font-display:swap;src:url('fonts/montserrat-400.woff2') format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:600;font-display:swap;src:url('fonts/montserrat-600.woff2') format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:700;font-display:swap;src:url('fonts/montserrat-700.woff2') format('woff2')}
+:root{--green:#083819;--ink:#0F231B;--muted:#5C6F66;--line:#E4E6E0;--wash:#F7F8F7;--pass:#0B6B33;--fail:#8F2B1F;--amber:#8a5a00}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Montserrat',system-ui,sans-serif;color:var(--ink);background:#fff;display:flex;flex-direction:column;overflow:hidden}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:12px;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:5px 7px;background:#fff}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--green);outline-offset:1px}
+
+.top{display:flex;align-items:center;gap:12px;padding:8px 14px;border-bottom:1px solid var(--line);flex:0 0 auto;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:9px}
+.brand img{height:26px}
+.brand .t{font-size:14px;font-weight:700}.brand .t span{color:var(--green)}
+.brand .d{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.projname{border:none;font-weight:600;font-size:13px;flex:0 1 200px;border-bottom:1px dashed transparent;border-radius:0;padding:4px 2px}
+.projname:hover{border-bottom-color:var(--line)}
+.grow{flex:1}
+.tbtn{font-size:11.5px;font-weight:600;border:1px solid var(--line);background:#fff;border-radius:5px;padding:6px 11px;color:var(--ink)}
+.tbtn:hover{border-color:var(--green);color:var(--green)}
+.tbtn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.tbtn.primary:hover{background:#0a4520;color:#fff}
+
+.stats{display:flex;gap:16px;padding:9px 16px;border-bottom:1px solid var(--line);font-size:11px;color:var(--muted);flex:0 0 auto;flex-wrap:wrap}
+.stats b{color:var(--ink);font-size:13px;margin-right:3px}
+.stats .fire b{color:var(--green)}
+
+.main{flex:1;display:flex;min-height:0}
+.list{flex:0 0 320px;border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.lhead{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;gap:8px}
+.lhead input{flex:1}
+.rows{flex:1;overflow-y:auto;padding:9px}
+.wrow{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:7px;padding:9px 11px;margin-bottom:7px;cursor:pointer}
+.wrow:hover{border-color:var(--green)}
+.wrow.on{border-color:var(--green);box-shadow:0 0 0 1px var(--green)}
+.wrow .id{font-weight:700;color:var(--green);width:40px;font-size:12.5px}
+.wrow .m{flex:1;font-size:11px;line-height:1.4}
+.wrow .m small{color:var(--muted)}
+.dots{display:flex;gap:3px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.dot.p{background:var(--pass)}.dot.f{background:var(--fail)}.dot.n{background:#c9cec9}
+.emptyl{padding:24px 18px;font-size:12px;color:var(--muted);line-height:1.7;text-align:center}
+
+.detail{flex:1;overflow-y:auto;min-width:0;background:var(--wash)}
+.dwrap{max-width:720px;margin:0 auto;padding:18px 20px 40px}
+.dhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+.dhead h1{font-size:19px;font-weight:700}
+.dhead .z{font-size:12px;color:var(--muted)}
+.dsub{font-size:12px;color:var(--muted);margin-bottom:14px}
+.stage{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.stage .sh{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.stage .nm{font-weight:600;font-size:13px;flex:1;min-width:150px}
+.stage .nm small{display:block;font-weight:400;font-size:10.5px;color:var(--muted);margin-top:2px}
+.stbtns{display:flex;gap:5px}
+.st{font-size:10px;font-weight:700;letter-spacing:.06em;border:1px solid var(--line);background:#fff;border-radius:5px;padding:5px 9px;color:var(--muted)}
+.st.pass.on{background:var(--pass);border-color:var(--pass);color:#fff}
+.st.fail.on{background:var(--fail);border-color:var(--fail);color:#fff}
+.st.na.on{background:var(--muted);border-color:var(--muted);color:#fff}
+.smeta{display:flex;gap:8px;align-items:center;margin-top:9px;flex-wrap:wrap}
+.smeta input[type=text]{width:70px}
+.smeta .note{flex:1;min-width:140px}
+.smeta .when{font-size:10.5px;color:var(--muted)}
+.photo{margin-top:9px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.photo img{height:64px;border-radius:5px;border:1px solid var(--line);cursor:pointer}
+.pbtn{font-size:10.5px;font-weight:600;border:1px dashed var(--line);background:none;border-radius:5px;padding:7px 10px;color:var(--muted)}
+.pbtn:hover{border-color:var(--green);color:var(--green)}
+.req{font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--amber);text-transform:uppercase}
+.wfoot{display:flex;gap:8px;margin-top:14px}
+.danger{color:var(--fail);border-color:#e4c7c2}
+.danger:hover{color:var(--fail);border-color:var(--fail)}
+
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12px;padding:8px 16px;border-radius:6px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:9;max-width:84%;text-align:center}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+
+.dlgwrap{position:fixed;inset:0;background:rgba(15,35,27,.35);display:none;align-items:center;justify-content:center;z-index:20}
+.dlgwrap.show{display:flex}
+.dlg{background:#fff;border-radius:9px;padding:20px 22px;width:330px;max-width:92vw}
+.dlg h2{font-size:14px;font-weight:700;margin-bottom:12px}
+.frow{margin-bottom:10px}
+.frow label{display:block;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.frow input{width:100%}
+.f2{display:flex;gap:10px}.f2 .frow{flex:1}
+.dact{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+
+@media (max-width:760px){.list{flex-basis:100%;border-right:none}.detail{display:none}
+ body.viewing .list{display:none} body.viewing .detail{display:block}
+ .back{display:inline-flex!important}}
+.back{display:none;margin-bottom:10px}
+
+/* ---------- print pack ---------- */
+#pack{display:none}
+@media print{
+ body>*{display:none!important}
+ body{overflow:visible;display:block}
+ #pack{display:block!important;font-size:11px;color:#0F231B}
+ .pcov{page-break-after:always;padding-top:30mm}
+ .pcov img{width:60mm;margin-bottom:16mm}
+ .pcov h1{font-size:24pt;font-weight:700;margin-bottom:4mm}
+ .pcov .p2{font-size:12pt;color:#5C6F66;margin-bottom:14mm}
+ .pcov table{font-size:10.5pt;border-collapse:collapse}
+ .pcov td{padding:2mm 6mm 2mm 0;color:#0F231B}
+ .pcov td:first-child{color:#5C6F66;font-weight:600}
+ .pwall{page-break-inside:avoid;border:1px solid #E4E6E0;border-radius:3mm;padding:5mm 6mm;margin-bottom:5mm}
+ .pwall h2{font-size:13pt;margin-bottom:1mm}.pwall h2 span{color:#083819}
+ .pwall .pm{color:#5C6F66;font-size:9.5pt;margin-bottom:3mm}
+ .pwall table{width:100%;border-collapse:collapse;font-size:9.5pt}
+ .pwall th{text-align:left;font-size:8pt;letter-spacing:.08em;text-transform:uppercase;color:#5C6F66;border-bottom:1px solid #E4E6E0;padding:1.5mm 2mm}
+ .pwall td{border-bottom:1px solid #E4E6E0;padding:1.8mm 2mm;vertical-align:top}
+ .ps{font-weight:700}.ps.P{color:#0B6B33}.ps.F{color:#8F2B1F}.ps.N{color:#5C6F66}
+ .pph{margin-top:3mm}
+ .pph img{height:34mm;margin:0 2mm 2mm 0;border:1px solid #E4E6E0;border-radius:2mm}
+ .pfoot{font-size:8.5pt;color:#5C6F66;border-top:1px solid #E4E6E0;padding-top:2mm;margin-top:2mm}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><img src="assets/cube.png" alt="EDM Holdings">
+    <div><div class="t">EDM <span>Evidence</span></div><div class="d">Quality &amp; fire-stopping records</div></div></div>
+  <input class="projname" id="projName" value="Untitled project" aria-label="Project name">
+  <div class="grow"></div>
+  <button class="tbtn" id="btnImport">Import from EDM Measure</button>
+  <button class="tbtn" id="btnAdd">Add wall</button>
+  <button class="tbtn" id="btnOpen">Open</button>
+  <button class="tbtn" id="btnSave">Save</button>
+  <button class="tbtn primary" id="btnPack">Print handover pack</button>
+  <input type="file" id="fileImp" accept=".json,.edm" hidden>
+  <input type="file" id="fileOpen" accept=".json,.edm" hidden>
+  <input type="file" id="filePhoto" accept="image/*" capture="environment" hidden>
+</header>
+
+<div class="stats" id="stats"></div>
+
+<div class="main">
+  <section class="list">
+    <div class="lhead"><input id="filter" placeholder="Filter by ref, zone or type…" aria-label="Filter walls"></div>
+    <div class="rows" id="rows">
+      <div class="emptyl">No walls yet.<br><br>Import the register from an <b>EDM Measure</b> project file, or add walls by hand. Every wall gets its own inspection record.</div>
+    </div>
+  </section>
+  <section class="detail" id="detail"></section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="dlgwrap" id="dlg">
+  <div class="dlg">
+    <h2>Add wall</h2>
+    <div class="f2">
+      <div class="frow"><label>Ref</label><input id="aId" placeholder="W07"></div>
+      <div class="frow"><label>Type</label><input id="aType" placeholder="P2"></div>
+    </div>
+    <div class="frow"><label>Level / zone</label><input id="aZone" placeholder="L03 — Cores"></div>
+    <div class="f2">
+      <div class="frow"><label>Length (m)</label><input id="aLm" type="number" step="0.01"></div>
+      <div class="frow"><label>Height (m)</label><input id="aHt" type="number" step="0.05"></div>
+    </div>
+    <div class="dact"><button class="tbtn" id="aCancel">Cancel</button><button class="tbtn primary" id="aOK">Add wall</button></div>
+  </div>
+</div>
+
+<div id="pack"></div>
+
+<script src="assets/edm-autosave.js"></script>
+<script>
+'use strict';
+/* EDM Evidence — every wall, inspected, photographed, signed.
+   Companion to EDM Measure: import its project file and the register arrives numbered. */
+
+const STAGES=[
+ ['set','Setting out','Position and openings checked against drawing'],
+ ['frame','Framing / studwork','Centres, fixings, head detail, deflection allowance'],
+ ['mep','Services closed in','PHOTO REQUIRED — first-fix within the wall, before boarding',true],
+ ['ins','Insulation','Type and fit as specification'],
+ ['b1','Boarding — side one','Layers, staggers, fixing centres'],
+ ['b2','Boarding — side two','Layers, staggers, fixing centres'],
+ ['fire','Fire-stopping & penetrations','PHOTO REQUIRED — head of wall, seals, service penetrations',true],
+ ['dec','Ready for decoration','Tape and joint complete, surface accepted']
+];
+const S={walls:[],sel:null,filter:''};
+let photoTarget=null;
+
+const $=s=>document.querySelector(s);
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2600);}
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function today(){return new Date().toISOString().slice(0,10);}
+function blank(){const o={};STAGES.forEach(s=>o[s[0]]={s:'',d:'',by:'',note:'',photo:null});return o;}
+
+// ---------- summary ----------
+function wallState(w){
+  let pass=0,fail=0,done=0,total=0;
+  STAGES.forEach(st=>{const r=w.stages[st[0]];
+    if(r.s==='N'){return;} total++;
+    if(r.s==='P'){pass++;done++;} else if(r.s==='F'){fail++;} });
+  return {complete: total>0&&pass===total, fail:fail>0, pass, total};
+}
+function stats(){
+  const n=S.walls.length;
+  const comp=S.walls.filter(w=>wallState(w).complete).length;
+  const fails=S.walls.filter(w=>wallState(w).fail).length;
+  const fire=S.walls.filter(w=>w.stages.fire.s==='P').length;
+  const mepPh=S.walls.filter(w=>w.stages.mep.photo).length;
+  $('#stats').innerHTML = n? `
+    <span><b>${n}</b> walls on record</span>
+    <span><b>${comp}</b> fully signed off</span>
+    <span class="fire"><b>${fire}</b> fire-stopping passed</span>
+    <span><b>${mepPh}</b> photographed before closing</span>
+    ${fails?`<span style="color:var(--fail)"><b>${fails}</b> with a failed check</span>`:''}`
+   : `<span>Nothing on record yet — evidence starts with the first wall.</span>`;
+}
+
+// ---------- wall list ----------
+function rows(){
+  const q=S.filter.toLowerCase();
+  const ws=S.walls.filter(w=>!q||[w.id,w.zone,w.type].join(' ').toLowerCase().includes(q));
+  if(!S.walls.length){$('#rows').innerHTML=`<div class="emptyl">No walls yet.<br><br>Import the register from an <b>EDM Measure</b> project file, or add walls by hand. Every wall gets its own inspection record.</div>`;return;}
+  if(!ws.length){$('#rows').innerHTML=`<div class="emptyl">Nothing matches “${esc(S.filter)}”.</div>`;return;}
+  $('#rows').innerHTML=ws.map(w=>{
+    const dots=STAGES.map(st=>{const s=w.stages[st[0]].s;
+      return `<span class="dot ${s==='P'?'p':s==='F'?'f':s==='N'?'n':''}"></span>`;}).join('');
+    return `<div class="wrow ${w.id===S.sel?'on':''}" data-w="${esc(w.id)}" role="button" tabindex="0">
+      <span class="id">${esc(w.id)}</span>
+      <span class="m">${esc(w.type)}${w.lm?` · ${w.lm} lm`:''}${w.ht?` × ${w.ht} m`:''}<br><small>${esc(w.zone)||'No zone'}</small></span>
+      <span class="dots">${dots}</span></div>`;}).join('');
+  document.querySelectorAll('.wrow').forEach(el=>{
+    const go=()=>{S.sel=el.dataset.w;document.body.classList.add('viewing');render();};
+    el.addEventListener('click',go);
+    el.addEventListener('keydown',e=>{if(e.key==='Enter')go();});});
+}
+
+// ---------- detail ----------
+function detail(){
+  const w=S.walls.find(x=>x.id===S.sel);
+  if(!w){$('#detail').innerHTML='';return;}
+  $('#detail').innerHTML=`<div class="dwrap">
+    <button class="tbtn back" id="back">← All walls</button>
+    <div class="dhead"><h1>${esc(w.id)}</h1><span class="z">${esc(w.type)} · ${esc(w.zone)||'no zone'}${w.lm?` · ${w.lm} lm × ${w.ht} m`:''}</span></div>
+    <p class="dsub">Work through the stages in order. Anything marked <b>Fail</b> stays on the record with its note — that honesty is what makes a pass mean something.</p>
+    ${STAGES.map(st=>{const r=w.stages[st[0]];
+      return `<div class="stage">
+        <div class="sh">
+          <div class="nm">${st[1]}<small>${st[2]}</small></div>
+          <div class="stbtns" data-st="${st[0]}">
+            <button class="st pass ${r.s==='P'?'on':''}" data-v="P">PASS</button>
+            <button class="st fail ${r.s==='F'?'on':''}" data-v="F">FAIL</button>
+            <button class="st na ${r.s==='N'?'on':''}" data-v="N">N/A</button>
+          </div>
+        </div>
+        <div class="smeta">
+          <input type="text" placeholder="Initials" value="${esc(r.by)}" data-by="${st[0]}" aria-label="Inspector initials">
+          <input type="text" class="note" placeholder="Note" value="${esc(r.note)}" data-note="${st[0]}">
+          <span class="when">${r.d?esc(r.d):''}</span>
+        </div>
+        <div class="photo">
+          ${r.photo?`<img src="${r.photo}" alt="Evidence photo" data-view="${st[0]}">`:''}
+          <button class="pbtn" data-ph="${st[0]}">${r.photo?'Replace photo':'Attach photo'}</button>
+          ${st[3]&&!r.photo?'<span class="req">Photo required before sign-off</span>':''}
+        </div>
+      </div>`;}).join('')}
+    <div class="wfoot"><button class="tbtn danger" id="wDel">Remove wall</button></div>
+  </div>`;
+  const bk=$('#back'); if(bk)bk.addEventListener('click',()=>{document.body.classList.remove('viewing');});
+  document.querySelectorAll('[data-st] .st').forEach(b=>b.addEventListener('click',()=>{
+    const k=b.parentElement.dataset.st,r=w.stages[k],v=b.dataset.v;
+    if(v==='P'){const st=STAGES.find(x=>x[0]===k);
+      if(st[3]&&!r.photo){toast('This stage needs its photo first — that picture is the evidence.');return;}}
+    r.s=r.s===v?'':v; r.d=r.s?today():'';
+    render();}));
+  document.querySelectorAll('[data-by]').forEach(i=>i.addEventListener('input',()=>{w.stages[i.dataset.by].by=i.value;}));
+  document.querySelectorAll('[data-note]').forEach(i=>i.addEventListener('input',()=>{w.stages[i.dataset.note].note=i.value;}));
+  document.querySelectorAll('[data-ph]').forEach(b=>b.addEventListener('click',()=>{photoTarget={w,k:b.dataset.ph};$('#filePhoto').click();}));
+  document.querySelectorAll('[data-view]').forEach(im=>im.addEventListener('click',()=>{
+    const win=window.open('');win.document.write('<img src="'+im.src+'" style="max-width:100%">');}));
+  const del=$('#wDel'); if(del)del.addEventListener('click',()=>{
+    if(confirm('Remove '+w.id+' and its record?')){S.walls=S.walls.filter(x=>x.id!==w.id);S.sel=null;document.body.classList.remove('viewing');render();}});
+}
+$('#filePhoto').addEventListener('change',e=>{
+  const f=e.target.files[0];e.target.value='';if(!f||!photoTarget)return;
+  const img=new Image(),url=URL.createObjectURL(f);
+  img.onload=()=>{const M=1100,r=Math.min(1,M/Math.max(img.width,img.height));
+    const c=document.createElement('canvas');c.width=img.width*r;c.height=img.height*r;
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    photoTarget.w.stages[photoTarget.k].photo=c.toDataURL('image/jpeg',0.8);
+    photoTarget=null;render();toast('Photo attached to the record.');};
+  img.src=url;});
+
+function render(){stats();rows();detail();}
+
+// ---------- add / import / save ----------
+$('#btnAdd').addEventListener('click',()=>{$('#dlg').classList.add('show');$('#aId').value='W'+String(S.walls.length+1).padStart(2,'0');$('#aId').focus();});
+$('#aCancel').addEventListener('click',()=>$('#dlg').classList.remove('show'));
+$('#aOK').addEventListener('click',()=>{
+  const id=$('#aId').value.trim();if(!id){toast('Give the wall a ref.');return;}
+  if(S.walls.some(w=>w.id===id)){toast(id+' is already on record.');return;}
+  S.walls.push({id,type:$('#aType').value.trim()||'—',zone:$('#aZone').value.trim(),
+    lm:parseFloat($('#aLm').value)||'',ht:parseFloat($('#aHt').value)||'',stages:blank()});
+  $('#dlg').classList.remove('show');S.sel=id;render();});
+$('#filter').addEventListener('input',e=>{S.filter=e.target.value;rows();});
+
+$('#btnImport').addEventListener('click',()=>$('#fileImp').click());
+$('#fileImp').addEventListener('change',async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{const d=JSON.parse(await f.text());
+    if(!d.walls||!d.ppm){toast('That is not an EDM Measure project file.');return;}
+    let added=0;
+    d.walls.forEach(mw=>{
+      if(S.walls.some(w=>w.id===mw.id))return;
+      let L=0;for(let i=1;i<mw.pts.length;i++)L+=Math.hypot(mw.pts[i].x-mw.pts[i-1].x,mw.pts[i].y-mw.pts[i-1].y);
+      S.walls.push({id:mw.id,type:mw.typeId,zone:mw.zone||'',lm:+(L/d.ppm).toFixed(2),ht:mw.ht,stages:blank()});added++;});
+    if(d.name&&$('#projName').value==='Untitled project')$('#projName').value=d.name;
+    render();toast(added+' walls imported from the takeoff — same refs, so the bill and the evidence speak the same language.');
+  }catch(err){toast('Could not read that file.');}});
+
+$('#btnSave').addEventListener('click',()=>{
+  if(!S.walls.length){toast('Nothing to save yet.');return;}
+  const out={app:'EDM Evidence',v:1,name:$('#projName').value,walls:S.walls};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(out)],{type:'application/json'}));
+  a.download=($('#projName').value||'edm-evidence').replace(/[^\w\- ]+/g,'').trim().replace(/ +/g,'-')+'.evidence.json';
+  a.click();toast('Saved — records and photos in one file.');});
+$('#btnOpen').addEventListener('click',()=>$('#fileOpen').click());
+$('#fileOpen').addEventListener('change',async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{const d=JSON.parse(await f.text());
+    if(d.app!=='EDM Evidence'){toast('That is not an EDM Evidence file.');return;}
+    $('#projName').value=d.name||'Untitled project';S.walls=d.walls||[];S.sel=null;render();toast('Project restored.');
+  }catch(err){toast('Could not read that file.');}});
+
+// ---------- handover pack ----------
+$('#btnPack').addEventListener('click',()=>{
+  if(!S.walls.length){toast('Nothing to hand over yet.');return;}
+  const P=esc($('#projName').value),n=S.walls.length;
+  const comp=S.walls.filter(w=>wallState(w).complete).length;
+  const fire=S.walls.filter(w=>w.stages.fire.s==='P').length;
+  const SNAME={P:'Pass',F:'Fail',N:'N/A','':'—'};
+  let h=`<div class="pcov">
+    <img src="assets/logo.png" alt="EDM Holdings">
+    <h1>Quality &amp; fire-stopping handover pack</h1>
+    <div class="p2">${P}</div>
+    <table>
+      <tr><td>Walls on record</td><td>${n}</td></tr>
+      <tr><td>Fully signed off</td><td>${comp} of ${n}</td></tr>
+      <tr><td>Fire-stopping passed</td><td>${fire} of ${n}</td></tr>
+      <tr><td>Issued</td><td>${today()}</td></tr>
+      <tr><td>Issued by</td><td>EDM Holdings · Fit-Out &amp; Drywall Specialists · edmholdings.ae</td></tr>
+    </table>
+  </div>`;
+  S.walls.forEach(w=>{
+    h+=`<div class="pwall"><h2><span>${esc(w.id)}</span> — ${esc(w.type)}</h2>
+      <div class="pm">${esc(w.zone)||'No zone recorded'}${w.lm?` · ${w.lm} lm × ${w.ht} m`:''}</div>
+      <table><tr><th style="width:34%">Stage</th><th style="width:12%">Result</th><th style="width:14%">Date</th><th style="width:10%">By</th><th>Note</th></tr>`;
+    STAGES.forEach(st=>{const r=w.stages[st[0]];
+      h+=`<tr><td>${st[1]}</td><td class="ps ${r.s}">${SNAME[r.s]}</td><td>${esc(r.d)||'—'}</td><td>${esc(r.by)||'—'}</td><td>${esc(r.note)||''}</td></tr>`;});
+    h+=`</table>`;
+    const ph=STAGES.filter(st=>w.stages[st[0]].photo);
+    if(ph.length){h+=`<div class="pph">`+ph.map(st=>`<img src="${w.stages[st[0]].photo}" alt="${st[1]}">`).join('')+`</div>`;}
+    h+=`<div class="pfoot">Record ${esc(w.id)} · ${P} · EDM Holdings</div></div>`;});
+  $('#pack').innerHTML=h;
+  window.print();
+});
+
+render();
+
+/* Autosave: keeps this device's copy up to date between manual saves. */
+var edmSave = EDMAutosave.attach({ key: 'evidence', state: S, onRestore: function(){ try{ render(); }catch(e){} } });
+</script>
+</body>
+</html>
