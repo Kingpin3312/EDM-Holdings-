@@ -238,77 +238,79 @@ model Organisation {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users         User[]
-  memberships   Membership[]
-  companies     Company[]
-  leads         Lead[]
-  opportunities Opportunity[]
-  activities    Activity[]
-  tenders       Tender[]
-  estimates     Estimate[]
+  users                  User[]
+  memberships            Membership[]
+  companies              Company[]
+  leads                  Lead[]
+  opportunities          Opportunity[]
+  activities             Activity[]
+  tenders                Tender[]
+  estimates              Estimate[]
   integrationConnections IntegrationConnection[]
-  costItems     CostItem[]
-  rates         Rate[]
-  projects      Project[]
-  workers       Worker[]
-  labourAllocations LabourAllocation[]
-  attendanceDays AttendanceDay[]
-  labourRates   LabourRate[]
-  variations    Variation[]
-  rfis          Rfi[]
-  inspections   Inspection[]
-  ncrs          Ncr[]
-  incidents     Incident[]
-  toolboxTalks  ToolboxTalk[]
-  riskAssess    RiskAssessment[]
-  suppliers     Supplier[]
-  purchaseOrders PurchaseOrder[]
-  budgets       Budget[]
-  costCodes     CostCode[]
-  invoices      Invoice[]
-  documents     Document[]
-  aiJobs        AiJob[]
-  auditLogs     AuditLog[]
-  notifications Notification[]
-  settings      OrganisationSettings?
+  costItems              CostItem[]
+  rates                  Rate[]
+  projects               Project[]
+  workers                Worker[]
+  labourAllocations      LabourAllocation[]
+  attendanceDays         AttendanceDay[]
+  labourRates            LabourRate[]
+  variations             Variation[]
+  rfis                   Rfi[]
+  inspections            Inspection[]
+  ncrs                   Ncr[]
+  incidents              Incident[]
+  toolboxTalks           ToolboxTalk[]
+  riskAssess             RiskAssessment[]
+  suppliers              Supplier[]
+  purchaseOrders         PurchaseOrder[]
+  budgets                Budget[]
+  costCodes              CostCode[]
+  invoices               Invoice[]
+  documents              Document[]
+  aiJobs                 AiJob[]
+  auditLogs              AuditLog[]
+  notifications          Notification[]
+  settings               OrganisationSettings?
 }
 
 model User {
-  id             String   @id @default(cuid())
-  supabaseId     String?  @unique // maps to Supabase auth user
-  email          String   @unique
+  id             String       @id @default(cuid())
+  supabaseId     String?      @unique // maps to Supabase auth user
+  email          String       @unique
   firstName      String
   lastName       String
   phone          String?
   jobTitle       String?
-  isActive       Boolean  @default(true)
+  isActive       Boolean      @default(true)
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
-  memberships     Membership[]
-  ownedActivities Activity[]      @relation("ActivityOwner")
-  estimatedOpportunities Opportunity[] @relation("OpportunityEstimator")
-  managedProjects Project[]       @relation("ProjectManager")
-  assignedTasks   Task[]          @relation("TaskAssignee")
-  dailyReports    DailyReport[]
-  raisedRfis      Rfi[]           @relation("RfiRaisedBy")
-  raisedVariations Variation[]    @relation("VariationRaisedBy")
-  inspectionsDone Inspection[]    @relation("InspectionInspector")
-  notifications   Notification[]
-  auditLogs       AuditLog[]
+  memberships            Membership[]
+  ownedActivities        Activity[]     @relation("ActivityOwner")
+  estimatedOpportunities Opportunity[]  @relation("OpportunityEstimator")
+  managedProjects        Project[]      @relation("ProjectManager")
+  assignedTasks          Task[]         @relation("TaskAssignee")
+  dailyReports           DailyReport[]
+  raisedRfis             Rfi[]          @relation("RfiRaisedBy")
+  raisedVariations       Variation[]    @relation("VariationRaisedBy")
+  inspectionsDone        Inspection[]   @relation("InspectionInspector")
+  notifications          Notification[]
+  auditLogs              AuditLog[]
+  ownedLeads             Lead[]         @relation("LeadOwner")
+  reportedIncidents      Incident[]     @relation("IncidentReporter")
 }
 
 // A user's role within an organisation (supports multi-org and external parties).
 model Membership {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   userId         String
-  user           User     @relation(fields: [userId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
   role           Role
-  createdAt      DateTime @default(now())
+  createdAt      DateTime     @default(now())
 
   @@unique([userId, organisationId])
   @@index([organisationId])
@@ -317,7 +319,7 @@ model Membership {
 // ------------------------------- CRM ---------------------------------
 
 model Company {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
   name           String
@@ -327,16 +329,16 @@ model Company {
   address        String?
   city           String?
   notes          String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
-  contacts      Contact[]
-  leads         Lead[]
-  opportunities Opportunity[]
-  tendersAsClient    Tender[] @relation("TenderClient")
-  tendersAsConsultant Tender[] @relation("TenderConsultant")
-  tendersAsMainContractor Tender[] @relation("TenderMainContractor")
-  projects      Project[]
+  contacts                Contact[]
+  leads                   Lead[]
+  opportunities           Opportunity[]
+  tendersAsClient         Tender[]      @relation("TenderClient")
+  tendersAsConsultant     Tender[]      @relation("TenderConsultant")
+  tendersAsMainContractor Tender[]      @relation("TenderMainContractor")
+  projects                Project[]
 
   @@index([organisationId])
   @@index([type])
@@ -356,58 +358,62 @@ model Contact {
   updatedAt DateTime @updatedAt
 
   activities Activity[]
+
   @@index([companyId])
 }
 
 model Lead {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
   companyId      String?
-  company        Company? @relation(fields: [companyId], references: [id])
+  company        Company?     @relation(fields: [companyId], references: [id])
   title          String
   source         String?
-  stage          LeadStage @default(NEW)
-  estValue       Decimal?  @db.Decimal(14, 2)
+  stage          LeadStage    @default(NEW)
+  estValue       Decimal?     @db.Decimal(14, 2)
   nextFollowUpAt DateTime?
   ownerUserId    String?
+  owner          User?        @relation("LeadOwner", fields: [ownerUserId], references: [id])
   notes          String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   activities    Activity[]
   opportunities Opportunity[]
+
   @@index([organisationId])
   @@index([stage])
 }
 
 model Opportunity {
-  id             String   @id @default(cuid())
-  organisationId String
-  organisation   Organisation @relation(fields: [organisationId], references: [id])
-  companyId      String?
-  company        Company? @relation(fields: [companyId], references: [id])
-  leadId         String?
-  lead           Lead?    @relation(fields: [leadId], references: [id])
+  id              String            @id @default(cuid())
+  organisationId  String
+  organisation    Organisation      @relation(fields: [organisationId], references: [id])
+  companyId       String?
+  company         Company?          @relation(fields: [companyId], references: [id])
+  leadId          String?
+  lead            Lead?             @relation(fields: [leadId], references: [id])
   estimatorUserId String?
-  estimator      User?    @relation("OpportunityEstimator", fields: [estimatorUserId], references: [id])
-  name           String
-  value          Decimal  @db.Decimal(14, 2)
-  probability    Int      @default(20) // 0-100, drives weighted pipeline
-  status         OpportunityStatus @default(OPEN)
-  stage          OpportunityStage  @default(QUALIFYING)
-  expectedClose  DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  estimator       User?             @relation("OpportunityEstimator", fields: [estimatorUserId], references: [id])
+  name            String
+  value           Decimal           @db.Decimal(14, 2)
+  probability     Int               @default(20) // 0-100, drives weighted pipeline
+  status          OpportunityStatus @default(OPEN)
+  stage           OpportunityStage  @default(QUALIFYING)
+  expectedClose   DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
   activities Activity[]
   tender     Tender?
+
   @@index([organisationId])
   @@index([status])
 }
 
 model Activity {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
   type           ActivityType
@@ -416,16 +422,16 @@ model Activity {
   dueAt          DateTime?
   completedAt    DateTime?
   ownerUserId    String?
-  owner          User?    @relation("ActivityOwner", fields: [ownerUserId], references: [id])
+  owner          User?        @relation("ActivityOwner", fields: [ownerUserId], references: [id])
   contactId      String?
-  contact        Contact? @relation(fields: [contactId], references: [id])
+  contact        Contact?     @relation(fields: [contactId], references: [id])
   leadId         String?
-  lead           Lead?    @relation(fields: [leadId], references: [id])
+  lead           Lead?        @relation(fields: [leadId], references: [id])
   opportunityId  String?
   opportunity    Opportunity? @relation(fields: [opportunityId], references: [id])
   projectId      String?
-  project        Project? @relation(fields: [projectId], references: [id])
-  createdAt      DateTime @default(now())
+  project        Project?     @relation(fields: [projectId], references: [id])
+  createdAt      DateTime     @default(now())
 
   @@index([organisationId])
   @@index([dueAt])
@@ -434,27 +440,27 @@ model Activity {
 // --------------------------- TENDERS ---------------------------------
 
 model Tender {
-  id               String   @id @default(cuid())
+  id               String       @id @default(cuid())
   organisationId   String
   organisation     Organisation @relation(fields: [organisationId], references: [id])
   tenderNo         String
   projectName      String
   clientId         String?
-  client           Company? @relation("TenderClient", fields: [clientId], references: [id])
+  client           Company?     @relation("TenderClient", fields: [clientId], references: [id])
   consultantId     String?
-  consultant       Company? @relation("TenderConsultant", fields: [consultantId], references: [id])
+  consultant       Company?     @relation("TenderConsultant", fields: [consultantId], references: [id])
   mainContractorId String?
-  mainContractor   Company? @relation("TenderMainContractor", fields: [mainContractorId], references: [id])
-  opportunityId    String?  @unique
+  mainContractor   Company?     @relation("TenderMainContractor", fields: [mainContractorId], references: [id])
+  opportunityId    String?      @unique
   opportunity      Opportunity? @relation(fields: [opportunityId], references: [id])
   trades           Trade[]
-  value            Decimal? @db.Decimal(14, 2)
+  value            Decimal?     @db.Decimal(14, 2)
   dueDate          DateTime?
   status           TenderStatus @default(IDENTIFIED)
-  awardProbability Int      @default(20)
+  awardProbability Int          @default(20)
   notes            String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 
   estimates Estimate[]
   documents Document[]
@@ -468,150 +474,159 @@ model Tender {
 }
 
 model TenderEvent {
-  id        String   @id @default(cuid())
+  id        String       @id @default(cuid())
   tenderId  String
-  tender    Tender   @relation(fields: [tenderId], references: [id], onDelete: Cascade)
+  tender    Tender       @relation(fields: [tenderId], references: [id], onDelete: Cascade)
   status    TenderStatus
   note      String?
-  createdAt DateTime @default(now())
+  createdAt DateTime     @default(now())
+
   @@index([tenderId])
 }
 
 // -------------------------- ESTIMATING -------------------------------
 
 model CostItem {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
   code           String
   description    String
   trade          Trade
-  unit           String   // m2, m, nr, item...
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  unit           String // m2, m, nr, item...
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
-  rates        Rate[]
+  rates         Rate[]
   estimateLines EstimateLine[]
+
   @@unique([organisationId, code])
   @@index([trade])
 }
 
 model Rate {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
   costItemId     String?
-  costItem       CostItem? @relation(fields: [costItemId], references: [id])
+  costItem       CostItem?    @relation(fields: [costItemId], references: [id])
   type           RateType
   description    String
   unit           String
-  rate           Decimal  @db.Decimal(12, 4)
-  currency       String   @default("AED")
+  rate           Decimal      @db.Decimal(12, 4)
+  currency       String       @default("AED")
   supplierId     String?
-  supplier       Supplier? @relation(fields: [supplierId], references: [id])
-  validFrom      DateTime @default(now())
+  supplier       Supplier?    @relation(fields: [supplierId], references: [id])
+  validFrom      DateTime     @default(now())
   validTo        DateTime?
+
   @@index([organisationId])
   @@index([type])
 }
 
 model Estimate {
-  id             String   @id @default(cuid())
+  id             String         @id @default(cuid())
   organisationId String
-  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  organisation   Organisation   @relation(fields: [organisationId], references: [id])
   tenderId       String?
-  tender         Tender?  @relation(fields: [tenderId], references: [id])
+  tender         Tender?        @relation(fields: [tenderId], references: [id])
   ref            String
   title          String
   status         EstimateStatus @default(DRAFT)
-  overheadPct    Decimal  @default(8) @db.Decimal(5, 2)
-  profitPct      Decimal  @default(12) @db.Decimal(5, 2)
-  contingencyPct Decimal  @default(2) @db.Decimal(5, 2)
-  currency       String   @default("AED")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  overheadPct    Decimal        @default(8) @db.Decimal(5, 2)
+  profitPct      Decimal        @default(12) @db.Decimal(5, 2)
+  contingencyPct Decimal        @default(2) @db.Decimal(5, 2)
+  currency       String         @default("AED")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   lines      EstimateLine[]
   quotations Quotation[]
+
   @@unique([organisationId, ref])
   @@index([status])
 }
 
 model EstimateLine {
-  id          String   @id @default(cuid())
-  estimateId  String
-  estimate    Estimate @relation(fields: [estimateId], references: [id], onDelete: Cascade)
-  costItemId  String?
-  costItem    CostItem? @relation(fields: [costItemId], references: [id])
-  description String
-  trade       Trade
-  unit        String
-  qty         Decimal  @db.Decimal(14, 3)
-  labourRate  Decimal  @default(0) @db.Decimal(12, 4)
-  materialRate Decimal @default(0) @db.Decimal(12, 4)
-  plantRate   Decimal  @default(0) @db.Decimal(12, 4)
-  subRate     Decimal  @default(0) @db.Decimal(12, 4)
-  sortOrder   Int      @default(0)
+  id           String    @id @default(cuid())
+  estimateId   String
+  estimate     Estimate  @relation(fields: [estimateId], references: [id], onDelete: Cascade)
+  costItemId   String?
+  costItem     CostItem? @relation(fields: [costItemId], references: [id])
+  description  String
+  trade        Trade
+  unit         String
+  qty          Decimal   @db.Decimal(14, 3)
+  labourRate   Decimal   @default(0) @db.Decimal(12, 4)
+  materialRate Decimal   @default(0) @db.Decimal(12, 4)
+  plantRate    Decimal   @default(0) @db.Decimal(12, 4)
+  subRate      Decimal   @default(0) @db.Decimal(12, 4)
+  sortOrder    Int       @default(0)
+
   // lineTotal is computed in the service: qty * (sum of rates), then est markups applied
   @@index([estimateId])
 }
 
 model Quotation {
-  id          String   @id @default(cuid())
-  estimateId  String
-  estimate    Estimate @relation(fields: [estimateId], references: [id])
-  quoteNo     String
-  revision    Int      @default(0)
-  total       Decimal  @db.Decimal(14, 2)
-  validUntil  DateTime?
-  issuedAt    DateTime?
-  createdAt   DateTime @default(now())
+  id         String    @id @default(cuid())
+  estimateId String
+  estimate   Estimate  @relation(fields: [estimateId], references: [id])
+  quoteNo    String
+  revision   Int       @default(0)
+  total      Decimal   @db.Decimal(14, 2)
+  validUntil DateTime?
+  issuedAt   DateTime?
+  createdAt  DateTime  @default(now())
+
   @@unique([estimateId, quoteNo, revision])
 }
 
 // ------------------------- PROJECTS ----------------------------------
 
 model Project {
-  id             String   @id @default(cuid())
+  id             String        @id @default(cuid())
   organisationId String
-  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  organisation   Organisation  @relation(fields: [organisationId], references: [id])
   code           String
   name           String
   clientId       String?
-  client         Company? @relation(fields: [clientId], references: [id])
-  tenderId       String?  @unique
-  tender         Tender?  @relation(fields: [tenderId], references: [id])
+  client         Company?      @relation(fields: [clientId], references: [id])
+  tenderId       String?       @unique
+  tender         Tender?       @relation(fields: [tenderId], references: [id])
   trades         Trade[]
   status         ProjectStatus @default(PRECONSTRUCTION)
-  contractValue  Decimal? @db.Decimal(14, 2)
-  retentionPct   Decimal  @default(5) @db.Decimal(5, 2)
+  contractValue  Decimal?      @db.Decimal(14, 2)
+  retentionPct   Decimal       @default(5) @db.Decimal(5, 2)
   startDate      DateTime?
   endDate        DateTime?
   location       String?
-  emirate        String?  // Dubai, Abu Dhabi, Sharjah...
+  emirate        String? // Dubai, Abu Dhabi, Sharjah...
   managerUserId  String?
-  manager        User?    @relation("ProjectManager", fields: [managerUserId], references: [id])
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  manager        User?         @relation("ProjectManager", fields: [managerUserId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
-  phases        Phase[]
-  milestones    Milestone[]
-  tasks         Task[]
-  dailyReports  DailyReport[]
-  variations    Variation[]
-  rfis          Rfi[]
-  inspections   Inspection[]
-  ncrs          Ncr[]
-  incidents     Incident[]
-  toolboxTalks  ToolboxTalk[]
-  riskAssess    RiskAssessment[]
-  purchaseOrders PurchaseOrder[]
-  budgets       Budget[]
-  invoices      Invoice[]
-  documents     Document[]
-  activities    Activity[]
-  tradeProgress TradeProgress[]
-  aiJobs        AiJob[]
+  phases            Phase[]
+  milestones        Milestone[]
+  tasks             Task[]
+  dailyReports      DailyReport[]
+  variations        Variation[]
+  rfis              Rfi[]
+  inspections       Inspection[]
+  ncrs              Ncr[]
+  incidents         Incident[]
+  toolboxTalks      ToolboxTalk[]
+  riskAssess        RiskAssessment[]
+  purchaseOrders    PurchaseOrder[]
+  budgets           Budget[]
+  invoices          Invoice[]
+  documents         Document[]
+  activities        Activity[]
+  tradeProgress     TradeProgress[]
+  aiJobs            AiJob[]
+  snags             Snag[]
+  labourAllocations LabourAllocation[]
+  attendanceDays    AttendanceDay[]
 
   @@unique([organisationId, code])
   @@index([status])
@@ -619,46 +634,49 @@ model Project {
 }
 
 model Phase {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   projectId String
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   name      String
   startDate DateTime?
   endDate   DateTime?
-  sortOrder Int      @default(0)
+  sortOrder Int       @default(0)
   tasks     Task[]
+
   @@index([projectId])
 }
 
 model Milestone {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   projectId  String
-  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   name       String
   dueDate    DateTime?
   achievedAt DateTime?
+
   @@index([projectId])
 }
 
 model Task {
-  id          String   @id @default(cuid())
-  projectId   String
-  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  phaseId     String?
-  phase       Phase?   @relation(fields: [phaseId], references: [id])
-  name        String
-  status      TaskStatus @default(NOT_STARTED)
-  trade       Trade?
-  assigneeId  String?
-  assignee    User?    @relation("TaskAssignee", fields: [assigneeId], references: [id])
-  plannedStart DateTime?
-  plannedEnd   DateTime?
-  actualStart  DateTime?
-  actualEnd    DateTime?
-  percentComplete Int   @default(0)
-  dependsOnId String?
-  dependsOn   Task?    @relation("TaskDeps", fields: [dependsOnId], references: [id])
-  dependents  Task[]   @relation("TaskDeps")
+  id              String     @id @default(cuid())
+  projectId       String
+  project         Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  phaseId         String?
+  phase           Phase?     @relation(fields: [phaseId], references: [id])
+  name            String
+  status          TaskStatus @default(NOT_STARTED)
+  trade           Trade?
+  assigneeId      String?
+  assignee        User?      @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  plannedStart    DateTime?
+  plannedEnd      DateTime?
+  actualStart     DateTime?
+  actualEnd       DateTime?
+  percentComplete Int        @default(0)
+  dependsOnId     String?
+  dependsOn       Task?      @relation("TaskDeps", fields: [dependsOnId], references: [id])
+  dependents      Task[]     @relation("TaskDeps")
+
   @@index([projectId])
   @@index([status])
 }
@@ -666,82 +684,87 @@ model Task {
 // ------------------------ SITE REPORTING -----------------------------
 
 model DailyReport {
-  id          String   @id @default(cuid())
-  projectId   String
-  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  reportDate  DateTime
-  authorId    String?
-  author      User?    @relation(fields: [authorId], references: [id])
-  weather     String?
+  id           String       @id @default(cuid())
+  projectId    String
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reportDate   DateTime
+  authorId     String?
+  author       User?        @relation(fields: [authorId], references: [id])
+  weather      String?
   temperatureC Int?
-  delays      String?
-  notes       String?
-  status      ReportStatus @default(DRAFT)
+  delays       String?
+  notes        String?
+  status       ReportStatus @default(DRAFT)
   instructions String?
-  hoursLost   Decimal? @db.Decimal(5, 2)
-  safetyNote  String?
-  createdAt   DateTime @default(now())
+  hoursLost    Decimal?     @db.Decimal(5, 2)
+  safetyNote   String?
+  createdAt    DateTime     @default(now())
 
   labour     LabourEntry[]
   plant      PlantEntry[]
   deliveries DeliveryEntry[]
   events     SiteEvent[]
+
   @@unique([projectId, reportDate])
   @@index([reportDate])
 }
 
 model LabourEntry {
-  id            String   @id @default(cuid())
+  id            String      @id @default(cuid())
   dailyReportId String
   dailyReport   DailyReport @relation(fields: [dailyReportId], references: [id], onDelete: Cascade)
   trade         Trade
   headcount     Int
-  hours         Decimal  @db.Decimal(6, 2)
+  hours         Decimal     @db.Decimal(6, 2)
+
   @@index([dailyReportId])
 }
 
 model PlantEntry {
-  id            String   @id @default(cuid())
+  id            String      @id @default(cuid())
   dailyReportId String
   dailyReport   DailyReport @relation(fields: [dailyReportId], references: [id], onDelete: Cascade)
   item          String
   quantity      Int
-  hours         Decimal? @db.Decimal(6, 2)
+  hours         Decimal?    @db.Decimal(6, 2)
+
   @@index([dailyReportId])
 }
 
 model DeliveryEntry {
-  id            String   @id @default(cuid())
+  id            String      @id @default(cuid())
   dailyReportId String
   dailyReport   DailyReport @relation(fields: [dailyReportId], references: [id], onDelete: Cascade)
   material      String
-  quantity      Decimal  @db.Decimal(14, 3)
+  quantity      Decimal     @db.Decimal(14, 3)
   unit          String
   supplierId    String?
-  supplier      Supplier? @relation(fields: [supplierId], references: [id])
+  supplier      Supplier?   @relation(fields: [supplierId], references: [id])
+
   @@index([dailyReportId])
 }
 
 // -------------------------- VARIATIONS -------------------------------
 
 model Variation {
-  id             String   @id @default(cuid())
+  id             String          @id @default(cuid())
   organisationId String
-  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  organisation   Organisation    @relation(fields: [organisationId], references: [id])
   projectId      String
-  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
   ref            String
   title          String
   description    String?
   status         VariationStatus @default(DRAFT)
-  value          Decimal  @db.Decimal(14, 2)
+  value          Decimal         @db.Decimal(14, 2)
   raisedById     String?
-  raisedBy       User?    @relation("VariationRaisedBy", fields: [raisedById], references: [id])
+  raisedBy       User?           @relation("VariationRaisedBy", fields: [raisedById], references: [id])
   submittedAt    DateTime?
   decidedAt      DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   documents      Document[]
+
   @@unique([projectId, ref])
   @@index([status])
 }
@@ -749,22 +772,23 @@ model Variation {
 // ----------------------------- RFIs ----------------------------------
 
 model Rfi {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
   projectId      String
-  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project        Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
   ref            String
   subject        String
   question       String
   response       String?
-  status         RfiStatus @default(OPEN)
+  status         RfiStatus    @default(OPEN)
   raisedById     String?
-  raisedBy       User?    @relation("RfiRaisedBy", fields: [raisedById], references: [id])
+  raisedBy       User?        @relation("RfiRaisedBy", fields: [raisedById], references: [id])
   dueDate        DateTime?
   answeredAt     DateTime?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime     @default(now())
   documents      Document[]
+
   @@unique([projectId, ref])
   @@index([status])
 }
@@ -772,67 +796,71 @@ model Rfi {
 // -------------------------- QUALITY ----------------------------------
 
 model ChecklistTemplate {
-  id        String   @id @default(cuid())
-  name      String
-  trade     Trade?
-  items     Json     // [{ id, text, required }]
-  createdAt DateTime @default(now())
+  id          String       @id @default(cuid())
+  name        String
+  trade       Trade?
+  items       Json // [{ id, text, required }]
+  createdAt   DateTime     @default(now())
   inspections Inspection[]
 }
 
 model Inspection {
-  id             String   @id @default(cuid())
+  id             String             @id @default(cuid())
   organisationId String
-  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  organisation   Organisation       @relation(fields: [organisationId], references: [id])
   projectId      String
-  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project        Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
   templateId     String?
   template       ChecklistTemplate? @relation(fields: [templateId], references: [id])
   ref            String
   title          String
   trade          Trade?
-  result         InspectionResult @default(PENDING)
-  responses      Json?    // answers against template items
+  result         InspectionResult   @default(PENDING)
+  responses      Json? // answers against template items
   inspectorId    String?
-  inspector      User?    @relation("InspectionInspector", fields: [inspectorId], references: [id])
+  inspector      User?              @relation("InspectionInspector", fields: [inspectorId], references: [id])
   inspectedAt    DateTime?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime           @default(now())
   snags          Snag[]
+
   @@unique([projectId, ref])
   @@index([result])
 }
 
 model Snag {
-  id           String   @id @default(cuid())
+  id           String      @id @default(cuid())
   inspectionId String?
   inspection   Inspection? @relation(fields: [inspectionId], references: [id])
   projectId    String
+  project      Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
   ref          String
   description  String
   location     String?
   trade        Trade?
-  status       SnagStatus @default(OPEN)
+  status       SnagStatus  @default(OPEN)
   photoUrl     String?
   closedAt     DateTime?
-  createdAt    DateTime @default(now())
+  createdAt    DateTime    @default(now())
+
   @@index([projectId])
   @@index([status])
 }
 
 model Ncr {
-  id             String   @id @default(cuid())
-  organisationId String
-  organisation   Organisation @relation(fields: [organisationId], references: [id])
-  projectId      String
-  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  ref            String
-  title          String
-  description    String
-  severity       Severity @default(MEDIUM)
-  status         NcrStatus @default(OPEN)
+  id               String       @id @default(cuid())
+  organisationId   String
+  organisation     Organisation @relation(fields: [organisationId], references: [id])
+  projectId        String
+  project          Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  ref              String
+  title            String
+  description      String
+  severity         Severity     @default(MEDIUM)
+  status           NcrStatus    @default(OPEN)
   correctiveAction String?
-  closedAt       DateTime?
-  createdAt      DateTime @default(now())
+  closedAt         DateTime?
+  createdAt        DateTime     @default(now())
+
   @@unique([projectId, ref])
   @@index([status])
 }
@@ -840,147 +868,157 @@ model Ncr {
 // ----------------------------- HSE -----------------------------------
 
 model Incident {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
   projectId      String?
-  project        Project? @relation(fields: [projectId], references: [id])
+  project        Project?     @relation(fields: [projectId], references: [id])
   ref            String
   type           IncidentType
-  severity       Severity @default(LOW)
+  severity       Severity     @default(LOW)
   description    String
   occurredAt     DateTime
   reportedById   String?
+  reportedBy     User?        @relation("IncidentReporter", fields: [reportedById], references: [id])
   rootCause      String?
   actionsTaken   String?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime     @default(now())
+
   @@index([organisationId])
   @@index([type])
 }
 
 model ToolboxTalk {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
   projectId      String?
-  project        Project? @relation(fields: [projectId], references: [id])
+  project        Project?     @relation(fields: [projectId], references: [id])
   topic          String
   conductedAt    DateTime
-  attendees      Int      @default(0)
+  attendees      Int          @default(0)
   notes          String?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime     @default(now())
+
   @@index([organisationId])
 }
 
 model RiskAssessment {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
   projectId      String?
-  project        Project? @relation(fields: [projectId], references: [id])
+  project        Project?     @relation(fields: [projectId], references: [id])
   ref            String
   activity       String
-  hazards        Json     // [{ hazard, likelihood, severity, control }]
-  residualRisk   Severity @default(LOW)
+  hazards        Json // [{ hazard, likelihood, severity, control }]
+  residualRisk   Severity     @default(LOW)
   reviewedAt     DateTime?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime     @default(now())
+
   @@index([organisationId])
 }
 
 // -------------------------- PROCUREMENT ------------------------------
 
 model Supplier {
-  id             String   @id @default(cuid())
+  id             String          @id @default(cuid())
   organisationId String
-  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  organisation   Organisation    @relation(fields: [organisationId], references: [id])
   name           String
   trade          Trade?
   contactName    String?
   email          String?
   phone          String?
-  rating         Int?     // 1-5
-  createdAt      DateTime @default(now())
+  rating         Int? // 1-5
+  createdAt      DateTime        @default(now())
   rates          Rate[]
   purchaseOrders PurchaseOrder[]
   deliveries     DeliveryEntry[]
+
   @@index([organisationId])
 }
 
 model PurchaseOrder {
-  id             String   @id @default(cuid())
+  id             String              @id @default(cuid())
   organisationId String
-  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  organisation   Organisation        @relation(fields: [organisationId], references: [id])
   projectId      String?
-  project        Project? @relation(fields: [projectId], references: [id])
+  project        Project?            @relation(fields: [projectId], references: [id])
   supplierId     String
-  supplier       Supplier @relation(fields: [supplierId], references: [id])
+  supplier       Supplier            @relation(fields: [supplierId], references: [id])
   poNo           String
-  status         PoStatus @default(DRAFT)
-  currency       String   @default("AED")
-  total          Decimal  @default(0) @db.Decimal(14, 2)
+  status         PoStatus            @default(DRAFT)
+  currency       String              @default("AED")
+  total          Decimal             @default(0) @db.Decimal(14, 2)
   issuedAt       DateTime?
   expectedAt     DateTime?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime            @default(now())
   lines          PurchaseOrderLine[]
+
   @@unique([organisationId, poNo])
   @@index([status])
 }
 
 model PurchaseOrderLine {
-  id              String   @id @default(cuid())
+  id              String        @id @default(cuid())
   purchaseOrderId String
   purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
   description     String
-  qty             Decimal  @db.Decimal(14, 3)
+  qty             Decimal       @db.Decimal(14, 3)
   unit            String
-  unitPrice       Decimal  @db.Decimal(12, 4)
-  receivedQty     Decimal  @default(0) @db.Decimal(14, 3)
+  unitPrice       Decimal       @db.Decimal(12, 4)
+  receivedQty     Decimal       @default(0) @db.Decimal(14, 3)
+
   @@index([purchaseOrderId])
 }
 
 // ------------------------ FINANCIALS ---------------------------------
 
 model CostCode {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
   code           String
   description    String
   trade          Trade?
   budgets        Budget[]
+
   @@unique([organisationId, code])
 }
 
 model Budget {
-  id             String   @id @default(cuid())
-  organisationId String
-  organisation   Organisation @relation(fields: [organisationId], references: [id])
-  projectId      String
-  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  costCodeId     String?
-  costCode       CostCode? @relation(fields: [costCodeId], references: [id])
-  description    String
-  budgetAmount   Decimal  @db.Decimal(14, 2)
-  committedAmount Decimal @default(0) @db.Decimal(14, 2)
-  actualAmount   Decimal  @default(0) @db.Decimal(14, 2)
+  id              String       @id @default(cuid())
+  organisationId  String
+  organisation    Organisation @relation(fields: [organisationId], references: [id])
+  projectId       String
+  project         Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  costCodeId      String?
+  costCode        CostCode?    @relation(fields: [costCodeId], references: [id])
+  description     String
+  budgetAmount    Decimal      @db.Decimal(14, 2)
+  committedAmount Decimal      @default(0) @db.Decimal(14, 2)
+  actualAmount    Decimal      @default(0) @db.Decimal(14, 2)
+
   @@index([projectId])
 }
 
 model Invoice {
-  id             String   @id @default(cuid())
-  organisationId String
-  organisation   Organisation @relation(fields: [organisationId], references: [id])
-  projectId      String
-  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  invoiceNo      String
-  status         InvoiceStatus @default(DRAFT)
-  grossAmount    Decimal  @db.Decimal(14, 2)
-  retentionAmount Decimal @default(0) @db.Decimal(14, 2)
-  netAmount      Decimal  @db.Decimal(14, 2)
-  issuedAt       DateTime?
-  dueAt          DateTime?
-  paidAt         DateTime?
-  createdAt      DateTime @default(now())
+  id              String        @id @default(cuid())
+  organisationId  String
+  organisation    Organisation  @relation(fields: [organisationId], references: [id])
+  projectId       String
+  project         Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  invoiceNo       String
+  status          InvoiceStatus @default(DRAFT)
+  grossAmount     Decimal       @db.Decimal(14, 2)
+  retentionAmount Decimal       @default(0) @db.Decimal(14, 2)
+  netAmount       Decimal       @db.Decimal(14, 2)
+  issuedAt        DateTime?
+  dueAt           DateTime?
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+
   @@unique([organisationId, invoiceNo])
   @@index([status])
   @@index([dueAt])
@@ -989,23 +1027,24 @@ model Invoice {
 // ------------------------ DOCUMENT CONTROL ---------------------------
 
 model Document {
-  id             String   @id @default(cuid())
+  id             String             @id @default(cuid())
   organisationId String
-  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  organisation   Organisation       @relation(fields: [organisationId], references: [id])
   title          String
-  category       String   // drawing, contract, spec, submittal...
-  status         DocStatus @default(DRAFT)
-  currentRev     String   @default("A")
+  category       String // drawing, contract, spec, submittal...
+  status         DocStatus          @default(DRAFT)
+  currentRev     String             @default("A")
   projectId      String?
-  project        Project? @relation(fields: [projectId], references: [id])
+  project        Project?           @relation(fields: [projectId], references: [id])
   tenderId       String?
-  tender         Tender?  @relation(fields: [tenderId], references: [id])
+  tender         Tender?            @relation(fields: [tenderId], references: [id])
   variationId    String?
-  variation      Variation? @relation(fields: [variationId], references: [id])
+  variation      Variation?         @relation(fields: [variationId], references: [id])
   rfiId          String?
-  rfi            Rfi?     @relation(fields: [rfiId], references: [id])
-  createdAt      DateTime @default(now())
+  rfi            Rfi?               @relation(fields: [rfiId], references: [id])
+  createdAt      DateTime           @default(now())
   revisions      DocumentRevision[]
+
   @@index([organisationId])
   @@index([category])
 }
@@ -1015,12 +1054,13 @@ model DocumentRevision {
   documentId String
   document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
   revision   String
-  storageKey String   // Supabase Storage object key
+  storageKey String // Supabase Storage object key
   fileName   String
   fileSize   Int?
   uploadedBy String?
   note       String?
   createdAt  DateTime @default(now())
+
   @@unique([documentId, revision])
 }
 
@@ -1029,14 +1069,14 @@ model DocumentRevision {
 // metrics held in JSON, plus typed columns for the common quantities.
 
 model TradeProgress {
-  id          String   @id @default(cuid())
-  projectId   String
-  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  trade       Trade
-  area        String?  // zone / level / room
-  date        DateTime @default(now())
-  quantity    Decimal  @db.Decimal(14, 3) // m2 installed, nr, etc.
-  unit        String
+  id         String   @id @default(cuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  trade      Trade
+  area       String? // zone / level / room
+  date       DateTime @default(now())
+  quantity   Decimal  @db.Decimal(14, 3) // m2 installed, nr, etc.
+  unit       String
   // trade-specific attributes:
   //  DRYWALL  -> { boardType, fireRating, acousticRating, partitionType }
   //  CEILINGS -> { gridSystem, tileSystem }
@@ -1044,8 +1084,9 @@ model TradeProgress {
   //  TIMBER   -> { material, fixingSystem }
   //  GLAZING  -> { stage: fabrication|delivery|installation, system }
   //  PAINTING -> { stage: prep|primer|finish, coats, system }
-  attributes  Json?
-  notes       String?
+  attributes Json?
+  notes      String?
+
   @@index([projectId])
   @@index([trade])
 }
@@ -1053,23 +1094,24 @@ model TradeProgress {
 // ----------------------------- AI ------------------------------------
 
 model AiJob {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
   projectId      String?
-  project        Project? @relation(fields: [projectId], references: [id])
+  project        Project?     @relation(fields: [projectId], references: [id])
   type           AiJobType
-  status         AiJobStatus @default(QUEUED)
-  provider       String   @default("anthropic") // anthropic | openai
+  status         AiJobStatus  @default(QUEUED)
+  provider       String       @default("anthropic") // anthropic | openai
   model          String?
-  inputRef       String?  // storage key for uploaded drawing/BOQ, or source id
+  inputRef       String? // storage key for uploaded drawing/BOQ, or source id
   prompt         String?
   output         Json?
   tokensIn       Int?
   tokensOut      Int?
   error          String?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime     @default(now())
   completedAt    DateTime?
+
   @@index([organisationId])
   @@index([type])
   @@index([status])
@@ -1078,33 +1120,35 @@ model AiJob {
 // ----------------------- AUDIT / NOTIFICATIONS -----------------------
 
 model AuditLog {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
   userId         String?
-  user           User?    @relation(fields: [userId], references: [id])
-  action         String   // CREATE | UPDATE | DELETE | LOGIN | EXPORT...
-  entity         String   // model name
+  user           User?        @relation(fields: [userId], references: [id])
+  action         String // CREATE | UPDATE | DELETE | LOGIN | EXPORT...
+  entity         String // model name
   entityId       String?
   before         Json?
   after          Json?
   ip             String?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime     @default(now())
+
   @@index([organisationId])
   @@index([entity, entityId])
 }
 
 model Notification {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
   userId         String
-  user           User     @relation(fields: [userId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
   title          String
   body           String?
   link           String?
   readAt         DateTime?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime     @default(now())
+
   @@index([userId])
   @@index([readAt])
 }
@@ -1116,8 +1160,8 @@ model Notification {
 // near-zero cost: nothing about "how EDM works" is baked into the code.
 
 model OrganisationSettings {
-  id             String   @id @default(cuid())
-  organisationId String   @unique
+  id             String       @id @default(cuid())
+  organisationId String       @unique
   organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
   // config shape (see apps/api/src/config/org-config.ts):
   //  { enabledTrades: Trade[], features: { tenders, estimating, ... },
@@ -1126,8 +1170,8 @@ model OrganisationSettings {
   config         Json
   // optional white-label branding for the product path (logo, colours)
   branding       Json?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
 
 // ---- Integrations (Microsoft 365 / Graph, accounting, messaging, e-sign) ----
@@ -1149,21 +1193,21 @@ enum IntegrationStatus {
 }
 
 model IntegrationConnection {
-  id             String   @id @default(cuid())
-  organisationId String
-  organisation   Organisation @relation(fields: [organisationId], references: [id])
-  provider       IntegrationProvider
-  status         IntegrationStatus @default(DISCONNECTED)
-  accountEmail   String?
+  id               String              @id @default(cuid())
+  organisationId   String
+  organisation     Organisation        @relation(fields: [organisationId], references: [id])
+  provider         IntegrationProvider
+  status           IntegrationStatus   @default(DISCONNECTED)
+  accountEmail     String?
   externalTenantId String? // e.g. Xero org id / DocuSign account id / WhatsApp phone number id
-  apiBaseUrl     String?   // per-account API base, e.g. DocuSign account base URI
-  accessToken    String?   // encrypted blob in production
-  refreshToken   String?   // encrypted blob in production
-  expiresAt      DateTime?
-  scopes         String?
-  lastSyncedAt   DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  apiBaseUrl       String? // per-account API base, e.g. DocuSign account base URI
+  accessToken      String? // encrypted blob in production
+  refreshToken     String? // encrypted blob in production
+  expiresAt        DateTime?
+  scopes           String?
+  lastSyncedAt     DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
 
   @@unique([organisationId, provider])
 }
@@ -1207,7 +1251,8 @@ model LabourAllocation {
   id               String       @id @default(cuid())
   organisationId   String
   organisation     Organisation @relation(fields: [organisationId], references: [id])
-  projectId        String // app-level link to Project
+  projectId        String
+  project          Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
   workerId         String? // a specific worker, or null for a planned crew by trade
   worker           Worker?      @relation(fields: [workerId], references: [id])
   trade            Trade
@@ -1226,6 +1271,7 @@ model AttendanceDay {
   organisationId String
   organisation   Organisation     @relation(fields: [organisationId], references: [id])
   projectId      String
+  project        Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
   workerId       String
   worker         Worker           @relation(fields: [workerId], references: [id])
   date           DateTime         @db.Date

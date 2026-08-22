@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
-import { tenantWhere } from "../../common/tenant";
+import { tenantWhere, assertOwned } from "../../common/tenant";
 import { CreateActivityDto } from "./dto/create-activity.dto";
 
 @Injectable()
@@ -14,9 +14,23 @@ export class ActivitiesService {
     });
   }
 
-  create(orgId: string, dto: CreateActivityDto) {
-    const { dueAt, ...rest } = dto;
-    return this.prisma.activity.create({ data: { ...rest, dueAt: dueAt ? new Date(dueAt) : undefined, organisation: { connect: { id: orgId } } } });
+  async create(orgId: string, dto: CreateActivityDto) {
+    const { dueAt, contactId, leadId, opportunityId, projectId, ownerUserId, ...rest } = dto;
+    await assertOwned(this.prisma, orgId, {
+      contact: contactId, lead: leadId, opportunity: opportunityId, project: projectId, user: ownerUserId,
+    });
+    return this.prisma.activity.create({
+      data: {
+        ...rest,
+        dueAt: dueAt ? new Date(dueAt) : undefined,
+        organisation: { connect: { id: orgId } },
+        contact: contactId ? { connect: { id: contactId } } : undefined,
+        lead: leadId ? { connect: { id: leadId } } : undefined,
+        opportunity: opportunityId ? { connect: { id: opportunityId } } : undefined,
+        project: projectId ? { connect: { id: projectId } } : undefined,
+        owner: ownerUserId ? { connect: { id: ownerUserId } } : undefined,
+      },
+    });
   }
 
   async complete(orgId: string, id: string) {

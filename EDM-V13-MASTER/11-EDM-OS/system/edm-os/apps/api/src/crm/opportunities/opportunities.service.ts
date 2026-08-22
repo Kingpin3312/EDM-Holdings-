@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from "@nestjs/comm
 import { OpportunityStatus, OpportunityStage, ActivityType, ProjectStatus } from "@edm-os/db";
 import { PrismaService } from "../../prisma/prisma.service";
 import { SettingsService } from "../../settings/settings.service";
-import { tenantWhere } from "../../common/tenant";
+import { tenantWhere, assertOwned } from "../../common/tenant";
 import { CreateOpportunityDto } from "./dto/create-opportunity.dto";
 import { UpdateOpportunityDto } from "./dto/update-opportunity.dto";
 import { ConvertToProjectDto } from "./dto/convert-to-project.dto";
@@ -25,8 +25,9 @@ export class OpportunitiesService {
     return opp;
   }
 
-  create(orgId: string, dto: CreateOpportunityDto) {
+  async create(orgId: string, dto: CreateOpportunityDto) {
     const { companyId, leadId, expectedClose, ...rest } = dto;
+    await assertOwned(this.prisma, orgId, { company: companyId, lead: leadId });
     return this.prisma.opportunity.create({
       data: {
         ...rest,
@@ -41,9 +42,15 @@ export class OpportunitiesService {
   async update(orgId: string, id: string, dto: UpdateOpportunityDto) {
     await this.get(orgId, id);
     const { companyId, leadId, expectedClose, ...rest } = dto;
+    await assertOwned(this.prisma, orgId, { company: companyId, lead: leadId });
     return this.prisma.opportunity.update({
       where: { id },
-      data: { ...rest, expectedClose: expectedClose ? new Date(expectedClose) : undefined, company: companyId ? { connect: { id: companyId } } : undefined },
+      data: {
+        ...rest,
+        expectedClose: expectedClose ? new Date(expectedClose) : undefined,
+        company: companyId ? { connect: { id: companyId } } : undefined,
+        lead: leadId ? { connect: { id: leadId } } : undefined,
+      },
     });
   }
 
@@ -67,6 +74,22 @@ export class OpportunitiesService {
     return updated;
   }
 
+  // Next free project code. Derived from the highest code already issued rather
+  // than from a row count: a count goes backwards when a project is deleted and
+  // then collides with a code that still exists. Sequential scan stays correct
+  // because @@unique([organisationId, code]) rejects a duplicate outright.
+  private async nextProjectCode(orgId: string): Promise<string> {
+    const latest = await this.prisma.project.findMany({
+      where: { organisationId: orgId, code: { startsWith: "EDM-P-" } },
+      select: { code: true },
+    });
+    const highest = latest.reduce((max, p) => {
+      const n = Number(p.code.slice("EDM-P-".length));
+      return Number.isFinite(n) && n > max ? n : max;
+    }, 0);
+    return `EDM-P-${String(highest + 1).padStart(4, "0")}`;
+  }
+
   // Convert a won opportunity into a live project — the sales→delivery handoff.
   // Name, client and contract value carry over so nothing is re-keyed. The
   // opportunity is stamped WON and the handoff is logged on its activity trail.
@@ -76,8 +99,8 @@ export class OpportunitiesService {
     if (opp.status === OpportunityStatus.LOST) {
       throw new BadRequestException("Cannot convert a lost opportunity to a project");
     }
-    const count = await this.prisma.project.count({ where: { organisationId: orgId } });
-    const code = dto.code ?? `EDM-P-${String(count + 1).padStart(4, "0")}`;
+    await assertOwned(this.prisma, orgId, { user: dto.managerUserId });
+    const code = dto.code ?? (await this.nextProjectCode(orgId));
     const [project] = await this.prisma.$transaction([
       this.prisma.project.create({
         data: {

@@ -40,7 +40,7 @@ export class FinanceService {
     const costToComplete = r2(budgetTotal - actual);
 
     // Cash (applications for payment)
-    const certifiedStatuses = [InvoiceStatus.CERTIFIED, InvoiceStatus.PAID];
+    const certifiedStatuses: InvoiceStatus[] = [InvoiceStatus.CERTIFIED, InvoiceStatus.PAID];
     const certified = r2(invoices.filter((i) => certifiedStatuses.includes(i.status)).reduce((s, i) => s + n(i.grossAmount), 0));
     const paid = r2(invoices.filter((i) => i.status === InvoiceStatus.PAID).reduce((s, i) => s + n(i.netAmount), 0));
     const certifiedNet = r2(invoices.filter((i) => certifiedStatuses.includes(i.status)).reduce((s, i) => s + n(i.netAmount), 0));

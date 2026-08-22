@@ -1,4 +1,4 @@
-import { PartialType } from "@nestjs/common";
+import { PartialType } from "@nestjs/mapped-types";
 import { IsEnum, IsOptional } from "class-validator";
 import { EstimateStatus } from "@edm-os/db";
 import { CreateEstimateDto } from "./create-estimate.dto";

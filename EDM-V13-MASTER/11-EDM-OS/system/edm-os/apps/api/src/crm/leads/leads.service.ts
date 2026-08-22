@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { LeadStage, OpportunityStatus } from "@edm-os/db";
 import { PrismaService } from "../../prisma/prisma.service";
-import { tenantWhere } from "../../common/tenant";
+import { tenantWhere, assertOwned } from "../../common/tenant";
 import { CreateLeadDto } from "./dto/create-lead.dto";
 import { UpdateLeadDto } from "./dto/update-lead.dto";
 import { ConvertLeadDto } from "./dto/convert-lead.dto";
@@ -41,24 +41,32 @@ export class LeadsService {
     });
   }
 
-  create(orgId: string, dto: CreateLeadDto) {
-    const { companyId, nextFollowUpAt, ...rest } = dto;
+  async create(orgId: string, dto: CreateLeadDto) {
+    const { companyId, nextFollowUpAt, ownerUserId, ...rest } = dto;
+    await assertOwned(this.prisma, orgId, { company: companyId, user: ownerUserId });
     return this.prisma.lead.create({
       data: {
         ...rest,
         nextFollowUpAt: nextFollowUpAt ? new Date(nextFollowUpAt) : undefined,
         organisation: { connect: { id: orgId } },
         company: companyId ? { connect: { id: companyId } } : undefined,
+        owner: ownerUserId ? { connect: { id: ownerUserId } } : undefined,
       },
     });
   }
 
   async update(orgId: string, id: string, dto: UpdateLeadDto) {
     await this.get(orgId, id);
-    const { companyId, nextFollowUpAt, ...rest } = dto;
+    const { companyId, nextFollowUpAt, ownerUserId, ...rest } = dto;
+    await assertOwned(this.prisma, orgId, { company: companyId, user: ownerUserId });
     return this.prisma.lead.update({
       where: { id },
-      data: { ...rest, nextFollowUpAt: nextFollowUpAt ? new Date(nextFollowUpAt) : undefined, company: companyId ? { connect: { id: companyId } } : undefined },
+      data: {
+        ...rest,
+        nextFollowUpAt: nextFollowUpAt ? new Date(nextFollowUpAt) : undefined,
+        company: companyId ? { connect: { id: companyId } } : undefined,
+        owner: ownerUserId ? { connect: { id: ownerUserId } } : undefined,
+      },
     });
   }
 

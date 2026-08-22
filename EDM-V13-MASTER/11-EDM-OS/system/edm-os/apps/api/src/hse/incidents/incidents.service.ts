@@ -30,9 +30,15 @@ export class IncidentsService {
 
   async create(orgId: string, dto: CreateIncidentDto) {
     if (dto.projectId) await this.assertProjectInOrg(orgId, dto.projectId);
-    const { projectId, occurredAt, ...rest } = dto;
+    const { projectId, occurredAt, reportedById, ...rest } = dto;
     return this.prisma.incident.create({
-      data: { ...rest, occurredAt: new Date(occurredAt), organisation: { connect: { id: orgId } }, project: projectId ? { connect: { id: projectId } } : undefined },
+      data: {
+        ...rest,
+        occurredAt: new Date(occurredAt),
+        organisation: { connect: { id: orgId } },
+        project: projectId ? { connect: { id: projectId } } : undefined,
+        reportedBy: reportedById ? { connect: { id: reportedById } } : undefined,
+      },
     });
   }
 

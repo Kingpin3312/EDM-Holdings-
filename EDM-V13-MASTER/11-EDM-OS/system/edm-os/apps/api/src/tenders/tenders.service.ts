@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma, TenderStatus } from "@edm-os/db";
 import { PrismaService } from "../prisma/prisma.service";
+import { assertOwned } from "../common/tenant";
 import { CreateTenderDto } from "./dto/create-tender.dto";
 import { UpdateTenderDto } from "./dto/update-tender.dto";
 
@@ -46,12 +47,18 @@ export class TendersService {
 
   async update(orgId: string, id: string, dto: UpdateTenderDto) {
     await this.get(orgId, id); // ownership check
+    const { clientId, consultantId, mainContractorId, dueDate, ...rest } = dto;
+    await assertOwned(this.prisma, orgId, { company: clientId });
+    await assertOwned(this.prisma, orgId, { company: consultantId });
+    await assertOwned(this.prisma, orgId, { company: mainContractorId });
     return this.prisma.tender.update({
       where: { id },
       data: {
-        ...dto,
-        dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
-        client: dto.clientId ? { connect: { id: dto.clientId } } : undefined,
+        ...rest,
+        dueDate: dueDate ? new Date(dueDate) : undefined,
+        client: clientId ? { connect: { id: clientId } } : undefined,
+        consultant: consultantId ? { connect: { id: consultantId } } : undefined,
+        mainContractor: mainContractorId ? { connect: { id: mainContractorId } } : undefined,
       },
     });
   }

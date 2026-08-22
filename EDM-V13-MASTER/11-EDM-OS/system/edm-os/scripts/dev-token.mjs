@@ -1,11 +1,16 @@
 // Mint a local dev access token the API will accept — no Supabase needed.
 //
-// The API verifies a JWT signed with SUPABASE_JWT_SECRET and maps the token to
-// an EDM user by `email` (see apps/api/src/auth/jwt.strategy.ts). This script
-// signs an HS256 token for the seeded owner so you can call protected routes.
+// The API verifies a JWT signed with SUPABASE_JWT_SECRET and resolves the user
+// from the token SUBJECT (`sub`). On a user's first sign-in, when no supabaseId
+// is recorded yet, the `email` claim links the account once and the subject is
+// written back — see apps/api/src/auth/jwt.strategy.ts. So the first call with
+// this token claims the seeded user, and every later call matches on subject.
+//
+// The secret must be at least 32 characters, or set EDM_DEV=1 to allow the
+// insecure "dev-secret" default for local work only.
 //
 // Usage:
-//   SUPABASE_JWT_SECRET=dev-secret node scripts/dev-token.mjs
+//   SUPABASE_JWT_SECRET=dev-secret EDM_DEV=1 node scripts/dev-token.mjs
 //   TOKEN=$(SUPABASE_JWT_SECRET=dev-secret node scripts/dev-token.mjs)
 //   curl localhost:4000/api/v1/crm/dashboard/agenda -H "Authorization: Bearer $TOKEN"
 //

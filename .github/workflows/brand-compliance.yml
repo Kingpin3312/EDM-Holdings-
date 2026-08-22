@@ -1,0 +1,29 @@
+name: Brand and claim compliance
+
+# Enforces the Hard Rules in CLAUDE.md and the five positions in DECISIONS.md
+# across the website and every client-facing document. build.sh checked four
+# PDFs, five of the twenty-two banned words and one absolute, and never failed
+# on a bad result — so nothing was actually stopping a regression.
+
+on:
+  push:
+    paths:
+      - "EDM-V13-MASTER/02-Website/**"
+      - "EDM-V13-MASTER/03-Corporate-Documents/**"
+      - "EDM-V13-MASTER/09-Document-Sources/**"
+      - "EDM-V13-MASTER/13-Go-To-Market/**"
+      - "tools/compliance-check.py"
+      - ".github/workflows/brand-compliance.yml"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install --quiet pypdf
+      - name: Check claims, banned wording and brand tokens
+        run: python3 tools/compliance-check.py

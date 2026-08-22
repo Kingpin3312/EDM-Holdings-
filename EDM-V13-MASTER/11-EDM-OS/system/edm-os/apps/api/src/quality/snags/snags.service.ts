@@ -29,12 +29,21 @@ export class SnagsService {
 
   async create(orgId: string, dto: CreateSnagDto) {
     await this.assertProjectInOrg(orgId, dto.projectId);
-    const { inspectionId, ...rest } = dto;
-    return this.prisma.snag.create({ data: { ...rest, ...(inspectionId ? { inspection: { connect: { id: inspectionId } } } : {}) } });
+    const { inspectionId, projectId, ...rest } = dto;
+    return this.prisma.snag.create({
+      data: {
+        ...rest,
+        project: { connect: { id: projectId } },
+        ...(inspectionId ? { inspection: { connect: { id: inspectionId } } } : {}),
+      },
+    });
   }
 
   async update(orgId: string, id: string, dto: UpdateSnagDto) {
     await this.get(orgId, id);
+    // UpdateSnagDto deliberately carries no projectId or inspectionId: moving a
+    // snag between projects is not an edit, and allowing it here would cross the
+    // organisation boundary that get() has just checked.
     return this.prisma.snag.update({ where: { id }, data: dto });
   }
 

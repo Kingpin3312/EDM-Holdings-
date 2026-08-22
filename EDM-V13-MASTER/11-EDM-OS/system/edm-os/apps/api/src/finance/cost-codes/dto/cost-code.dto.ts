@@ -5,5 +5,5 @@ export class CreateCostCodeDto {
   @IsString() description!: string;
   @IsOptional() @IsEnum(Trade) trade?: Trade;
 }
-import { PartialType } from "@nestjs/common";
+import { PartialType } from "@nestjs/mapped-types";
 export class UpdateCostCodeDto extends PartialType(CreateCostCodeDto) {}

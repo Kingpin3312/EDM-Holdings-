@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma, ProjectStatus } from "@edm-os/db";
 import { PrismaService } from "../prisma/prisma.service";
+import { assertOwned } from "../common/tenant";
 import { CreateProjectDto } from "./dto/create-project.dto";
 import { UpdateProjectDto } from "./dto/update-project.dto";
 
@@ -46,14 +47,17 @@ export class ProjectsService {
 
   async update(orgId: string, id: string, dto: UpdateProjectDto) {
     await this.get(orgId, id);
+    const { clientId, tenderId, managerUserId, startDate, endDate, ...rest } = dto;
+    await assertOwned(this.prisma, orgId, { company: clientId, tender: tenderId, user: managerUserId });
     return this.prisma.project.update({
       where: { id },
       data: {
-        ...dto,
-        startDate: dto.startDate ? new Date(dto.startDate) : undefined,
-        endDate: dto.endDate ? new Date(dto.endDate) : undefined,
-        client: dto.clientId ? { connect: { id: dto.clientId } } : undefined,
-        manager: dto.managerUserId ? { connect: { id: dto.managerUserId } } : undefined,
+        ...rest,
+        startDate: startDate ? new Date(startDate) : undefined,
+        endDate: endDate ? new Date(endDate) : undefined,
+        client: clientId ? { connect: { id: clientId } } : undefined,
+        tender: tenderId ? { connect: { id: tenderId } } : undefined,
+        manager: managerUserId ? { connect: { id: managerUserId } } : undefined,
       },
     });
   }

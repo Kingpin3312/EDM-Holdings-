@@ -12,7 +12,11 @@ async function bootstrap() {
   }
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix("api/v1");
-  app.enableCors({ origin: process.env.CORS_ORIGIN?.split(",") ?? true, credentials: true });
+  // Never fall back to `true`: with credentials enabled that reflects whatever
+  // origin asks, so any site a signed-in user visits could call the API as them.
+  // validateEnv guarantees CORS_ORIGIN is present outside local development.
+  const corsOrigins = process.env.CORS_ORIGIN?.split(",").map((o) => o.trim()).filter(Boolean) ?? [];
+  app.enableCors({ origin: corsOrigins.length ? corsOrigins : false, credentials: true });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   const port = Number(process.env.API_PORT ?? 4000);
   await app.listen(port);

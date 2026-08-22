@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { EstimateStatus } from "@edm-os/db";
 import { PrismaService } from "../../prisma/prisma.service";
-import { tenantWhere } from "../../common/tenant";
+import { tenantWhere, assertOwned } from "../../common/tenant";
 import { CreateEstimateDto } from "./dto/create-estimate.dto";
 import { UpdateEstimateDto } from "./dto/update-estimate.dto";
 import { CreateLineDto } from "./dto/create-line.dto";
@@ -43,7 +43,14 @@ export class EstimatesService {
   // ---- BOQ lines ----
   async addLine(orgId: string, estimateId: string, dto: CreateLineDto) {
     await this.get(orgId, estimateId);
-    return this.prisma.estimateLine.create({ data: { ...dto, estimate: { connect: { id: estimateId } } } });
+    const { costItemId, ...rest } = dto;
+    return this.prisma.estimateLine.create({
+      data: {
+        ...rest,
+        estimate: { connect: { id: estimateId } },
+        costItem: costItemId ? { connect: { id: costItemId } } : undefined,
+      },
+    });
   }
 
   async updateLine(orgId: string, estimateId: string, lineId: string, dto: UpdateLineDto) {
