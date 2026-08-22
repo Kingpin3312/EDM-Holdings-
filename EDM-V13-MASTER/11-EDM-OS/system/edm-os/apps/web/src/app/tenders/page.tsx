@@ -13,7 +13,7 @@ export default function TendersPage() {
       <div className="grid grid-cols-3 gap-3 mb-5">
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Live tenders</div><div className="mt-1 text-2xl font-bold">{tenders.filter(t=>t.prob>0).length}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Gross value</div><div className="mt-1 text-2xl font-bold">{AED(tenders.reduce((s,t)=>s+t.value,0))}</div></Card>
-        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-sage">Weighted value</div><div className="mt-1 text-2xl font-bold">{AED(weighted)}</div></Card>
+        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-emerald-on">Weighted value</div><div className="mt-1 text-2xl font-bold">{AED(weighted)}</div></Card>
       </div>
       <Card className="p-5">
         <table className="w-full text-sm">

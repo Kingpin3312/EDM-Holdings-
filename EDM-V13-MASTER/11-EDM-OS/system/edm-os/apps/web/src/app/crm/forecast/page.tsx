@@ -3,11 +3,13 @@ import { CrmTabs } from "@/components/CrmTabs";
 import { Card, Badge, SectionTitle } from "@/components/ui";
 import { AED } from "@/lib/data";
 import { getForecast } from "@/lib/server-data";
+import { DataSourceBanner } from "@/components/DataSource";
 
 const short = (n: number) => (n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : `${Math.round(n / 1000)}k`);
 
 export default async function ForecastPage() {
-  const { capacityPerMonth, months } = await getForecast();
+  const forecastS = await getForecast();
+  const { capacityPerMonth, months } = forecastS.data;
 
   const totalProjected = months.reduce((s, m) => s + m.projected, 0);
   const peak = months.reduce((a, b) => (b.projected > a.projected ? b : a), months[0]);
@@ -29,12 +31,13 @@ export default async function ForecastPage() {
         <button className="bg-emerald text-white text-sm font-semibold px-4 py-2 rounded-card">Adjust capacity</button>
       </div>
       <CrmTabs active="forecast" />
+      <DataSourceBanner source={forecastS.source} reason={forecastS.reason} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Projected (6 mo)</div><div className="mt-1 text-2xl font-bold">{AED(totalProjected)}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Avg utilisation</div><div className="mt-1 text-2xl font-bold">{avgUtil}%</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Peak month</div><div className="mt-1 text-[15px] font-bold leading-tight">{peak.label}</div><div className="text-xs text-charcoal-muted">{AED(peak.projected)}</div></Card>
-        <Card className={`p-4 ${monthsOver > 0 ? "bg-charcoal text-white border-charcoal" : "bg-emerald text-white border-emerald"}`}><div className={`text-[11px] uppercase tracking-wider font-semibold ${monthsOver > 0 ? "text-white/70" : "text-sage"}`}>Months over capacity</div><div className="mt-1 text-2xl font-bold">{monthsOver}</div></Card>
+        <Card className={`p-4 ${monthsOver > 0 ? "bg-charcoal text-white border-charcoal" : "bg-emerald text-white border-emerald"}`}><div className={`text-[11px] uppercase tracking-wider font-semibold ${monthsOver > 0 ? "text-white/70" : "text-emerald-on"}`}>Months over capacity</div><div className="mt-1 text-2xl font-bold">{monthsOver}</div></Card>
       </div>
 
       {/* Chart */}

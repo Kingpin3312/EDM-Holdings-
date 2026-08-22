@@ -2,12 +2,13 @@ import { Injectable } from "@nestjs/common";
 import { LeadStage, OpportunityStatus, ActivityType } from "@edm-os/db";
 import { PrismaService } from "../prisma/prisma.service";
 import { tenantWhere } from "../common/tenant";
+import { SettingsService } from "../settings/settings.service";
 
 // One call that returns everything the CRM overview needs, so the frontend
 // makes a single request instead of stitching five together.
 @Injectable()
 export class CrmDashboardService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private settings: SettingsService) {}
 
   async summary(orgId: string) {
     const horizon = new Date(Date.now() + 7 * 864e5);
@@ -98,7 +99,12 @@ export class CrmDashboardService {
   // expected close month for the next `monthsAhead` months and compares each
   // month against a delivery-capacity assumption — the "can we resource what we
   // win" view that generic CRMs don't provide. Capacity is configurable.
-  async forecast(orgId: string, capacityPerMonth = 3_500_000, monthsAhead = 6) {
+  async forecast(orgId: string, capacityOverride?: number, monthsAhead = 6) {
+    // Capacity is a business figure, not a constant. It used to default to
+    // AED 3,500,000 in code, which rendered on the forecast screen looking
+    // exactly like a number someone had decided. Null until it is set.
+    const config = await this.settings.getOrCreate(orgId);
+    const capacityPerMonth = capacityOverride ?? config.fiscal?.deliveryCapacityPerMonth ?? 0;
     const now = new Date();
     const open = await this.prisma.opportunity.findMany({
       where: tenantWhere(orgId, { status: OpportunityStatus.OPEN, expectedClose: { not: null } }),
@@ -107,15 +113,17 @@ export class CrmDashboardService {
 
     const buckets = new Map<string, number>();
     const labels: { key: string; label: string }[] = [];
+    // Bucket in UTC on both sides. Mixing local getters with UTC timestamps
+    // moved month-end deals between months depending on where the server ran.
+    const monthKey = (d: Date) => `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
     for (let i = 0; i < monthsAhead; i++) {
-      const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      labels.push({ key, label: d.toLocaleString("en", { month: "short", year: "numeric" }) });
+      const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + i, 1));
+      const key = monthKey(d);
+      labels.push({ key, label: d.toLocaleString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" }) });
       buckets.set(key, 0);
     }
     for (const o of open) {
-      const d = new Date(o.expectedClose as Date);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      const key = monthKey(new Date(o.expectedClose as Date));
       if (buckets.has(key)) buckets.set(key, (buckets.get(key) ?? 0) + Number(o.value) * (o.probability / 100));
     }
 
@@ -176,7 +184,10 @@ export class CrmDashboardService {
     return [...map.values()]
       .map((e) => {
         const closed = e.wonCount + e.lostCount;
-        return { ...e, weighted: Math.round(e.weighted), capacity: Math.max(e.liveBids, 6), avgTurnaroundDays: 0, winRatePct: closed ? Math.round((e.wonCount / closed) * 100) : 0 };
+        // capacity and average turnaround are not derivable from what is
+        // recorded today. They were a hardcoded 6 and a hardcoded 0, shown as
+        // though measured. Omitted until there is something real behind them.
+        return { ...e, weighted: Math.round(e.weighted), winRatePct: closed ? Math.round((e.wonCount / closed) * 100) : 0 };
       })
       .sort((a, b) => b.liveBids - a.liveBids);
   }

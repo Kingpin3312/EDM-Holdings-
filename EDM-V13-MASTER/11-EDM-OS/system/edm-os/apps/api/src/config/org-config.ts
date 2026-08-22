@@ -24,7 +24,17 @@ export interface OrgConfig {
   projectWorkflow: { stages: string[] };
   crmPipeline: { stages: string[]; transitions: Record<string, string[]> };
   variationWorkflow: { stages: string[]; transitions: Record<string, string[]> };
-  fiscal: { currency: string; retentionPctDefault: number; overheadPctDefault: number; profitPctDefault: number };
+  fiscal: {
+    currency: string;
+    retentionPctDefault: number;
+    overheadPctDefault: number;
+    profitPctDefault: number;
+    contingencyPctDefault: number;
+    // Monthly delivery capacity, in the org's currency. Null until the business
+    // sets it — the forecast screen compares against this, and an invented
+    // figure rendered there looks exactly like a real one.
+    deliveryCapacityPerMonth: number | null;
+  };
 }
 
 // EDM's defaults: Phase 1 features on, later phases off until built.
@@ -68,5 +78,12 @@ export const DEFAULT_ORG_CONFIG: OrgConfig = {
       PAID: [],
     },
   },
-  fiscal: { currency: "AED", retentionPctDefault: 5, overheadPctDefault: 8, profitPctDefault: 12 },
+  fiscal: {
+    currency: "AED",
+    retentionPctDefault: 5,
+    overheadPctDefault: 8,
+    profitPctDefault: 12,
+    contingencyPctDefault: 5,
+    deliveryCapacityPerMonth: null,
+  },
 };

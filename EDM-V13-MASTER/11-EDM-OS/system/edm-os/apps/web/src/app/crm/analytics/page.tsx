@@ -3,9 +3,11 @@ import { CrmTabs } from "@/components/CrmTabs";
 import { Card, Badge, SectionTitle } from "@/components/ui";
 import { AED, companyTone } from "@/lib/data";
 import { getAnalytics } from "@/lib/server-data";
+import { DataSourceBanner } from "@/components/DataSource";
 
 export default async function CrmAnalyticsPage() {
-  const a = await getAnalytics();
+  const aS = await getAnalytics();
+  const a = aS.data;
   const closed = a.wonCount + a.lostCount;
   const wonW = closed ? (a.wonCount / closed) * 100 : 0;
   const sortedTypes = [...a.byType].sort((x, y) => y.winRatePct - x.winRatePct);
@@ -17,9 +19,10 @@ export default async function CrmAnalyticsPage() {
         <button className="bg-emerald text-white text-sm font-semibold px-4 py-2 rounded-card">Export</button>
       </div>
       <CrmTabs active="analytics" />
+      <DataSourceBanner source={aS.source} reason={aS.reason} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-sage">Hit rate (by count)</div><div className="mt-1 text-2xl font-bold">{a.winRatePct}%</div><div className="mt-0.5 text-xs text-emerald-soft">{a.wonCount} won · {a.lostCount} lost</div></Card>
+        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-emerald-on">Hit rate (by count)</div><div className="mt-1 text-2xl font-bold">{a.winRatePct}%</div><div className="mt-0.5 text-xs text-emerald-soft">{a.wonCount} won · {a.lostCount} lost</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Hit rate (by value)</div><div className="mt-1 text-2xl font-bold">{a.valueWinRatePct}%</div><div className="mt-0.5 text-xs text-charcoal-muted">of bid value pursued</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Won value</div><div className="mt-1 text-2xl font-bold">{AED(a.wonValue)}</div><div className="mt-0.5 text-xs text-charcoal-muted">{AED(a.lostValue)} lost</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Weighted open pipeline</div><div className="mt-1 text-2xl font-bold">{AED(a.weightedOpen)}</div><div className="mt-0.5 text-xs text-charcoal-muted">{a.openCount} live pursuits</div></Card>

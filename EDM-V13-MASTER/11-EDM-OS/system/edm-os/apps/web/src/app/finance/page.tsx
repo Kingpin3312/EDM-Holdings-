@@ -11,7 +11,7 @@ export default function FinancePage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-sage">Forecast value</div><div className="mt-1 text-xl font-bold">{AED(finVal.forecast)}</div></Card>
+        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-emerald-on">Forecast value</div><div className="mt-1 text-xl font-bold">{AED(finVal.forecast)}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Forecast cost</div><div className="mt-1 text-xl font-bold">{AED(finCost.budget)}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Forecast margin</div><div className="mt-1 text-xl font-bold text-emerald">{AED(finMargin.forecast)}</div><div className="text-[11px] text-charcoal-muted">{finMargin.pct}% of value</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Cash outstanding</div><div className="mt-1 text-xl font-bold text-bronze">{AED(finCash.outstanding)}</div></Card>

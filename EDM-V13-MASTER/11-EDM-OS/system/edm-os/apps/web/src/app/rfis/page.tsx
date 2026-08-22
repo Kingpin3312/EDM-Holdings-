@@ -11,7 +11,7 @@ export default function RfisPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-sage">Open</div><div className="mt-1 text-2xl font-bold">{r.open}</div></Card>
+        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-emerald-on">Open</div><div className="mt-1 text-2xl font-bold">{r.open}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Overdue</div><div className={`mt-1 text-2xl font-bold ${r.overdue ? "text-bronze" : ""}`}>{r.overdue}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Answered</div><div className="mt-1 text-2xl font-bold">{r.answered}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Closed</div><div className="mt-1 text-2xl font-bold">{r.closed}</div></Card>

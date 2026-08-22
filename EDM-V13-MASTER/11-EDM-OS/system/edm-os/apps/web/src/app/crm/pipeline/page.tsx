@@ -18,7 +18,7 @@ export default function PipelinePage() {
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Open opportunities</div><div className="mt-1 text-2xl font-bold">{pipelineBoard.reduce((s, c) => s + c.items.length, 0)}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Weighted pipeline</div><div className="mt-1 text-2xl font-bold">{AED(grandWeighted)}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Won (count)</div><div className="mt-1 text-2xl font-bold">{wonRollup.count}</div></Card>
-        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-sage">Won value</div><div className="mt-1 text-2xl font-bold">{AED(wonRollup.value)}</div></Card>
+        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-emerald-on">Won value</div><div className="mt-1 text-2xl font-bold">{AED(wonRollup.value)}</div></Card>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">

@@ -33,7 +33,7 @@ export default function LeadsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Open leads</div><div className="mt-1 text-2xl font-bold">{leadsList.length}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Estimated value</div><div className="mt-1 text-2xl font-bold">{AED(totalEst)}</div></Card>
-        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-sage">Follow-ups due</div><div className="mt-1 text-2xl font-bold">3</div></Card>
+        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-emerald-on">Follow-ups due</div><div className="mt-1 text-2xl font-bold">3</div></Card>
       </div>
 
       <Card className="p-5">

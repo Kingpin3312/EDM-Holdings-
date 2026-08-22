@@ -3,6 +3,7 @@ import { CrmTabs } from "@/components/CrmTabs";
 import { Card, Badge, SectionTitle } from "@/components/ui";
 import { crmAgenda } from "@/lib/data";
 import { getAgenda } from "@/lib/server-data";
+import { DataSourceBanner } from "@/components/DataSource";
 import Link from "next/link";
 
 type Item = (typeof crmAgenda)["bidDeadlines"][number];
@@ -27,7 +28,8 @@ function Row({ i }: { i: Item }) {
 }
 
 export default async function FollowUpsPage() {
-  const { bidDeadlines, followUps, tasks } = await getAgenda();
+  const agendaS = await getAgenda();
+  const { bidDeadlines, followUps, tasks } = agendaS.data;
   const all = [...bidDeadlines, ...followUps, ...tasks];
   const overdue = all.filter((i) => i.overdue).length;
   const thisWeek = all.filter((i) => i.days <= 7).length;
@@ -40,9 +42,10 @@ export default async function FollowUpsPage() {
         <button className="bg-emerald text-white text-sm font-semibold px-4 py-2 rounded-card">Log activity</button>
       </div>
       <CrmTabs active="followups" />
+      <DataSourceBanner source={agendaS.source} reason={agendaS.reason} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-        <Card className={`p-4 ${overdue > 0 ? "bg-emerald text-white border-emerald" : ""}`}><div className={`text-[11px] uppercase tracking-wider font-semibold ${overdue > 0 ? "text-sage" : "text-charcoal-muted"}`}>Overdue</div><div className="mt-1 text-2xl font-bold">{overdue}</div></Card>
+        <Card className={`p-4 ${overdue > 0 ? "bg-emerald text-white border-emerald" : ""}`}><div className={`text-[11px] uppercase tracking-wider font-semibold ${overdue > 0 ? "text-emerald-on" : "text-charcoal-muted"}`}>Overdue</div><div className="mt-1 text-2xl font-bold">{overdue}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Due this week</div><div className="mt-1 text-2xl font-bold">{thisWeek}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Open bid deadlines</div><div className="mt-1 text-2xl font-bold">{bidDeadlines.length}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Next submission</div><div className="mt-1 text-2xl font-bold">{nextBid?.due ?? "—"}</div></Card>

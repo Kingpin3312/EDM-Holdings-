@@ -1,13 +1,25 @@
 import { ReactNode } from "react";
 
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`bg-white border border-line rounded-card ${className}`}>{children}</div>;
+  // Only apply the default surface when the caller has not supplied one.
+  // Tailwind emits utilities in its own sorted order, not the order they appear
+  // in the class attribute, so `bg-white` here beat a `bg-emerald` passed in by
+  // a caller — which rendered the accent KPI tiles white, with their white value
+  // text invisible on top. The weighted-pipeline figure was unreadable on every
+  // screen that used the pattern.
+  const hasBg = /(^|\s)bg-/.test(className);
+  const hasBorder = /(^|\s)border-(?!$)/.test(className);
+  return (
+    <div className={`${hasBg ? "" : "bg-white"} border ${hasBorder ? "" : "border-line"} rounded-card ${className}`}>
+      {children}
+    </div>
+  );
 }
 
 export function StatTile({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: boolean }) {
   return (
     <Card className={`p-4 ${accent ? "bg-emerald text-white border-emerald" : ""}`}>
-      <div className={`text-[11px] uppercase tracking-wider font-semibold ${accent ? "text-sage" : "text-charcoal-muted"}`}>{label}</div>
+      <div className={`text-[11px] uppercase tracking-wider font-semibold ${accent ? "text-emerald-on" : "text-charcoal-muted"}`}>{label}</div>
       <div className={`mt-1.5 text-2xl font-bold ${accent ? "text-white" : "text-charcoal"}`}>{value}</div>
       {sub && <div className={`mt-0.5 text-xs ${accent ? "text-emerald-soft" : "text-charcoal-muted"}`}>{sub}</div>}
     </Card>

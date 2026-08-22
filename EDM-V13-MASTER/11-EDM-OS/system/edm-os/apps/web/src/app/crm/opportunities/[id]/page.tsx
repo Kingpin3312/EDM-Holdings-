@@ -50,7 +50,7 @@ export default function OpportunityDetailPage({ params }: { params: { id: string
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Contract value</div><div className="mt-1 text-2xl font-bold">{AED(opp.value)}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Win probability</div><div className="mt-1 text-2xl font-bold">{opp.prob}%</div></Card>
-        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-sage">Weighted</div><div className="mt-1 text-2xl font-bold">{AED(weighted)}</div></Card>
+        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-emerald-on">Weighted</div><div className="mt-1 text-2xl font-bold">{AED(weighted)}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Bid due</div><div className="mt-1 text-2xl font-bold">{opp.bidDue}</div></Card>
       </div>
 
@@ -60,7 +60,7 @@ export default function OpportunityDetailPage({ params }: { params: { id: string
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
               <div className="text-sm font-bold">Won — handed off to delivery</div>
-              <div className="text-[13px] text-sage mt-0.5">Client, value and history carried over to the live project. No re-keying.</div>
+              <div className="text-[13px] text-emerald-on mt-0.5">Client, value and history carried over to the live project. No re-keying.</div>
             </div>
             <Link href="/projects" className="bg-white text-emerald text-sm font-semibold px-4 py-2 rounded-card">Open {opp.convertedProjectCode} →</Link>
           </div>

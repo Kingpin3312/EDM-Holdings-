@@ -11,7 +11,7 @@ export default function QualityPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-sage">Open snags</div><div className="mt-1 text-2xl font-bold">{q.openSnags}</div></Card>
+        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-emerald-on">Open snags</div><div className="mt-1 text-2xl font-bold">{q.openSnags}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Open NCRs</div><div className="mt-1 text-2xl font-bold">{q.ncrsOpen}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Inspection pass rate</div><div className="mt-1 text-2xl font-bold">{q.passRate}%</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Critical items</div><div className={`mt-1 text-2xl font-bold ${q.critical ? "text-bronze" : ""}`}>{q.critical}</div></Card>

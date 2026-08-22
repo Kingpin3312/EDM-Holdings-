@@ -58,7 +58,7 @@ export default function DocumentsPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-sage">Documents</div><div className="mt-1 text-2xl font-bold">{total}</div></Card>
+        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-emerald-on">Documents</div><div className="mt-1 text-2xl font-bold">{total}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Awaiting review</div><div className="mt-1 text-2xl font-bold">{forReview}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">For construction</div><div className="mt-1 text-2xl font-bold">{forConstruction}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Open transmittals</div><div className="mt-1 text-2xl font-bold">{openTransmittals}</div></Card>

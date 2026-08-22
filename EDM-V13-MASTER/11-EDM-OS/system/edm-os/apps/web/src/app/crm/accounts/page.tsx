@@ -3,9 +3,11 @@ import { CrmTabs } from "@/components/CrmTabs";
 import { Card, Badge, SectionTitle } from "@/components/ui";
 import { AED, companyTone, accountFocus } from "@/lib/data";
 import { getAccounts } from "@/lib/server-data";
+import { DataSourceBanner } from "@/components/DataSource";
 
 export default async function AccountsPage() {
-  const accounts = await getAccounts();
+  const accountsS = await getAccounts();
+  const accounts = accountsS.data;
 
   const totalWon = accounts.reduce((s, a) => s + a.wonValue, 0);
   const top = accounts.reduce((a, b) => (b.wonValue > a.wonValue ? b : a), accounts[0]);
@@ -20,12 +22,13 @@ export default async function AccountsPage() {
         <button className="bg-emerald text-white text-sm font-semibold px-4 py-2 rounded-card">Add account</button>
       </div>
       <CrmTabs active="accounts" />
+      <DataSourceBanner source={accountsS.source} reason={accountsS.reason} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Active clients</div><div className="mt-1 text-2xl font-bold">{accounts.length}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Won value (all clients)</div><div className="mt-1 text-2xl font-bold">{AED(totalWon)}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Top client</div><div className="mt-1 text-[15px] font-bold leading-tight">{top?.name}</div><div className="text-xs text-charcoal-muted">{AED(top?.wonValue ?? 0)} won</div></Card>
-        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-sage">Avg win rate</div><div className="mt-1 text-2xl font-bold">{avgWin}%</div></Card>
+        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-emerald-on">Avg win rate</div><div className="mt-1 text-2xl font-bold">{avgWin}%</div></Card>
       </div>
 
       <Card className="p-5">

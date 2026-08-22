@@ -291,8 +291,12 @@ export const crmForecast: { capacityPerMonth: number; months: ForecastMonth[] } 
 // estimating queue (the bottleneck for a bid-heavy contractor) can be balanced.
 export type Estimator = {
   id: string; name: string; role: string;
-  liveBids: number; liveValue: number; weighted: number; capacity: number;
-  wonCount: number; lostCount: number; winRatePct: number; avgTurnaroundDays: number;
+  liveBids: number; liveValue: number; weighted: number;
+  wonCount: number; lostCount: number; winRatePct: number;
+  // capacity and avgTurnaroundDays were shown as measurements but were a
+  // hardcoded 6 and a hardcoded 0 on the API side. They return when there is
+  // something real behind them — a recorded bid start and submission date.
+  capacity?: number; avgTurnaroundDays?: number;
 };
 export const estimators: Estimator[] = [
   { id: "est-1", name: "Aoife Byrne", role: "Senior Estimator", liveBids: 6, liveValue: 7_800_000, weighted: 3_300_000, capacity: 6, wonCount: 9, lostCount: 5, winRatePct: 64, avgTurnaroundDays: 5.1 },
@@ -302,11 +306,15 @@ export const estimators: Estimator[] = [
 ];
 
 // Load tier from how full an estimator's bid slate is.
-export function estimatorLoad(e: { liveBids: number; capacity: number }): { label: string; tone: string; pct: number } {
-  const pct = e.capacity ? Math.round((e.liveBids / e.capacity) * 100) : 0;
-  if (pct >= 100) return { label: "At capacity", tone: "bg-bronze/15 text-bronze", pct };
-  if (pct >= 80) return { label: "Busy", tone: "bg-sage/30 text-emerald-dark", pct };
-  return { label: "Available", tone: "bg-emerald-soft text-emerald", pct };
+// Load is only meaningful once a capacity has been set for the estimator.
+// Without one there is nothing to be a percentage of, so the badge says so
+// rather than quietly reporting "Available" at 0%.
+export function estimatorLoad(e: { liveBids: number; capacity?: number }): { label: string; tone: string; pct: number } {
+  if (!e.capacity) return { label: "No capacity set", tone: "border border-line-strong text-charcoal-muted", pct: 0 };
+  const pct = Math.round((e.liveBids / e.capacity) * 100);
+  if (pct >= 100) return { label: "At capacity", tone: "bg-emerald text-white", pct };
+  if (pct >= 80) return { label: "Busy", tone: "bg-emerald/15 text-emerald", pct };
+  return { label: "Available", tone: "border border-emerald text-emerald", pct };
 }
 
 // ---- CRM bid calendar (production: derived from opportunity close dates + lead follow-ups) ----

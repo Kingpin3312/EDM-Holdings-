@@ -11,7 +11,7 @@ export default function VariationsPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-sage">Pending value</div><div className="mt-1 text-2xl font-bold">{AED(v.pendingValue)}</div></Card>
+        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-emerald-on">Pending value</div><div className="mt-1 text-2xl font-bold">{AED(v.pendingValue)}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Approved value</div><div className="mt-1 text-2xl font-bold">{AED(v.approvedValue)}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Total raised</div><div className="mt-1 text-2xl font-bold">{AED(v.totalRaised)}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Open variations</div><div className="mt-1 text-2xl font-bold">{v.count}</div></Card>

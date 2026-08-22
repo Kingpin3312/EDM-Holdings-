@@ -3,6 +3,7 @@ import { CrmTabs } from "@/components/CrmTabs";
 import { Card, Badge, SectionTitle } from "@/components/ui";
 import { AED, type CalendarEvent } from "@/lib/data";
 import { getCalendar } from "@/lib/server-data";
+import { DataSourceBanner } from "@/components/DataSource";
 import { buildMonthGrid, daysUntil, countdownLabel } from "@/lib/calendar";
 import Link from "next/link";
 
@@ -15,7 +16,8 @@ const chipTone: Record<CalendarEvent["type"], string> = {
 const typeLabel: Record<CalendarEvent["type"], string> = { bid: "Bid", "follow-up": "Follow-up", task: "Task" };
 
 export default async function CalendarPage() {
-  const { events } = await getCalendar();
+  const calendarS = await getCalendar();
+  const { events } = calendarS.data;
   const now = new Date();
   const y = now.getFullYear();
   const m = now.getMonth();
@@ -40,12 +42,13 @@ export default async function CalendarPage() {
         <button className="bg-emerald text-white text-sm font-semibold px-4 py-2 rounded-card">New deadline</button>
       </div>
       <CrmTabs active="calendar" />
+      <DataSourceBanner source={calendarS.source} reason={calendarS.reason} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Bids due this month</div><div className="mt-1 text-2xl font-bold">{bidsThisMonth.length}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Bid value due</div><div className="mt-1 text-2xl font-bold">{AED(bidValue)}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Next deadline</div><div className="mt-1 text-[15px] font-bold leading-tight truncate">{next ? next.title.split(" — ")[0] : "—"}</div><div className="text-xs text-charcoal-muted">{next ? countdownLabel(daysUntil(next.date)) : "Nothing upcoming"}</div></Card>
-        <Card className={`p-4 ${overdue > 0 ? "bg-charcoal text-white border-charcoal" : "bg-emerald text-white border-emerald"}`}><div className={`text-[11px] uppercase tracking-wider font-semibold ${overdue > 0 ? "text-white/70" : "text-sage"}`}>Overdue</div><div className="mt-1 text-2xl font-bold">{overdue}</div></Card>
+        <Card className={`p-4 ${overdue > 0 ? "bg-charcoal text-white border-charcoal" : "bg-emerald text-white border-emerald"}`}><div className={`text-[11px] uppercase tracking-wider font-semibold ${overdue > 0 ? "text-white/70" : "text-emerald-on"}`}>Overdue</div><div className="mt-1 text-2xl font-bold">{overdue}</div></Card>
       </div>
 
       {/* Month grid — tablet/laptop */}

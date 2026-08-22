@@ -13,7 +13,7 @@ export default function ProcurementPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-sage">Committed spend</div><div className="mt-1 text-2xl font-bold">{AED(p.committedSpend)}</div></Card>
+        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-emerald-on">Committed spend</div><div className="mt-1 text-2xl font-bold">{AED(p.committedSpend)}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Open POs</div><div className="mt-1 text-2xl font-bold">{p.openPOs}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Awaiting delivery</div><div className="mt-1 text-2xl font-bold">{AED(p.awaitingDelivery)}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Suppliers</div><div className="mt-1 text-2xl font-bold">{p.suppliers}</div></Card>

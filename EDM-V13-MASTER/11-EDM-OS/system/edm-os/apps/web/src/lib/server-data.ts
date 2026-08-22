@@ -2,10 +2,30 @@ import { apiGet } from "./api";
 import { getApiToken } from "./auth";
 import { crmAgenda, crmAnalytics, crmForecast, clientScorecards, crmCalendar, estimators, type ClientScore, type CalendarEvent, type Estimator } from "./data";
 
-// Live-or-mock data layer. Each getter tries the live API; on any failure
-// (no token, API down, unexpected shape) it falls back to the seeded mock in
-// `lib/data.ts`, so screens always render. When the API is reachable and a
-// token is present, screens show real data from Postgres.
+// Live-or-demonstration data layer.
+//
+// Each getter tries the live API and falls back to the fixture in `lib/data.ts`
+// so a screen always renders. The fallback used to be silent, which is the
+// dangerous part: with the API down, the token missing or a query throwing, a
+// director saw convincing invented numbers with nothing to say they were not
+// real. An empty live result did the same — "no accounts yet" rendered as a
+// list of demonstration accounts.
+//
+// Every getter now returns { data, source, reason }. `source` is one of:
+//   "live"  — served by the API
+//   "empty" — the API answered, and there is genuinely nothing yet
+//   "demo"  — the API could not be reached; these numbers are illustrative
+//
+// Screens must show the source. <DataSource> in components/DataSource.tsx does
+// it consistently; a screen that drops it is a screen that can lie.
+
+export type DataSource = "live" | "empty" | "demo";
+export type Sourced<T> = { data: T; source: DataSource; reason?: string };
+
+function demo<T>(data: T, e: unknown): Sourced<T> {
+  const reason = e instanceof Error ? e.message : "the API could not be reached";
+  return { data, source: "demo", reason };
+}
 
 function rel(dateStr?: string | null): { days: number; label: string; overdue: boolean } {
   if (!dateStr) return { days: 9999, label: "—", overdue: false };
@@ -21,10 +41,10 @@ type RawLead = { id: string; title: string; nextFollowUpAt?: string | null; comp
 type RawTask = { id: string; subject: string; dueAt?: string | null; opportunityId?: string | null; leadId?: string | null; companyId?: string | null };
 type RawAgenda = { bidDeadlines: RawOpp[]; followUps: RawLead[]; tasks: RawTask[] };
 
-export async function getAgenda(): Promise<typeof crmAgenda> {
+export async function getAgenda(): Promise<Sourced<typeof crmAgenda>> {
   try {
     const r = await apiGet<RawAgenda>("/crm/dashboard/agenda", getApiToken());
-    return {
+    const mapped = {
       bidDeadlines: r.bidDeadlines.map((o) => {
         const d = rel(o.expectedClose);
         return { id: o.id, title: o.name, sub: o.company?.name ?? "", owner: "", due: d.label, days: d.days, overdue: d.overdue, href: `/crm/opportunities/${o.id}` };
@@ -39,8 +59,10 @@ export async function getAgenda(): Promise<typeof crmAgenda> {
         return { id: a.id, title: a.subject, sub: "", owner: "", due: d.label, days: d.days, overdue: d.overdue, href };
       }),
     };
-  } catch {
-    return crmAgenda;
+    const empty = !mapped.bidDeadlines.length && !mapped.followUps.length && !mapped.tasks.length;
+    return { data: mapped, source: empty ? "empty" : "live" };
+  } catch (e) {
+    return demo(crmAgenda, e);
   }
 }
 
@@ -51,10 +73,10 @@ type RawAnalytics = {
   funnel: { leads: number; opportunities: number; won: number };
 };
 
-export async function getAnalytics(): Promise<typeof crmAnalytics> {
+export async function getAnalytics(): Promise<Sourced<typeof crmAnalytics>> {
   try {
     const a = await apiGet<RawAnalytics>("/crm/dashboard/analytics", getApiToken());
-    return {
+    const mapped = {
       wonCount: a.wonCount, lostCount: a.lostCount, winRatePct: a.winRatePct,
       wonValue: a.wonValue, lostValue: a.lostValue, valueWinRatePct: a.valueWinRatePct,
       weightedOpen: a.weightedOpen, openValue: a.openValue, openCount: a.openCount,
@@ -65,31 +87,36 @@ export async function getAnalytics(): Promise<typeof crmAnalytics> {
         { label: "Won", count: a.funnel?.won ?? 0, value: 0 },
       ],
     };
-  } catch {
-    return crmAnalytics;
+    const empty = !mapped.wonCount && !mapped.lostCount && !mapped.openCount;
+    return { data: mapped, source: empty ? "empty" : "live" };
+  } catch (e) {
+    return demo(crmAnalytics, e);
   }
 }
 
-export async function getForecast(): Promise<typeof crmForecast> {
+export async function getForecast(): Promise<Sourced<typeof crmForecast>> {
   try {
     const f = await apiGet<typeof crmForecast>("/crm/dashboard/forecast", getApiToken());
-    if (!f?.months?.length) return crmForecast;
-    return f;
-  } catch {
-    return crmForecast;
+    if (!f?.months?.length) return { data: crmForecast, source: "empty" };
+    const empty = f.months.every((m) => !m.projected);
+    return { data: f, source: empty ? "empty" : "live" };
+  } catch (e) {
+    return demo(crmForecast, e);
   }
 }
 
-export async function getAccounts(): Promise<ClientScore[]> {
+export async function getAccounts(): Promise<Sourced<ClientScore[]>> {
   try {
     const rows = await apiGet<ClientScore[]>("/crm/dashboard/accounts", getApiToken());
-    return Array.isArray(rows) && rows.length ? rows : clientScorecards;
-  } catch {
-    return clientScorecards;
+    if (!Array.isArray(rows)) throw new Error("unexpected shape from /crm/dashboard/accounts");
+    // An empty list is a real answer — no clients yet — not a reason to show demo data.
+    return rows.length ? { data: rows, source: "live" } : { data: [], source: "empty" };
+  } catch (e) {
+    return demo(clientScorecards, e);
   }
 }
 
-export async function getCalendar(): Promise<typeof crmCalendar> {
+export async function getCalendar(): Promise<Sourced<typeof crmCalendar>> {
   try {
     const r = await apiGet<RawAgenda>("/crm/dashboard/agenda", getApiToken());
     const events: CalendarEvent[] = [
@@ -97,17 +124,18 @@ export async function getCalendar(): Promise<typeof crmCalendar> {
       ...r.followUps.filter((l) => l.nextFollowUpAt).map((l) => ({ date: l.nextFollowUpAt as string, title: l.title, type: "follow-up" as const, company: l.company?.name ?? "", href: `/crm/leads/${l.id}` })),
       ...r.tasks.filter((a) => a.dueAt).map((a) => ({ date: a.dueAt as string, title: a.subject, type: "task" as const, company: "", href: a.opportunityId ? `/crm/opportunities/${a.opportunityId}` : a.leadId ? `/crm/leads/${a.leadId}` : "/crm/calendar" })),
     ];
-    return events.length ? { events } : crmCalendar;
-  } catch {
-    return crmCalendar;
+    return events.length ? { data: { events }, source: "live" } : { data: { events: [] }, source: "empty" };
+  } catch (e) {
+    return demo(crmCalendar, e);
   }
 }
 
-export async function getEstimators(): Promise<Estimator[]> {
+export async function getEstimators(): Promise<Sourced<Estimator[]>> {
   try {
     const rows = await apiGet<Estimator[]>("/crm/dashboard/estimators", getApiToken());
-    return Array.isArray(rows) && rows.length ? rows : estimators;
-  } catch {
-    return estimators;
+    if (!Array.isArray(rows)) throw new Error("unexpected shape from /crm/dashboard/estimators");
+    return rows.length ? { data: rows, source: "live" } : { data: [], source: "empty" };
+  } catch (e) {
+    return demo(estimators, e);
   }
 }

@@ -3,16 +3,26 @@ import { Card, Badge, SectionTitle } from "@/components/ui";
 import { CrmTabs } from "@/components/CrmTabs";
 import { AED, pipelineStages, accountFocus } from "@/lib/data";
 import { getAnalytics, getForecast, getAccounts, getCalendar } from "@/lib/server-data";
+import { DataSourceBanner } from "@/components/DataSource";
+import { ForecastVsCapacity, WinRateBar } from "@/components/Charts";
 import { daysUntil, countdownLabel } from "@/lib/calendar";
 import Link from "next/link";
 
 const typeBadge = { bid: "bg-emerald text-white", "follow-up": "bg-sage/40 text-emerald-dark", task: "bg-charcoal text-white" } as const;
 
 export default async function CrmPage() {
-  const [analytics, forecast, accounts, calendar] = await Promise.all([getAnalytics(), getForecast(), getAccounts(), getCalendar()]);
+  const [analyticsS, forecastS, accountsS, calendarS] = await Promise.all([getAnalytics(), getForecast(), getAccounts(), getCalendar()]);
+  const analytics = analyticsS.data, forecast = forecastS.data, accounts = accountsS.data, calendar = calendarS.data;
+  // If any panel fell back to the fixture, say so once at the top rather than
+  // letting invented numbers sit beside real ones with nothing to tell them apart.
+  const fellBack = [analyticsS, forecastS, accountsS, calendarS].find((x) => x.source === "demo");
 
   const now = new Date();
-  const overMonths = forecast.months.filter((m) => m.projected > m.capacity);
+  // With no delivery capacity configured there is nothing to be over. Comparing
+  // against a capacity of zero made every month with any pipeline read as
+  // "over capacity", which is alarming and wrong.
+  const capacitySet = forecast.months.some((m) => m.capacity > 0);
+  const overMonths = capacitySet ? forecast.months.filter((m) => m.projected > m.capacity) : [];
   const events = [...calendar.events].sort((a, b) => +new Date(a.date) - +new Date(b.date));
   const bidsThisMonth = calendar.events.filter((e) => { const d = new Date(e.date); return e.type === "bid" && d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth(); }).length;
   const nextDeadline = events.find((e) => daysUntil(e.date) >= 0) ?? events[0];
@@ -26,13 +36,27 @@ export default async function CrmPage() {
         <button className="bg-emerald text-white text-sm font-semibold px-4 py-2 rounded-card">New lead</button>
       </div>
       <CrmTabs active="overview" />
+      {fellBack && <DataSourceBanner source="demo" reason={fellBack.reason} />}
 
       {/* Headline KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-sage">Weighted pipeline</div><div className="mt-1 text-2xl font-bold">{AED(analytics.weightedOpen)}</div></Card>
+        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-emerald-on">Weighted pipeline</div><div className="mt-1 text-2xl font-bold">{AED(analytics.weightedOpen)}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Win rate</div><div className="mt-1 text-2xl font-bold">{analytics.winRatePct}%</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Open opportunities</div><div className="mt-1 text-2xl font-bold">{analytics.openCount}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Bids due this month</div><div className="mt-1 text-2xl font-bold">{bidsThisMonth}</div></Card>
+      </div>
+
+      {/* Forecast and win rate — the two questions a director actually asks */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-5">
+        <Card className="p-5 lg:col-span-2"><ForecastVsCapacity months={forecast.months} /></Card>
+        <Card className="p-5 flex flex-col justify-between gap-4">
+          <WinRateBar won={analytics.wonCount} lost={analytics.lostCount} />
+          <div className="pt-3 border-t" style={{ borderColor: "#E4E6E0" }}>
+            <div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">By value</div>
+            <div className="mt-1 text-lg font-bold text-charcoal tabular-nums">{analytics.valueWinRatePct}%</div>
+            <div className="text-[12px] text-charcoal-muted">{AED(analytics.wonValue)} won of {AED(analytics.wonValue + analytics.lostValue)} closed</div>
+          </div>
+        </Card>
       </div>
 
       {/* Intelligence highlights — link into the deep screens */}
@@ -40,8 +64,10 @@ export default async function CrmPage() {
         <Link href="/crm/forecast" className="block">
           <Card className={`p-4 h-full transition-colors hover:border-emerald ${overMonths.length ? "" : ""}`}>
             <div className="flex items-center justify-between"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Capacity watch</div><span className="text-[11px] text-emerald font-semibold">Forecast →</span></div>
-            {overMonths.length ? (
-              <><div className="mt-1 text-lg font-bold text-charcoal">{overMonths.length} month{overMonths.length > 1 ? "s" : ""} over capacity</div><div className="text-[12px] text-charcoal-muted">{overMonths.map((m) => m.label.replace(" 2026", "")).join(", ")} — plan to subcontract or hire</div></>
+            {!capacitySet ? (
+              <><div className="mt-1 text-lg font-bold text-charcoal">Not set</div><div className="text-[12px] text-charcoal-muted">Set a monthly delivery capacity to see where the pipeline outruns it</div></>
+            ) : overMonths.length ? (
+              <><div className="mt-1 text-lg font-bold text-charcoal">{overMonths.length} month{overMonths.length > 1 ? "s" : ""} over capacity</div><div className="text-[12px] text-charcoal-muted">{overMonths.map((m) => m.label.replace(/ \d{4}$/, "")).join(", ")} — plan to subcontract or hire</div></>
             ) : (<><div className="mt-1 text-lg font-bold text-emerald">Capacity healthy</div><div className="text-[12px] text-charcoal-muted">No months over delivery capacity</div></>)}
           </Card>
         </Link>

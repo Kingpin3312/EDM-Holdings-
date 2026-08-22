@@ -45,7 +45,7 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Contacts</div><div className="mt-1 text-2xl font-bold">{contacts.length}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Open opportunities</div><div className="mt-1 text-2xl font-bold">{opps.length}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Pipeline value</div><div className="mt-1 text-2xl font-bold">{AED(grossOpps)}</div></Card>
-        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-sage">Weighted</div><div className="mt-1 text-2xl font-bold">{AED(weighted)}</div></Card>
+        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-emerald-on">Weighted</div><div className="mt-1 text-2xl font-bold">{AED(weighted)}</div></Card>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">

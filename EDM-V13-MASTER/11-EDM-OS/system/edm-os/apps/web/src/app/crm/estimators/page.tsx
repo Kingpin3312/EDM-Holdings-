@@ -3,13 +3,15 @@ import { CrmTabs } from "@/components/CrmTabs";
 import { Card, Badge, SectionTitle } from "@/components/ui";
 import { AED, estimatorLoad } from "@/lib/data";
 import { getEstimators } from "@/lib/server-data";
+import { DataSourceBanner } from "@/components/DataSource";
 
 export default async function EstimatorsPage() {
-  const team = await getEstimators();
+  const teamS = await getEstimators();
+  const team = teamS.data;
 
   const liveBids = team.reduce((s, e) => s + e.liveBids, 0);
   const liveValue = team.reduce((s, e) => s + e.liveValue, 0);
-  const turnarounds = team.map((e) => e.avgTurnaroundDays).filter((d) => d > 0);
+  const turnarounds = team.map((e) => e.avgTurnaroundDays ?? 0).filter((d) => d > 0);
   const avgTurnaround = turnarounds.length ? (turnarounds.reduce((s, d) => s + d, 0) / turnarounds.length).toFixed(1) : "—";
   const atCapacity = team.filter((e) => estimatorLoad(e).pct >= 100).length;
 
@@ -20,12 +22,13 @@ export default async function EstimatorsPage() {
         <button className="bg-emerald text-white text-sm font-semibold px-4 py-2 rounded-card">Assign bid</button>
       </div>
       <CrmTabs active="estimators" />
+      <DataSourceBanner source={teamS.source} reason={teamS.reason} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Estimating team</div><div className="mt-1 text-2xl font-bold">{team.length}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Live bids in flight</div><div className="mt-1 text-2xl font-bold">{liveBids}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Value being priced</div><div className="mt-1 text-2xl font-bold">{AED(liveValue)}</div></Card>
-        <Card className={`p-4 ${atCapacity > 0 ? "bg-charcoal text-white border-charcoal" : "bg-emerald text-white border-emerald"}`}><div className={`text-[11px] uppercase tracking-wider font-semibold ${atCapacity > 0 ? "text-white/70" : "text-sage"}`}>At capacity</div><div className="mt-1 text-2xl font-bold">{atCapacity}</div></Card>
+        <Card className={`p-4 ${atCapacity > 0 ? "bg-charcoal text-white border-charcoal" : "bg-emerald text-white border-emerald"}`}><div className={`text-[11px] uppercase tracking-wider font-semibold ${atCapacity > 0 ? "text-white/70" : "text-emerald-on"}`}>At capacity</div><div className="mt-1 text-2xl font-bold">{atCapacity}</div></Card>
       </div>
 
       <Card className="p-5">
@@ -54,7 +57,7 @@ export default async function EstimatorsPage() {
                         <div className="w-24 h-1.5 rounded-full bg-line overflow-hidden">
                           <div className={`h-full rounded-full ${load.pct >= 100 ? "bg-bronze" : "bg-emerald"}`} style={{ width: `${Math.min(load.pct, 100)}%` }} />
                         </div>
-                        <span className="text-[12px] text-charcoal-muted tabular-nums">{e.liveBids}/{e.capacity}</span>
+                        <span className="text-[12px] text-charcoal-muted tabular-nums">{e.capacity ? `${e.liveBids}/${e.capacity}` : e.liveBids}</span>
                       </div>
                     </td>
                     <td className="text-right font-semibold">{AED(e.liveValue)}</td>
@@ -64,7 +67,7 @@ export default async function EstimatorsPage() {
                         <span className="text-[12px] font-semibold text-charcoal tabular-nums">{e.winRatePct}%</span>
                       </div>
                     </td>
-                    <td className="text-right text-charcoal-muted">{e.avgTurnaroundDays > 0 ? `${e.avgTurnaroundDays.toFixed(1)} d` : "—"}</td>
+                    <td className="text-right text-charcoal-muted">{e.avgTurnaroundDays && e.avgTurnaroundDays > 0 ? `${e.avgTurnaroundDays.toFixed(1)} d` : "—"}</td>
                     <td><Badge className={load.tone}>{load.label}</Badge></td>
                   </tr>
                 );

@@ -11,7 +11,7 @@ export default function TradesPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-sage">Overall completion</div><div className="mt-1 text-2xl font-bold">{k.avgCompletion}%</div></Card>
+        <Card className="p-4 bg-emerald text-white border-emerald"><div className="text-[11px] uppercase tracking-wider font-semibold text-emerald-on">Overall completion</div><div className="mt-1 text-2xl font-bold">{k.avgCompletion}%</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Trades tracked</div><div className="mt-1 text-2xl font-bold">{k.tradesTracked}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Total installed</div><div className="mt-1 text-2xl font-bold">{k.totalInstalled.toLocaleString()} m²</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider font-semibold text-charcoal-muted">Records</div><div className="mt-1 text-2xl font-bold">{k.records}</div></Card>
