@@ -58,6 +58,14 @@ TEAM_HISTORY = re.compile(
 ENTITY_1986 = [r"edm (?:holdings )?(?:has )?(?:traded|trading) since 1986",
                r"established 1986", r"1986\s*established"]
 
+# DECISIONS.md, Decision 4 keeps "EST. 1986" in the STATIONERY FOOTER LOCKUP as
+# a deliberate, recorded choice: "In a footer lockup that reads as heritage and
+# is defensible... If you would rather it be consistent, remove it from the
+# footer too — but that is a design change to the stationery suite, so it is
+# yours to call." A check must not quietly overturn a decision the board took,
+# so the stationery is exempt from the 1986 rule and only from that rule.
+FOOTER_LOCKUP_EXEMPT = ("04-Stationery", "09-Stationery-Sources")
+
 # Brand tokens — the only permitted values (CLAUDE.md).
 ALLOWED_COLOURS = {
     "#FFFFFF", "#083819", "#0F231B", "#5C6F66", "#E4E6E0",
@@ -75,8 +83,27 @@ QUOTING = ("brand-guidelines", "Brand-Guidelines", "BRAND-TOKENS",
 # The PQQ pack is where the turnover figure is SUPPOSED to live (Decision 1).
 TURNOVER_ALLOWED = ("EDM-PQQ-Information-Pack",)
 
+# Internal working documents. START-HERE.md names these as internal, not client
+# hand-outs, so a finding here is reported but does not fail the build — it
+# would otherwise block every push on documents nobody sends out. They still
+# need correcting; they are simply not the gate.
+INTERNAL = ("EDM-Holdings-Board-Review", "EDM-Holdings-Pre-Launch-Audit",
+            "Project-Showcase", "EDM-Decisions", "EDM-Technology-Runbook",
+            "IMPLEMENTATION-ORDERS", "EDM-OS-Technical-Blueprint",
+            "EDM-OS-Internal-First-Build-Plan", "EDM-Developer-Engagement-Brief",
+            "EDM-OS-Commercial-Engine-Spec", "EDM-Labour-Productivity-Programme",
+            "Go-Live-Guide", "EDM-Photography-Case-Study-Brief",
+            # The lead playbook is the internal hunting list — it names target main
+            # contractors precisely because they are targets, not clients.
+            "EDM-Lead-Playbook", "EDM-Go-Live-Checklist", "EDM-Training-Manual")
+
 fails: list[str] = []
 warns: list[str] = []
+internal: list[str] = []
+
+
+def is_internal(path: str) -> bool:
+    return any(i in path for i in INTERNAL)
 
 
 def is_quoting(path: str) -> bool:
@@ -90,6 +117,9 @@ def rel(p: str) -> str:
 def scan_text(path: str, text: str, *, public: bool) -> None:
     """Apply the claim rules to one document's plain text."""
     low = re.sub(r"\s+", " ", text).lower()
+    # Fill-in templates carry bracketed placeholders like "[ £0.00m ]" — a slot
+    # to be completed, not a figure being claimed.
+    low = re.sub(r"\[[^\]]{0,60}\]", " ", low)
 
     def hits(patterns, regex=True):
         out = []
@@ -99,22 +129,24 @@ def scan_text(path: str, text: str, *, public: bool) -> None:
                 out.append(low[max(0, m.start() - 55): m.end() + 55])
         return out
 
+    bucket = internal if is_internal(path) else fails
     if not is_quoting(path):
         for ctx in hits(CLIENTS, regex=False):
-            fails.append(f"{rel(path)}: client named without filed consent — …{ctx.strip()}…")
+            bucket.append(f"{rel(path)}: client named without filed consent — …{ctx.strip()}…")
         for ctx in hits(ABSOLUTES, regex=False):
-            fails.append(f"{rel(path)}: absolute claim (Hard Rule 5) — …{ctx.strip()}…")
+            bucket.append(f"{rel(path)}: absolute claim (Hard Rule 5) — …{ctx.strip()}…")
         for ctx in hits(BANNED, regex=False) + hits(BANNED_RE):
-            fails.append(f"{rel(path)}: banned wording — …{ctx.strip()}…")
+            bucket.append(f"{rel(path)}: banned wording — …{ctx.strip()}…")
         for ctx in hits(FOUR_MARKETS):
             if TEAM_HISTORY.search(ctx):
                 continue   # the team's track record, which Decision 3 allows
-            fails.append(f"{rel(path)}: delivery claimed outside the UAE (Decision 3) — …{ctx.strip()}…")
-        for ctx in hits(ENTITY_1986):
-            fails.append(f"{rel(path)}: 1986 attached to the entity (Decision 4) — …{ctx.strip()}…")
+            bucket.append(f"{rel(path)}: delivery claimed outside the UAE (Decision 3) — …{ctx.strip()}…")
+        if not any(x in path for x in FOOTER_LOCKUP_EXEMPT):
+            for ctx in hits(ENTITY_1986):
+                bucket.append(f"{rel(path)}: 1986 attached to the entity (Decision 4) — …{ctx.strip()}…")
         if not any(a in path for a in TURNOVER_ALLOWED):
             for ctx in hits(TURNOVER):
-                fails.append(f"{rel(path)}: turnover figure in public material (Decision 1) — …{ctx.strip()}…")
+                bucket.append(f"{rel(path)}: turnover figure in public material (Decision 1) — …{ctx.strip()}…")
 
 
 def check_website() -> None:
@@ -169,7 +201,9 @@ def check_documents() -> None:
         warns.append("pypdf not installed — PDF checks skipped (pip install pypdf)")
         return
     for pdf in sorted(glob.glob(os.path.join(PACK, "**", "*.pdf"), recursive=True)):
-        if "_ARCHIVE" in pdf:          # deliberately kept, never issued
+        # Deliberately kept and never issued — checking them would only ever
+        # report what they are already labelled as.
+        if "_ARCHIVE" in pdf or "_WITHDRAWN" in pdf:
             continue
         try:
             r = PdfReader(pdf)
@@ -188,7 +222,7 @@ def check_documents() -> None:
         for f in fonts:
             base = re.sub(r"^[A-Z]{6}\+", "", f)
             if base != "?" and "montserrat" not in base.lower():
-                fails.append(f"{rel(pdf)}: second font family embedded — {base}")
+                (internal if is_internal(pdf) else fails).append(f"{rel(pdf)}: second font family embedded — {base}")
 
 
 def main() -> int:
@@ -203,13 +237,18 @@ def main() -> int:
 
     for w in warns:
         print(f"  warn  {w}")
+    for i in internal:
+        print(f"  note  {i}")
     for f in fails:
         print(f"  FAIL  {f}")
     print()
+    if internal:
+        print(f"{len(internal)} finding(s) in internal working documents — "
+              f"correct them, but they do not gate a release.")
     if fails:
-        print(f"{len(fails)} violation(s), {len(warns)} warning(s).")
+        print(f"{len(fails)} violation(s) in client-facing material, {len(warns)} warning(s).")
         return 1
-    print(f"Compliance clean. {len(warns)} warning(s).")
+    print(f"Client-facing material is clean. {len(warns)} warning(s).")
     return 0
 
 

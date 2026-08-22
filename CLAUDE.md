@@ -21,7 +21,7 @@ EDM Consultant FZCO.
 
 ## READ FIRST
 
-`_V12-DECISIONS.md` at the root settles five positions: the licensed-scope
+`DECISIONS.md` at the root settles five positions: the licensed-scope
 mismatch, the turnover figure, the safety claim, market wording and the 1986
 attribution. Those decisions override anything you find in an older document.
 
@@ -55,7 +55,7 @@ documents and in the LinkedIn specialties list.
 5. **Never use absolute claims.** No "100%", "guaranteed", "always", "zero
    defects", "world-class", "leading", "premier". The "100% safety record"
    currently in the capability statement and corporate brochure is to be
-   removed, not softened — replacement copy is in `_V12-DECISIONS.md`.
+   removed, not softened — replacement copy is in `DECISIONS.md`.
 
 6. **No turnover figure in public documents.** It is removed from all
    public-facing material and lives only in the PQQ pack alongside the accounts
@@ -146,7 +146,7 @@ opening with a rhetorical question, closing by summarising what you just said.
 
 1. Trade licence copy to be filed in the PQQ pack — the scope is confirmed, the
    attachment is not yet on file.
-2. Turnover and the safety claim are both settled in `_V12-DECISIONS.md` but
+2. Turnover and the safety claim are both settled in `DECISIONS.md` but
    cannot be applied until the capability statement and corporate brochure have
    editable sources. Building those sources is the first job worth doing.
 3. DET registered email still points to the formation agent.

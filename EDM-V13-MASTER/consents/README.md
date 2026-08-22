@@ -10,7 +10,13 @@ see `DECISIONS.md`.
 
 | Client / project | Status | Needed for |
 |---|---|---|
-| Khazna Data Centers · QAJ01 · PMK Group | **Verbal only, 19/07/2026** | LinkedIn Posts 08 and 17, the optional paragraph in the LinkedIn About, and the named tender editions in `13-Go-To-Market/Tender-Editions` |
+| Khazna Data Centers · QAJ01 · PMK Group | **Verbal only, 19/07/2026** | LinkedIn Posts 08 and 17, the optional paragraph in the LinkedIn About, and any named tender edition |
+| JLL · Gilbert-Ash · Graham · John Sisk & Son · McLaughlin & Harvey | **No record — raised 22/08/2026** | Named as clients in the withdrawn V11 documents. Not currently used anywhere live. Christopher to confirm the position before any of these names is used again. |
+
+**Added 22 August 2026.** The technical audit found five further names in the
+superseded tender editions that this register did not track. Those files are now
+in `13-Go-To-Market/Tender-Editions/_WITHDRAWN-do-not-issue/` and must not be
+issued. Nothing live names any of the eight.
 
 Draft request email: `13-Go-To-Market/LinkedIn/PMK-Consent-Email.md` — send
 version B.

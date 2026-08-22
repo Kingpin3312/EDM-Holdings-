@@ -1,0 +1,43 @@
+WITHDRAWN — DO NOT ISSUE THESE FILES TO ANYONE
+==============================================
+
+The four PDFs in this folder are the SUPERSEDED V11 documents. They are
+byte-identical to the copies in _ARCHIVE-superseded/edm-site-inline-styles/.
+They are kept only as a record of what was previously in circulation.
+
+They are not "the current documents with the client named". They are the old
+documents, and they still contain everything the board removed:
+
+  - "£21m+ average annual turnover (AED 90m+)"        DECISIONS.md, Decision 1
+  - "100% safety record, held across every EDM site"  DECISIONS.md, Decision 2
+  - "Four markets, one standard. UAE Ireland United
+     Kingdom Australia" and "we operate across four
+     markets"                                          DECISIONS.md, Decision 3
+  - "1986 established" / "EST. 1986" as an entity
+     claim                                             DECISIONS.md, Decision 4
+
+They also name EIGHT third parties, not the three the consent register tracks:
+
+  Khazna Data Centers · QAJ01 · PMK Group        — verbal consent only, 19/07/2026
+  JLL · Gilbert-Ash · Graham · John Sisk & Son
+  · McLaughlin & Harvey                          — NO CONSENT RECORD AT ALL
+
+The current public editions are 19 and 17 pages and carry none of the above:
+
+  03-Corporate-Documents/EDM-Capability-Statement.pdf
+  03-Corporate-Documents/EDM-Corporate-Brochure.pdf
+
+WHAT TO DO IF YOU NEED A NAMED EDITION FOR A TENDER
+---------------------------------------------------
+Do not reach for these files. Build a named edition from the CURRENT source:
+
+  1. Confirm written consent is filed in consents/ for every client you intend
+     to name. Verbal consent is not consent.
+  2. Copy 09-Document-Sources/capability-statement-public.html, add only the
+     client naming, and rebuild with 09-Document-Sources/build.sh.
+  3. Run tools/compliance-check.py before the file leaves the building.
+
+Moved here 22 August 2026 by the technical audit. The previous note in this
+folder said the public editions "carry the same content with the client and
+project generalised" — that was not true, and following it would have sent a
+prospect the version the board withdrew.

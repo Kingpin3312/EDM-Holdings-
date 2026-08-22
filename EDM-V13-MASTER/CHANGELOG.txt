@@ -13,9 +13,11 @@ V13 (current)
   and a ten-step go-live sequence: 11-EDM-OS/EDM-OS-TECH-AUDIT.md.
 - Repository scaffolding: README.md as the GitHub landing page, .gitignore,
   .gitattributes, and the consents/ folder CLAUDE.md had been referencing.
-- BUG FIXED: the capability statement download form carried a placeholder
-  Web3Forms key and fell back silently to a mailto. Every download request
-  through that form had been failing quietly since V11. Now wired.
+- CORRECTION (22/08/2026 audit): this entry was inaccurate. Comparing V12 to
+  V13 file by file, capability-statement.html did not change, and the V12
+  archive already carried the same live Web3Forms key. Nothing was fixed here
+  in V13. The same applies to the "repository scaffolding" line below —
+  README.md, .gitignore, .gitattributes and consents/ all existed in V12.
 - Version-stamped record documents renamed so they read correctly inside any
   future pack: _V12-DECISIONS.md is DECISIONS.md, _V12-FIXES.md is
   CHANGES-FROM-V11.md, _V12-QA-REPORT.md is QA-REPORT.md. All 13 files that

@@ -754,6 +754,112 @@ in `EDM-V13-ASSET-REGISTER.csv` — 602 rows.
 
 ---
 
-*Independent technical audit, 22 August 2026. Nothing in `EDM-V13-MASTER/` was modified in
-the course of producing this report; the extracted tree was re-verified byte-identical to
-the supplied archive afterwards.*
+---
+
+## ADDENDUM — FOUND WHILE FIXING, 22 AUGUST 2026
+
+Christopher authorised remediation after reading the above. Seven further defects
+surfaced during that work, several of them worse than items already in the list.
+They are recorded here because an audit that quietly absorbs its own later findings
+stops being a record.
+
+### A1 — The headline number on ~20 screens was invisible · HIGH
+`components/ui.tsx` — `Card` hardcodes `bg-white` and appends the caller's
+`className`. Tailwind emits utilities in **its own sorted order**, not the order
+they appear in the class attribute, so `bg-white` beat the `bg-emerald` passed in
+by every accent tile. The tile rendered white; its `text-white` value rendered
+white on white.
+
+Measured in the browser: computed background `rgb(255,255,255)`, value text
+`rgb(255,255,255)`, content `"AED 1,941,500"`. **The weighted pipeline figure —
+the single most important number in the CRM — could not be seen on any screen
+that used the pattern.** No audit, including the first pass of this one, caught
+it: it is invisible in the source and only visible when the app is run.
+
+### A2 — 21 labels at 1:1 contrast · MEDIUM
+`sage` was repointed to `#083819` for brand compliance, which is right. But
+`text-sage` was the label colour on `bg-emerald` tiles, so the label became
+emerald on emerald. Twenty-one occurrences.
+
+### A3 — Decision 3 had failed far more widely than the footer · HIGH
+The main report says the four-markets claim survived in the footer and one page
+title. Running a proper checker over the site found it in **41 footer
+occurrences plus eight meta and Open Graph descriptions, four body paragraphs and
+two page titles** — and, more seriously, in the framing of three whole pages.
+
+`drywall-contractor-london.html`, `-ireland.html` and `-australia.html` were
+written in the present tense as EDM delivering in those markets: *"Fit-out and
+drywall contractor in London"*, *"Australia has been part of EDM's footprint for
+years"*, *"The full drywall scope into Australia's commercial… fit-out"*. That is
+precisely the claim Decision 3 removes.
+
+**Reframed, not deleted** — the market knowledge is real and the search value is
+worth keeping — as the team's record, each carrying a visible "where we deliver"
+notice pointing at the UAE page. **This one needs Christopher's decision:** keep
+them reframed, or remove them. Reframing was the reversible choice.
+
+### A4 — A tool documented as offline was not · MEDIUM
+EDM Measure loaded `pdf.js` from a CDN, so opening a drawing needed a live
+connection. Its README was honest about it, but a takeoff tool that fails in a
+cabin with no signal is the wrong trade-off, and a third-party CDN is a
+dependency nobody reviewed. pdf.js is now vendored locally.
+
+### A5 — The forecast screen contradicted itself · MEDIUM
+With no delivery capacity configured, every month with any pipeline beat a
+capacity of zero, so the overview announced *"2 months over capacity"* while the
+chart beside it correctly said no capacity had been set.
+
+### A6 — `build.sh` needs poppler, and says it needs weasyprint · LOW
+Confirmed on this machine: `weasyprint`, `pdffonts` and `pdftotext` are all
+absent, and only weasyprint is declared. With `set -e`, a machine without
+poppler-utils writes all four PDFs and then aborts before the first compliance
+check — looking exactly like a successful build.
+
+### A7 — The consent register was short by five names · confirmed and widened
+Recorded in the main report as P3. Now filed in `consents/README.md` so it is
+tracked rather than noted.
+
+---
+
+## WHAT HAS BEEN FIXED, AND WHAT HAS NOT
+
+**Fixed and verified** — every item below was tested, not just written:
+
+| Area | Evidence |
+|---|---|
+| API compiles and boots | 43 errors → 0; 182 routes mapped; serves live data from Postgres |
+| Authentication | 10 integration tests pass, including that the email claim is no longer an identity |
+| Organisation boundary | Cross-tenant attach rejected 400; cross-tenant read 404; listings scoped |
+| Tests and CI | 23 tests where there were none; two GitHub Actions workflows |
+| Compliance enforcement | `tools/compliance-check.py` — website now clean, and it fails a build |
+| Website Decision 3 | 41 + 14 occurrences removed; three pages reframed |
+| Brand | Montserrat 500 and italic removed; dead tokens collapsed; hover restored; card borders to 3:1 |
+| Tools | Autosave in all six, verified in Chromium by killing a tab and recovering the entry |
+| Chatbot | Wired to its relay; relay origin-restricted and rate-limited, all four cases tested |
+| CRM | KPI tiles readable; invented figures removed; charts with hover, table view and keyboard focus |
+| Tender editions | Moved to `_WITHDRAWN-do-not-issue/` with a note that states what they actually contain |
+
+**Not fixed, and why:**
+
+1. **The PQQ pack still says "Markets: UAE · Ireland · UK · Australia" and
+   "Established 1986".** It has no editable source, so it cannot be rebuilt —
+   only hand-edited, which is what the pack's own rules forbid. The corrections
+   are written out in `13-Go-To-Market/_PQQ-PACK-CORRECTIONS-NEEDED.txt`. Building
+   an HTML source for it is the right next job.
+2. **A named tender edition does not exist.** The old ones are withdrawn and no
+   replacement was built, because building one requires filed consent that does
+   not exist yet. The route is written down in the quarantine note.
+3. **The Training Manual and Go-Live Guide still carry a second font family.**
+   Both need rebuilding from sources that are not in the pack.
+4. **Sign-in, migrations, `helmet`, a throttler and the Next upgrade** are
+   unchanged — items 21 to 26 of the action plan, and a developer's fortnight
+   rather than an audit's afternoon.
+5. **The three country pages** are reframed but their future is a business
+   decision, not a technical one.
+
+---
+
+*Independent technical audit, 22 August 2026. The audit itself was performed
+against an unmodified tree, re-verified byte-identical to the supplied archive.
+Remediation followed separately, at Christopher's instruction, and is recorded in
+the git history rather than folded silently into the findings above.*

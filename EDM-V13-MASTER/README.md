@@ -19,7 +19,7 @@ see `_BOARD-SIGN-OFF.md`.
 | `QA-REPORT.md` | The six defects found in QA, how they were fixed, and what is now checked automatically. |
 | `11-EDM-OS/EDM-OS-TECH-AUDIT.md` | **Read before touching the codebase.** Dependencies installed, both apps compiled, schema and API read. The web app renders from mock data — 0 of 40 pages call the API. |
 | `START-HERE.md` | The original pack orientation note. |
-| `CHANGELOG.txt` | Version log. V12 is current. |
+| `CHANGELOG.txt` | Version log. V13 is current. |
 
 ---
 
@@ -29,7 +29,11 @@ see `_BOARD-SIGN-OFF.md`.
 written consent is filed in `consents/`.**
 
 Consent for Khazna Data Centers, QAJ01 and PMK Group is currently **verbal
-only**. Named editions are quarantined in `13-Go-To-Market/Tender-Editions`.
+only**. Five further names — JLL, Gilbert-Ash, Graham, John Sisk & Son and
+McLaughlin & Harvey — appear in the superseded editions with no consent record
+at all. Those editions are the withdrawn V11 documents and are quarantined in
+`13-Go-To-Market/Tender-Editions/_WITHDRAWN-do-not-issue/`. They are not the
+current documents with names added, and must not be issued.
 Generalised versions are live everywhere else, and unnamed alternatives are
 already written for the two LinkedIn posts that depend on it.
 
