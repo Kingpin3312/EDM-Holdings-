@@ -67,6 +67,11 @@ All four cards now carry the right person's number, and they agree with this pac
 | Christopher Simon · COO | +971 (0) 58 601 2021 | +971 (0) 58 601 2021 |
 | Kenny Buchanan · Project Director | +971 (0) 58 580 0870 | +971 (0) 58 580 0870 |
 
+**Eddie's +44 number is deliberate — do not "correct" it.** He is not based in
+Dubai; the UK mobile is the right contact for him. A future reader seeing a UK
+number on a UAE firm's card may take it for the same mistake that was just fixed.
+It is not. Confirmed by Christopher, 22/08/2026.
+
 A contact-consistency check now runs over the cards and this pack together: two
 people sharing a number fails the build, and one person appearing with two numbers
 raises a warning. Nothing had been comparing them before, which is how a director
