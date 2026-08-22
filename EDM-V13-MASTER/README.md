@@ -60,6 +60,7 @@ than Montserrat means a glyph was typed instead of drawn.
 | Corporate brochure | 17 | `09-Document-Sources/corporate-brochure-public.html` |
 | Handover standard | 1 | `09-Document-Sources/handover-standard.html` |
 | Brand guidelines | 7 | `09-Document-Sources/brand-guidelines.html` |
+| PQQ information pack | 4 | `09-Document-Sources/pqq-information-pack.html` |
 
 ## Building the social templates
 

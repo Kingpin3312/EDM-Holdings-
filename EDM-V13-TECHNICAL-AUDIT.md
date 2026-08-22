@@ -672,7 +672,7 @@ Ordered by what unblocks what. Each item is marked **[fix]** — an engineering 
 | 1 | Remove the four superseded files from `13-Go-To-Market/Tender-Editions/`. Rebuild the named editions from the **current** sources, adding only the client naming. | Claude Code | **[fix]** |
 | 2 | Correct `_DISTRIBUTION-WARNING.txt` — it currently tells the reader the opposite of the truth. | Claude Code | **[fix]** |
 | 3 | ~~Decide the position on JLL, Gilbert-Ash, Graham, John Sisk & Son and McLaughlin & Harvey.~~ **Decided 22/08/2026 — generalised.** Six names (Farrans too) removed from the public capability statement; page 17 now states the naming position itself. Rebuilt and verified. | Christopher · done | **[decide]** |
-| 4 | Remove `Markets: UAE · Ireland · UK · Australia` from the PQQ pack. | Claude Code | **[fix]** |
+| 4 | ~~Remove `Markets: UAE · Ireland · UK · Australia` from the PQQ pack.~~ **Done 22/08/2026** — built it an HTML source first, so it is now rebuilt rather than hand-edited and is inside both checkers. | Claude Code · done | **[fix]** |
 | 5 | Chase written consent from PMK / Khazna. The 7 October LinkedIn date still stands. | Christopher | **[decide]** |
 
 ### Before the site is promoted
@@ -861,13 +861,39 @@ and the website download byte-identical to the corporate-documents copy. The
 route back — file the consent, restore the name in the source, rebuild — is
 recorded in `09-Document-Sources/_CLIENT-NAMING-DECIDED.md`.
 
-**Not fixed, and why:**
+**The PQQ pack, resolved 22 August 2026.** It was the last client-facing document
+without a source, which is why it could not be corrected properly. It has one now
+(`09-Document-Sources/pqq-information-pack.html`), builds with the others, and is
+covered by both checkers. "Markets: UAE · Ireland · UK · Australia" and
+"Established 1986" are gone; the £20.31m turnover figure stays, because Decision 1
+puts it there. Every bracketed field is still a field — none was invented.
 
-1. **The PQQ pack still says "Markets: UAE · Ireland · UK · Australia" and
-   "Established 1986".** It has no editable source, so it cannot be rebuilt —
-   only hand-edited, which is what the pack's own rules forbid. The corrections
-   are written out in `13-Go-To-Market/_PQQ-PACK-CORRECTIONS-NEEDED.txt`. Building
-   an HTML source for it is the right next job.
+Building it surfaced three more defects, all of them found by rendering the output
+and looking at it rather than reading the source:
+
+- **Content was being silently clipped.** `.page` is a fixed height with
+  `overflow:hidden`, so a long page does not reflow — it slides under the footer
+  or vanishes. The first PQQ build lost the entire Key Contacts block from the
+  PDF. `tools/check-page-overflow.py` now catches this, and it runs in `build.sh`
+  and in CI.
+- **Page 11 of the live capability statement had the same fault** — its last row
+  ran under the footer and behind the page number, in the document people
+  download. Pre-existing, and missed by this audit's first pass, which checked
+  page numbers but not collisions. Fixed.
+- **The capability deck carried the same client list** — Gilbert-Ash, Graham,
+  John Sisk & Son, McLaughlin & Harvey, Farrans — plus "leading main contractors".
+  `build.sh` had never looked for those names, and its deck check printed FAIL
+  while the script still reported success. Both fixed; the slide now carries the
+  same position as the capability statement.
+
+`build.sh` no longer depends on poppler either. It needed `pdffonts` and
+`pdftotext` without declaring them, and with `set -e` a machine without them wrote
+all five PDFs and then aborted before the first check — looking exactly like a
+successful build. That was finding D4, and it bit during this work.
+
+**Client-facing material now passes the compliance check with zero violations.**
+
+**Not fixed, and why:**
 2. **A named tender edition does not exist.** The old ones are withdrawn and no
    replacement was built, because building one requires filed consent that does
    not exist yet. The route is written down in the quarantine note.
